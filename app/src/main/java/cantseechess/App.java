@@ -3,12 +3,37 @@
  */
 package cantseechess;
 
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
+
 public class App {
     public String getGreeting() {
         return "Hello World!";
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        var tokenPath = Paths.get("token");
+        String token = null;
+        try {
+            token = Files.readString(tokenPath, StandardCharsets.UTF_8);
+        } catch (NoSuchFileException e) {
+            Files.createFile(tokenPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        if (token == null) {
+            System.out.println("no token in token file");
+            return;
+        }
+        JDA jda = JDABuilder.createDefault(token).build();
+
         System.out.println(new App().getGreeting());
     }
 }
