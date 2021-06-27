@@ -17,18 +17,25 @@ public class App {
         return "Hello World!";
     }
 
-    public static void main(String[] args) throws Exception {
+    public static String getToken() {
         var tokenPath = Paths.get("token");
-        String token = null;
         try {
-            token = Files.readString(tokenPath, StandardCharsets.UTF_8);
+            return Files.readString(tokenPath, StandardCharsets.UTF_8);
         } catch (NoSuchFileException e) {
-            Files.createFile(tokenPath);
+            try {
+                Files.createFile(tokenPath);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            return;
         }
-        if (token == null) {
+        return null;
+    }
+
+    public static void main(String[] args) throws Exception {
+        String token = getToken();
+        if (token == null || token.equals("")) {
             System.out.println("no token in token file");
             return;
         }
