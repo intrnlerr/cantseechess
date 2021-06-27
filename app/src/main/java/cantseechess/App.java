@@ -39,8 +39,11 @@ public class App {
             System.out.println("no token in token file");
             return;
         }
-        JDA jda = JDABuilder.createDefault(token).build();
 
+        JDA jda = JDABuilder.createDefault(token)
+                .addEventListeners(new BotListener())
+                .build();
+        jda.awaitReady();
         System.out.println(new App().getGreeting());
     }
 }
