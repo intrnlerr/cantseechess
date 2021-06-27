@@ -35,7 +35,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
         String token = getToken();
-        if (token == null || token.equals("")) {
+        if (token == null || token.isBlank()) {
             System.out.println("no token in token file");
             return;
         }
