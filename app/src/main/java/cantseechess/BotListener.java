@@ -52,6 +52,13 @@ public class BotListener extends ListenerAdapter {
                 games.put(challenge.challenger, game);
                 challenges.remove(event.getAuthor().getId());
                 event.getChannel().sendMessage("game").queue();
+            } else if (args[0].equals("!decline")) {
+                var challenge = challenges.remove(event.getAuthor().getId());
+                if (challenge == null) {
+                    event.getChannel().sendMessage("no challenge to decline!").queue();
+                    return;
+                }
+                event.getChannel().sendMessage("challenge declined.").queue();
             }
         } else if (games.containsKey(event.getAuthor().getId())) {
             // TODO: game logic
