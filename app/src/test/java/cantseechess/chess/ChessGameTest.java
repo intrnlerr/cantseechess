@@ -1,9 +1,5 @@
 package cantseechess.chess;
 
-import cantseechess.chess.ChessGame;
-import cantseechess.chess.Color;
-import cantseechess.chess.Position;
-import cantseechess.chess.pieces.*;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;

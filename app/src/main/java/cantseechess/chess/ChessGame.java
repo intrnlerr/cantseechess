@@ -1,7 +1,5 @@
 package cantseechess.chess;
 
-import cantseechess.chess.pieces.*;
-
 public class ChessGame {
     private Piece[][] board_pieces = new Piece[8][8];
     private Color turnColor = Color.white;
@@ -41,20 +39,60 @@ public class ChessGame {
                     continue;
                 }
                 switch (c) {
-                    case '/': --rank; file = 0; break;
-                    case 'P': board_pieces[rank][file] = new Pawn(Color.white); ++file; break;
-                    case 'N': board_pieces[rank][file] = new Knight(Color.white); ++file; break;
-                    case 'B': board_pieces[rank][file] = new Bishop(Color.white); ++file; break;
-                    case 'R': board_pieces[rank][file] = new Rook(Color.white); ++file; break;
-                    case 'Q': board_pieces[rank][file] = new Queen(Color.white); ++file; break;
-                    case 'K': board_pieces[rank][file] = new King(Color.white); ++file; break;
-                    case 'p': board_pieces[rank][file] = new Pawn(Color.black); ++file; break;
-                    case 'n': board_pieces[rank][file] = new Knight(Color.black); ++file; break;
-                    case 'b': board_pieces[rank][file] = new Bishop(Color.black); ++file; break;
-                    case 'r': board_pieces[rank][file] = new Rook(Color.black); ++file; break;
-                    case 'q': board_pieces[rank][file] = new Queen(Color.black); ++file; break;
-                    case 'k': board_pieces[rank][file] = new King(Color.black); ++file; break;
-                    default: throw new IncorrectFENException(null);
+                    case '/':
+                        --rank;
+                        file = 0;
+                        break;
+                    case 'P':
+                        board_pieces[rank][file] = new Pawn(Color.white);
+                        ++file;
+                        break;
+                    case 'N':
+                        board_pieces[rank][file] = new Knight(Color.white);
+                        ++file;
+                        break;
+                    case 'B':
+                        board_pieces[rank][file] = new Bishop(Color.white);
+                        ++file;
+                        break;
+                    case 'R':
+                        board_pieces[rank][file] = new Rook(Color.white);
+                        ++file;
+                        break;
+                    case 'Q':
+                        board_pieces[rank][file] = new Queen(Color.white);
+                        ++file;
+                        break;
+                    case 'K':
+                        board_pieces[rank][file] = new King(Color.white);
+                        ++file;
+                        break;
+                    case 'p':
+                        board_pieces[rank][file] = new Pawn(Color.black);
+                        ++file;
+                        break;
+                    case 'n':
+                        board_pieces[rank][file] = new Knight(Color.black);
+                        ++file;
+                        break;
+                    case 'b':
+                        board_pieces[rank][file] = new Bishop(Color.black);
+                        ++file;
+                        break;
+                    case 'r':
+                        board_pieces[rank][file] = new Rook(Color.black);
+                        ++file;
+                        break;
+                    case 'q':
+                        board_pieces[rank][file] = new Queen(Color.black);
+                        ++file;
+                        break;
+                    case 'k':
+                        board_pieces[rank][file] = new King(Color.black);
+                        ++file;
+                        break;
+                    default:
+                        throw new IncorrectFENException(null);
                 }
             }
             //TODO set board_pieces to the board content in the FEN
