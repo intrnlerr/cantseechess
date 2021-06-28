@@ -1,5 +1,7 @@
 package cantseechess.chess;
 
+import java.util.Objects;
+
 public class Position {
     private int rank;
     private int file;
@@ -32,5 +34,19 @@ public class Position {
 
     public int getRank() {
         return rank;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Position position = (Position) o;
+        return rank == position.rank &&
+                file == position.file;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rank, file);
     }
 }
