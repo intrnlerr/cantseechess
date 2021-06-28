@@ -1,5 +1,5 @@
-package cantseechess;
-import cantseechess.Color;
+package cantseechess.chess;
+
 public class ChessGame {
     private Piece[][] board_pieces = new Piece[8][8];
     private Color turnColor = Color.white;

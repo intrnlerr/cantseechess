@@ -1,4 +1,4 @@
-package cantseechess;
+package cantseechess.chess;
 
 public class Position {
     Position(String position) {

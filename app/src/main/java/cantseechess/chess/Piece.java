@@ -1,4 +1,4 @@
-package cantseechess;
+package cantseechess.chess;
 
 public abstract class Piece {
     private Color color;

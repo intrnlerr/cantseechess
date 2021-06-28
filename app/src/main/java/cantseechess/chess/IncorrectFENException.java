@@ -1,4 +1,4 @@
-package cantseechess;
+package cantseechess.chess;
 
 public class IncorrectFENException extends Exception {
     public IncorrectFENException(Throwable err) {

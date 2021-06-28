@@ -1,5 +1,7 @@
 package cantseechess;
 
+import cantseechess.chess.ChessGame;
+
 public class Challenge {
     public final String challenger;
     public final String challenged;

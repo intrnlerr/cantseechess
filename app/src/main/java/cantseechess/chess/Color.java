@@ -1,4 +1,4 @@
-package cantseechess;
+package cantseechess.chess;
 
 public enum Color {
     white,
