@@ -1,5 +1,7 @@
 package cantseechess.chess;
 
+import cantseechess.chess.pieces.*;
+
 public class ChessGame {
     private Piece[][] board_pieces = new Piece[8][8];
     private Color turnColor = Color.white;
@@ -17,10 +19,12 @@ public class ChessGame {
             importFEN(START_FEN);
         } catch (IncorrectFENException e) {
             System.err.println("START_FEN was somehow wrong");
+            e.printStackTrace();
         }
     }
+
     //Import chess game from fen
-    public ChessGame(String FEN) throws IncorrectFENException{
+    public ChessGame(String FEN) throws IncorrectFENException {
         importFEN(FEN);
     }
 
@@ -28,17 +32,45 @@ public class ChessGame {
     private void importFEN(String FEN) throws IncorrectFENException {
         try {
             String[] content = FEN.split(" ");
-            String[] boardContent = content[0].split("/");
+            int rank = 7;
+            int file = 0;
+            for (int i = 0; i < content[0].length(); ++i) {
+                char c = content[0].charAt(i);
+                if (c > '0' && c < '9') {
+                    file += (c - '0');
+                    continue;
+                }
+                switch (c) {
+                    case '/': --rank; file = 0; break;
+                    case 'P': board_pieces[rank][file] = new Pawn(Color.white); ++file; break;
+                    case 'N': board_pieces[rank][file] = new Knight(Color.white); ++file; break;
+                    case 'B': board_pieces[rank][file] = new Bishop(Color.white); ++file; break;
+                    case 'R': board_pieces[rank][file] = new Rook(Color.white); ++file; break;
+                    case 'Q': board_pieces[rank][file] = new Queen(Color.white); ++file; break;
+                    case 'K': board_pieces[rank][file] = new King(Color.white); ++file; break;
+                    case 'p': board_pieces[rank][file] = new Pawn(Color.black); ++file; break;
+                    case 'n': board_pieces[rank][file] = new Knight(Color.black); ++file; break;
+                    case 'b': board_pieces[rank][file] = new Bishop(Color.black); ++file; break;
+                    case 'r': board_pieces[rank][file] = new Rook(Color.black); ++file; break;
+                    case 'q': board_pieces[rank][file] = new Queen(Color.black); ++file; break;
+                    case 'k': board_pieces[rank][file] = new King(Color.black); ++file; break;
+                    default: throw new IncorrectFENException(null);
+                }
+            }
             //TODO set board_pieces to the board content in the FEN
             //The color of the player whose turn it is
             turnColor = content[1].equalsIgnoreCase("w") ? Color.white : Color.black;
             castling = content[2];
-            enPassantSquare = new Position(content[3]);
+            enPassantSquare = content[3].charAt(0) == '-' ? null : new Position(content[3]);
             halfmoveClock = Integer.parseInt(content[4]);
             moves = Integer.parseInt(content[5]);
         } catch (Exception e) {
             throw new IncorrectFENException(e);
         }
 
+    }
+
+    public Piece getPiece(Position position) {
+        return board_pieces[position.getRank()][position.getFile()];
     }
 }
