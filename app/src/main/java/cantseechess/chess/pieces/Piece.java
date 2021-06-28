@@ -12,6 +12,10 @@ public abstract class Piece {
         this.color = color;
     }
 
+    public Color getColor() {
+        return color;
+    }
+
     //returns true or false whether or not the move can be made (if there's an allied piece in the way)
     boolean search(Piece[][] board, Position from, Position to, boolean diagonal, boolean straight) {
         boolean straightReturn = false;
