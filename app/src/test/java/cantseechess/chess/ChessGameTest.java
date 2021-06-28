@@ -1,4 +1,4 @@
-package cantseechess;
+package cantseechess.chess;
 
 import cantseechess.chess.ChessGame;
 import cantseechess.chess.Color;
