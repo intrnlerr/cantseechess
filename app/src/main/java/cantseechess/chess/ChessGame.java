@@ -9,8 +9,22 @@ public class ChessGame {
     //The square which player turnColor can en passant to
     private Position enPassantSquare = null;
     //Availability to castle
-    private String castling = "KQkq";
-    private final String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    private Castling castling = new Castling("KQkq");
+    private static final String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+    class Castling {
+        public boolean kingSideWhite;
+        public boolean queenSideWhite;
+        public boolean kingSideBlack;
+        public boolean queenSideBlack;
+
+        Castling(String str) {
+            kingSideWhite = str.contains("K");
+            queenSideWhite = str.contains("Q");
+            kingSideBlack = str.contains("k");
+            queenSideBlack = str.contains("q");
+        }
+    }
 
     public ChessGame() {
         try {
@@ -95,10 +109,9 @@ public class ChessGame {
                         throw new IncorrectFENException(null);
                 }
             }
-            //TODO set board_pieces to the board content in the FEN
             //The color of the player whose turn it is
             turnColor = content[1].equalsIgnoreCase("w") ? Color.white : Color.black;
-            castling = content[2];
+            castling = new Castling(content[2]);
             enPassantSquare = content[3].charAt(0) == '-' ? null : new Position(content[3]);
             halfmoveClock = Integer.parseInt(content[4]);
             moves = Integer.parseInt(content[5]);
