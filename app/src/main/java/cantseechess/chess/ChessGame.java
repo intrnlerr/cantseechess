@@ -24,6 +24,14 @@ public class ChessGame {
             kingSideBlack = str.contains("k");
             queenSideBlack = str.contains("q");
         }
+
+        public boolean canCastleKingside(Color c) {
+            return c == Color.white ? kingSideWhite : kingSideBlack;
+        }
+
+        public boolean canCastleQueenside(Color c) {
+            return c == Color.white ? queenSideWhite : queenSideBlack;
+        }
     }
 
     public ChessGame() {
@@ -121,7 +129,43 @@ public class ChessGame {
 
     }
 
+    // returns whether the move was valid or not
+    public boolean tryMove(String move, Color turnColor) {
+        // parse algebraic notation
+        if (move.matches("\\A(O-O|0-0)\\z")) {
+            if (castling.canCastleKingside(turnColor)) {
+                // TODO: actually castle
+                return true;
+            }
+            return false;
+        }
+        if (move.matches("\\A(O-O-O|0-0-0)\\z")) {
+            // TODO: queenside castle
+            return true;
+        }
+        var pieceType = move.charAt(0);
+        if (pieceType >= 'a' && pieceType < 'i') {
+            // pawn move
+            var endPos = new Position(move);
+            for (int r = 0; r < 7; ++r) {
+                var p = getPiece(r, endPos.getFile());
+                if (p instanceof Pawn && p.getColor() == turnColor) {
+                    //
+                    return true;
+                }
+            }
+            return false;
+        } else {
+
+        }
+        return false;
+    }
+
     public Piece getPiece(Position position) {
         return board_pieces[position.getRank()][position.getFile()];
+    }
+
+    private Piece getPiece(int rank, int file) {
+        return board_pieces[rank][file];
     }
 }
