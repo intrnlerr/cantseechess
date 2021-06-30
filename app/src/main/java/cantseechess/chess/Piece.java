@@ -1,118 +1,119 @@
 package cantseechess.chess;
 
 public abstract class Piece {
-    private Color color;
+    private final Color color;
 
-    abstract void canMove(Piece[][] board, Position from, Position to);
+    abstract boolean canMove(Piece[][] board, Position from, Position to);
+
+    public boolean matchesColor(Piece other) {
+        if (other.isBlank()) return false;
+        return other.getColor() == this.getColor();
+    }
+
+    @Untested
+    public boolean isBlank() {
+        return this instanceof Blank;
+    }
 
     public Piece(Color color) {
         this.color = color;
     }
 
-    public Color getColor() {
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
+    //you should only have to use matchesColor() everywhere but here
+    protected Color getColor() {
         return color;
     }
 
-    //returns true or false whether or not the move can be made (if there's an allied piece in the way)
-    boolean search(Piece[][] board, Position from, Position to, boolean diagonal, boolean straight) {
-        boolean straightReturn = false;
-        boolean diagonalReturn = false;
-        if (diagonal) diagonalReturn = searchDiagonal(board, from, to, null);
-        if (straight) straightReturn = searchStraight(board, from, to, null);
-        return diagonalReturn == diagonal && straightReturn == straight;
-    }
+    @Untested
+    protected boolean searchDiagonal(Piece[][] board, Position from, Position to, Position sp) {
+        Piece search = board[sp.getFile()][sp.getRank()];
 
-    boolean searchDiagonal(Piece[][] board, Position from, Position to, Position searchPos) {
-        /*ChessPiece search = chessBoard[sp.y][sp.x].getPiece();
+        int horizontalChange = to.getRank() - from.getRank();
+        int verticalChange = to.getFile() - from.getFile();
 
-        int horizontalChange = newPos.x - originalPos.x;
-        int verticalChange = newPos.y - originalPos.y;
-
-        //Otherwise it would directly change the original search position which was causing bugs
-        Position searchPos = new Position(sp.x, sp.y);
+        //Otherwise it would directly change the original search position
+        Position searchPos = new Position(sp.getRank(), sp.getFile());
 
         //If the piece that the search function is currently selecting is not a blank piece then return false, as something is blocking the bishop's way
-        if ((!(search instanceof Blank) && !(searchPos.equals(newPos))) && !(searchPos.equals(originalPos))) {
+        if ((!search.isBlank() && !searchPos.equals(to)) && !searchPos.equals(from)) {
             return false;
         }
         //If the tile has been reached, and the bishop can move there
-        else if (!search.isAlly() && (searchPos.equals(newPos))) {
+        else if (!search.matchesColor(board[from.getFile()][from.getRank()]) && (searchPos.equals(to))) {
             return true;
         }
         //If the tile has been reached, and the bishop can't move there
-        else if ((searchPos.equals(newPos)) && search.isAlly()) {
+        else if ((searchPos.equals(to)) && search.matchesColor(board[from.getFile()][from.getRank()])) {
             return false;
         }
         //The search function will recursively run until it reaches the specified position.
         else {
             //Setting search position one up-right
             if (horizontalChange == -verticalChange && verticalChange < 0) {
-                searchPos.x++;
-                searchPos.y--;
+                searchPos = new Position(searchPos.getRank() + 1, searchPos.getFile() - 1);
             }
             //Setting search position one up-left
             else if (horizontalChange == verticalChange && verticalChange < 0) {
-                searchPos.x--;
-                searchPos.y--;
+                searchPos = new Position(searchPos.getRank() - 1, searchPos.getFile() - 1);
             }
             //Setting search position one down-right
             else if (horizontalChange == verticalChange && verticalChange > 0) {
-                searchPos.x++;
-                searchPos.y++;
+                searchPos = new Position(searchPos.getRank() + 1, searchPos.getFile() + 1);
             }
             //Setting search position one down-left
             else {
-                searchPos.x--;
-                searchPos.y++;
+                searchPos = new Position(searchPos.getRank() - 1, searchPos.getFile() + 1);
             }
-            return searchForPiece(chessBoard, newPos, searchPos, originalPos);
-        }*/
-        return false;
+            return searchDiagonal(board, from, to, searchPos);
+        }
     }
 
-    boolean searchStraight(Piece[][] board, Position from, Position to, Position searchPos) {
-        /*
-        if (newPos.equals(originalPos)) return false;
-        ChessPiece search = chessBoard[sp.y][sp.x].getPiece();
+    @Untested
+    protected boolean searchStraight(Piece[][] board, Position from, Position to, Position sp) {
+        
+        if (to.equals(from)) return false;
+        Piece search = board[sp.getFile()][sp.getRank()];
 
         //Otherwise it would directly change the original search position which was causing bugs
-        Position searchPos = new Position(sp.x, sp.y);
+        Position searchPos = new Position(sp.getRank(), sp.getFile());
 
         //If the piece that the search function is currently selecting is not a blank piece then return false, as something is blocking the rook's way
-        if ((!(search instanceof Blank) && !searchPos.equals(newPos)) && !searchPos.equals(originalPos)) {
+        if ((!search.isBlank() && !searchPos.equals(to)) && !searchPos.equals(from)) {
             return false;
         }
         //If the tile has been reached, and the rook can move there
-        else if (!search.isAlly() && searchPos.equals(newPos)){
+        else if (search.matchesColor(board[from.getFile()][from.getRank()]) && searchPos.equals(to)){
             return true;
         }
-        else if (search.isAlly() && searchPos.equals(newPos)) {
+        else if (search.matchesColor(board[from.getFile()][from.getRank()]) && searchPos.equals(to)) {
             return false;
         }
         //The search function will recursively run until it reaches the specified position.
         else {
             //Setting search position one downwards
-            if (searchPos.x == originalPos.x && searchPos.y < newPos.y) {
-                searchPos.y++;
+            if (searchPos.getRank() == from.getRank() && searchPos.getFile() < to.getFile()) {
+                searchPos = new Position(searchPos.getRank(), searchPos.getFile() + 1);
             }
             //Setting search position one upwards
-            else if (searchPos.x == originalPos.x && searchPos.y > newPos.y) {
-                searchPos.y--;
+            else if (searchPos.getRank() == from.getRank() && searchPos.getFile() > to.getFile()) {
+                searchPos = new Position(searchPos.getRank(), searchPos.getFile() - 1);
             }
             //Setting search position one to the right
-            else if (searchPos.y == originalPos.y && searchPos.x < newPos.x) {
-                searchPos.x++;
+            else if (searchPos.getFile() == from.getFile() && searchPos.getRank() < to.getRank()) {
+                searchPos = new Position(searchPos.getRank() + 1, searchPos.getFile());
             }
             //Setting search position one to the left
-            else if (searchPos.y == originalPos.y && searchPos.x > newPos.x){
-                searchPos.x--;
+            else if (searchPos.getFile() == from.getFile() && searchPos.getRank() > to.getRank()){
+                searchPos = new Position(searchPos.getRank() - 1, searchPos.getFile());
             }
             //Continue searching.
-            return searchForPiece(chessBoard, newPos, searchPos, originalPos);
-
+            return searchStraight(board, from, to, searchPos);
         }
-         */
-        return false;
     }
 }
 
@@ -121,30 +122,17 @@ class King extends Piece {
         super(color);
     }
 
+    @Untested
     @Override
-    void canMove(Piece[][] board, Position from, Position to) {
-        /*
-        int verticalChange = Math.abs(newPos.y - currPos.y);
-        int horizontalChange = Math.abs(newPos.x - currPos.x);
-        int horizontalChangeSign = 0;
-        if (horizontalChange != 0)
-            horizontalChangeSign = (newPos.x - currPos.x)/horizontalChange;
-        ChessTile rook = chessBoard[newPos.y][newPos.x];
-        ChessTile king = chessBoard[currPos.y][currPos.x];
-        if (rook.getPiece().isAlly() && rook.getPiece().hasMoved == false && rook.getPiece() instanceof Rook && this.hasMoved == false) {
-            if (ChessGame.isUnderAttack(king).length == 0
-                    && ChessGame.isUnderAttack(chessBoard[currPos.y][currPos.x + horizontalChangeSign]).length == 0
-                    && chessBoard[currPos.y][currPos.x + horizontalChangeSign].getPiece() instanceof Blank
-                    && ChessGame.isUnderAttack(chessBoard[currPos.y][currPos.x + horizontalChangeSign*2]).length == 0
-                    && chessBoard[currPos.y][currPos.x + horizontalChangeSign*2].getPiece() instanceof Blank)
-                if ((horizontalChange == 4 && chessBoard[currPos.y][currPos.x + horizontalChangeSign*3].getPiece() instanceof Blank) || horizontalChange == 3)
-                    return CASTLE;
+    boolean canMove(Piece[][] board, Position from, Position to) {
+        
+        int verticalChange = Math.abs(to.getFile() - from.getFile());
+        int horizontalChange = Math.abs(to.getRank() - from.getRank());
+        if (!board[to.getFile()][to.getRank()].matchesColor(board[from.getFile()][from.getRank()]) && (verticalChange + horizontalChange == 1 || (verticalChange == 1 && horizontalChange == 1))) {
+            return true;
         }
-        else if (!chessBoard[newPos.y][newPos.x].getPiece().isAlly() && (verticalChange + horizontalChange == 1 || (verticalChange == 1 && horizontalChange == 1))) {
-            return NORMAL;
-        }
-        return NONE;
-         */
+        return false;
+         
     }
 }
 
@@ -153,20 +141,17 @@ class Queen extends Piece {
         super(color);
     }
 
+    @Untested
     @Override
-    void canMove(Piece[][] board, Position from, Position to) {
-        /*
-        int horizontalChange = Math.abs(newPos.x - currPos.x);
-        int verticalChange = Math.abs(newPos.y - currPos.y);
-        if (!chessBoard[newPos.y][newPos.x].getPiece().isAlly()
-                && (horizontalChange == verticalChange
-                || ((currPos.x == newPos.x && !(newPos.y == currPos.y))
-                || (currPos.y == newPos.y && !(newPos.x == currPos.x))))
-                && searchForPiece(chessBoard, newPos, currPos, currPos)) {
-            return NORMAL;
+    boolean canMove(Piece[][] board, Position from, Position to) {
+        int horizontalChange = Math.abs(to.getRank() - from.getRank());
+        int verticalChange = Math.abs(to.getFile() - from.getFile());
+        if (!board[to.getFile()][to.getRank()].matchesColor(board[from.getFile()][from.getRank()])) {
+            if ((horizontalChange == verticalChange && searchDiagonal(board, from, to, from))) return true;
+            else if ((from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to, from))) return true;
+            return false;
         }
-        else return NONE;
-         */
+        else return false;
     }
 }
 
@@ -175,18 +160,18 @@ class Rook extends Piece {
         super(color);
     }
 
+    @Untested
     @Override
-    void canMove(Piece[][] board, Position from, Position to) {
-        /*
-        boolean movingCorrect = (currPos.x == newPos.x && !(newPos.y == currPos.y)) || (currPos.y == newPos.y && !(newPos.x == currPos.x));
+    boolean canMove(Piece[][] board, Position from, Position to) {
+        boolean movingCorrect = (from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()));
 
         //You're correctly moving
-        if (movingCorrect && searchForPiece(chessBoard, newPos, currPos, currPos)) {
-            return NORMAL;
+        if (movingCorrect && searchStraight(board, from, to, from)) {
+            return true;
         }
         //You're moving incorrectly
-        return NONE;
-         */
+        return false;
+
     }
 
 }
@@ -196,17 +181,18 @@ class Bishop extends Piece {
         super(color);
     }
 
+    @Untested
     @Override
-    void canMove(Piece[][] board, Position from, Position to) {
-        /*
-        int horizontalChange = Math.abs(newPos.x - currPos.x);
-        int verticalChange = Math.abs(newPos.y - currPos.y);
+    boolean canMove(Piece[][] board, Position from, Position to) {
 
-        if (horizontalChange == verticalChange && searchForPiece(chessBoard, newPos, currPos, currPos)) {
-            return NORMAL;
+        int horizontalChange = Math.abs(to.getRank() - from.getRank());
+        int verticalChange = Math.abs(to.getFile() - from.getFile());
+
+        if (horizontalChange == verticalChange && searchDiagonal(board, from, to, from)) {
+            return true;
         }
-        else return NONE;
-         */
+        else return false;
+
     }
 }
 
@@ -215,20 +201,20 @@ class Knight extends Piece {
         super(color);
     }
 
+    @Untested
     @Override
-    void canMove(Piece[][] board, Position from, Position to) {
-        /*
-        int horizontalChange = Math.abs(newPos.x - currPos.x);
-        int verticalChange = (Math.abs(newPos.y - currPos.y));
+    boolean canMove(Piece[][] board, Position from, Position to) {
+
+        int horizontalChange = Math.abs(to.getRank() - from.getRank());
+        int verticalChange = (Math.abs(to.getFile() - from.getFile()));
 
         boolean movingCorrect = (verticalChange == 2 && horizontalChange == 1) || (verticalChange == 1 && horizontalChange == 2);
 
-        if (!chessBoard[newPos.y][newPos.x].getPiece().isAlly() && movingCorrect) {
-            System.out.println("Knight at " + currPos + " can move to " + chessBoard[newPos.y][newPos.x]);
-            return NORMAL;
+        if (!board[to.getFile()][to.getRank()].matchesColor(board[from.getFile()][from.getRank()]) && movingCorrect) {
+            return true;
         }
-        else return NONE;
-         */
+        else return false;
+
     }
 }
 
@@ -239,43 +225,46 @@ class Pawn extends Piece {
         super(color);
     }
 
+    @Untested
     @Override
-    void canMove(Piece[][] board, Position from, Position to) {
-        /*
+    boolean canMove(Piece[][] board, Position from, Position to) {
 
-        int verticalChange = newPos.y - currPos.y;
-        int horizontalChange = newPos.x - currPos.x;
+
+        int verticalChange = to.getFile() - from.getFile();
+        int horizontalChange = to.getRank() - from.getRank();
         int verticalLimit = 1;
 
         //If you haven't moved yet then you are able to move 2 spaces instead of 1.
-        if (hasMoved == false) {
+        if (!hasMoved) {
             verticalLimit = 2;
         }
 
-        ChessPiece moveToPiece = chessBoard[newPos.y][newPos.x].getPiece();
+        Piece moveToPiece = board[to.getFile()][to.getRank()];
+        //If the pawn is trying to move backwards return false
+        if ((board[from.getFile()][from.getRank()].getColor() == Color.black && verticalChange < 0) || (board[from.getFile()][from.getRank()].getColor() == Color.white && verticalChange > 0 ))
+            return false;
 
         //If the path your location is completely blank
-        boolean canMoveToPos = (moveToPiece instanceof Blank && verticalChange == -1)  || (verticalChange == -2 && chessBoard[currPos.y - 2][currPos.x].getPiece() instanceof Blank && chessBoard[currPos.y - 1][currPos.x].getPiece() instanceof Blank);
+        boolean canMoveToPos = (moveToPiece.isBlank() && Math.abs(verticalChange) == 1)  || (Math.abs(verticalChange) == 2 && board[from.getFile() - 2][from.getRank()].isBlank() && board[from.getFile() - 1][from.getRank()].isBlank());
 
         //If the piece ahead is blank and you clicked to a piece you can actually move to or you are attacking a piece then return true (
         if ((canMoveToPos && Math.abs(verticalChange) <= verticalLimit && horizontalChange == 0)
-                || (verticalChange == -1 && Math.abs(horizontalChange) == 1 && !(moveToPiece instanceof Blank) && !moveToPiece.isAlly())){
-            if (newPos.y == 0) {
-                return PROMOTION;
-            }
-            else return NORMAL;
-        }
-
-        else if (Math.abs(horizontalChange) == 1 && verticalChange == -1){
-            ChessPiece passantPiece = chessBoard[newPos.y+1][newPos.x].getPiece();
-            if (!passantPiece.isAlly() && passantPiece instanceof Pawn && ((Pawn) passantPiece).pawnDoubleJumpTurnNumber == ChessGame.getTurnNumber() - 1) {
-                return EN_PASSANT;
-            }
-            else return NONE;
+                || (Math.abs(verticalChange) == 1 && Math.abs(horizontalChange) == 1 && moveToPiece.matchesColor(board[from.getFile()][from.getRank()]))){
+            return true;
         }
         else {
-            return NONE;
+            return false;
         }
-         */
+
+    }
+}
+
+class Blank extends Piece {
+    public Blank(Color color) {
+        super(null);
+    }
+    @Override
+    boolean canMove(Piece[][] board, Position from, Position to) {
+        return false;
     }
 }
