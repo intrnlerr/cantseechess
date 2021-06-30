@@ -54,6 +54,12 @@ public class ChessGame {
             String[] content = FEN.split(" ");
             int rank = 7;
             int file = 0;
+            //Set all board pieces to Blank (so they're not null)
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    board_pieces[i][j] = new Blank();
+                }
+            }
             for (int i = 0; i < content[0].length(); ++i) {
                 char c = content[0].charAt(i);
                 if (c > '0' && c < '9') {
