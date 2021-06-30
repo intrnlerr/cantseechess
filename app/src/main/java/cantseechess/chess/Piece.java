@@ -260,7 +260,7 @@ class Pawn extends Piece {
 }
 
 class Blank extends Piece {
-    public Blank(Color color) {
+    public Blank() {
         super(null);
     }
     @Override
