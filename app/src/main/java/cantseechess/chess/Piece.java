@@ -228,10 +228,11 @@ class Pawn extends Piece {
     @Untested
     @Override
     boolean canMove(Piece[][] board, Position from, Position to) {
-
-
-        int verticalChange = to.getFile() - from.getFile();
-        int horizontalChange = to.getRank() - from.getRank();
+        int verticalChange = to.getRank() - from.getRank();
+        if (verticalChange == 0) {
+            return false;
+        }
+        int horizontalChange = to.getFile() - from.getFile();
         int verticalLimit = 1;
 
         //If you haven't moved yet then you are able to move 2 spaces instead of 1.
@@ -241,21 +242,20 @@ class Pawn extends Piece {
 
         Piece moveToPiece = board[to.getFile()][to.getRank()];
         //If the pawn is trying to move backwards return false
-        if ((board[from.getFile()][from.getRank()].getColor() == Color.black && verticalChange < 0) || (board[from.getFile()][from.getRank()].getColor() == Color.white && verticalChange > 0 ))
+        if ((getColor() == Color.black && verticalChange > 0) || (getColor() == Color.white && verticalChange < 0 ))
             return false;
 
         //If the path your location is completely blank
-        boolean canMoveToPos = (moveToPiece.isBlank() && Math.abs(verticalChange) == 1)  || (Math.abs(verticalChange) == 2 && board[from.getFile() - 2][from.getRank()].isBlank() && board[from.getFile() - 1][from.getRank()].isBlank());
+        var rankChange = verticalChange > 0 ? -1 : 1;
+        // start at the endpoint and check backwards that the path is clear
+        for (int r = to.getRank(); r != from.getRank(); r += rankChange) {
+            if (!board[from.getFile()][r].isBlank()) {
+                return false;
+            }
+        }
 
         //If the piece ahead is blank and you clicked to a piece you can actually move to or you are attacking a piece then return true (
-        if ((canMoveToPos && Math.abs(verticalChange) <= verticalLimit && horizontalChange == 0)
-                || (Math.abs(verticalChange) == 1 && Math.abs(horizontalChange) == 1 && moveToPiece.matchesColor(board[from.getFile()][from.getRank()]))){
-            return true;
-        }
-        else {
-            return false;
-        }
-
+        return Math.abs(verticalChange) <= verticalLimit && horizontalChange == 0 || Math.abs(verticalChange) == 1 && Math.abs(horizontalChange) == 1 && moveToPiece.matchesColor(board[from.getFile()][from.getRank()]);
     }
 }
 
