@@ -72,51 +72,51 @@ public class ChessGame {
                         file = 0;
                         break;
                     case 'P':
-                        board_pieces[rank][file] = new Pawn(Color.white);
+                        board_pieces[file][rank] = new Pawn(Color.white);
                         ++file;
                         break;
                     case 'N':
-                        board_pieces[rank][file] = new Knight(Color.white);
+                        board_pieces[file][rank] = new Knight(Color.white);
                         ++file;
                         break;
                     case 'B':
-                        board_pieces[rank][file] = new Bishop(Color.white);
+                        board_pieces[file][rank] = new Bishop(Color.white);
                         ++file;
                         break;
                     case 'R':
-                        board_pieces[rank][file] = new Rook(Color.white);
+                        board_pieces[file][rank] = new Rook(Color.white);
                         ++file;
                         break;
                     case 'Q':
-                        board_pieces[rank][file] = new Queen(Color.white);
+                        board_pieces[file][rank] = new Queen(Color.white);
                         ++file;
                         break;
                     case 'K':
-                        board_pieces[rank][file] = new King(Color.white);
+                        board_pieces[file][rank] = new King(Color.white);
                         ++file;
                         break;
                     case 'p':
-                        board_pieces[rank][file] = new Pawn(Color.black);
+                        board_pieces[file][rank] = new Pawn(Color.black);
                         ++file;
                         break;
                     case 'n':
-                        board_pieces[rank][file] = new Knight(Color.black);
+                        board_pieces[file][rank] = new Knight(Color.black);
                         ++file;
                         break;
                     case 'b':
-                        board_pieces[rank][file] = new Bishop(Color.black);
+                        board_pieces[file][rank] = new Bishop(Color.black);
                         ++file;
                         break;
                     case 'r':
-                        board_pieces[rank][file] = new Rook(Color.black);
+                        board_pieces[file][rank] = new Rook(Color.black);
                         ++file;
                         break;
                     case 'q':
-                        board_pieces[rank][file] = new Queen(Color.black);
+                        board_pieces[file][rank] = new Queen(Color.black);
                         ++file;
                         break;
                     case 'k':
-                        board_pieces[rank][file] = new King(Color.black);
+                        board_pieces[file][rank] = new King(Color.black);
                         ++file;
                         break;
                     default:
@@ -168,10 +168,10 @@ public class ChessGame {
     }
 
     public Piece getPiece(Position position) {
-        return board_pieces[position.getRank()][position.getFile()];
+        return board_pieces[position.getFile()][position.getRank()];
     }
 
     private Piece getPiece(int rank, int file) {
-        return board_pieces[rank][file];
+        return board_pieces[file][rank];
     }
 }
