@@ -1,5 +1,7 @@
 package cantseechess.chess;
 
+import java.util.Optional;
+
 public class ChessGame {
     private Piece[][] board_pieces = new Piece[8][8];
     private Color turnColor = Color.white;
@@ -150,20 +152,49 @@ public class ChessGame {
             return true;
         }
         var pieceType = move.charAt(0);
+        Optional<Class<?>> pieceClass = Optional.empty();
+        Position endpoint = null;
         if (pieceType >= 'a' && pieceType < 'i') {
             // pawn move
-            var endPos = new Position(move);
-            for (int r = 0; r < 7; ++r) {
-                var p = getPiece(r, endPos.getFile());
-                if (p instanceof Pawn && p.getColor() == turnColor) {
-                    //
-                    return true;
+            endpoint = new Position(move);
+            pieceClass = Optional.of(Pawn.class);
+        } else {
+            switch (pieceType) {
+                case 'n':
+                case 'N':
+                    pieceClass = Optional.of(Knight.class);
+                    break;
+                case 'K':
+                    pieceClass = Optional.of(King.class);
+                    break;
+                case 'R':
+                    pieceClass = Optional.of(Rook.class);
+                    break;
+                case 'Q':
+                    pieceClass = Optional.of(Queen.class);
+                    break;
+                case 'B':
+                    pieceClass = Optional.of(Bishop.class);
+                    break;
+
+            }
+            endpoint = new Position(move.substring(1));
+        }
+        if (pieceClass.isEmpty()) {
+            return false;
+        }
+        for (int rank = 0; rank < 8; ++rank) {
+            for (int file = 0; file < 8; ++file) {
+                var piece = board_pieces[file][rank];
+                if (piece.getColor() == turnColor && pieceClass.get().isInstance(piece)) {
+                    if (board_pieces[file][rank].canMove(board_pieces, new Position(rank, file), endpoint)) {
+                        // TODO: make move :)
+                        return true;
+                    }
                 }
             }
-            return false;
-        } else {
-
         }
+
         return false;
     }
 
