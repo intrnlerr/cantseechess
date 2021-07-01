@@ -75,7 +75,7 @@ public abstract class Piece {
 
     @Untested
     protected boolean searchStraight(Piece[][] board, Position from, Position to, Position sp) {
-        
+
         if (to.equals(from)) return false;
         Piece search = board[sp.getFile()][sp.getRank()];
 
@@ -87,10 +87,9 @@ public abstract class Piece {
             return false;
         }
         //If the tile has been reached, and the rook can move there
-        else if (search.matchesColor(this) && searchPos.equals(to)){
-            return true;
-        }
         else if (search.matchesColor(this) && searchPos.equals(to)) {
+            return true;
+        } else if (search.matchesColor(this) && searchPos.equals(to)) {
             return false;
         }
         //The search function will recursively run until it reaches the specified position.
@@ -108,7 +107,7 @@ public abstract class Piece {
                 searchPos = new Position(searchPos.getRank() + 1, searchPos.getFile());
             }
             //Setting search position one to the left
-            else if (searchPos.getFile() == from.getFile() && searchPos.getRank() > to.getRank()){
+            else if (searchPos.getFile() == from.getFile() && searchPos.getRank() > to.getRank()) {
                 searchPos = new Position(searchPos.getRank() - 1, searchPos.getFile());
             }
             //Continue searching.
@@ -125,14 +124,14 @@ class King extends Piece {
     @Untested
     @Override
     boolean canMove(Piece[][] board, Position from, Position to) {
-        
+
         int verticalChange = Math.abs(to.getFile() - from.getFile());
         int horizontalChange = Math.abs(to.getRank() - from.getRank());
         if (!board[to.getFile()][to.getRank()].matchesColor(this) && (verticalChange + horizontalChange == 1 || (verticalChange == 1 && horizontalChange == 1))) {
             return true;
         }
         return false;
-         
+
     }
 }
 
@@ -148,10 +147,10 @@ class Queen extends Piece {
         int verticalChange = Math.abs(to.getFile() - from.getFile());
         if (!board[to.getFile()][to.getRank()].matchesColor(this)) {
             if ((horizontalChange == verticalChange && searchDiagonal(board, from, to, from))) return true;
-            else if ((from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to, from))) return true;
+            else if ((from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to, from)))
+                return true;
             return false;
-        }
-        else return false;
+        } else return false;
     }
 }
 
@@ -190,8 +189,7 @@ class Bishop extends Piece {
 
         if (horizontalChange == verticalChange && searchDiagonal(board, from, to, from)) {
             return true;
-        }
-        else return false;
+        } else return false;
 
     }
 }
@@ -212,8 +210,7 @@ class Knight extends Piece {
 
         if (!board[to.getFile()][to.getRank()].matchesColor(this) && movingCorrect) {
             return true;
-        }
-        else return false;
+        } else return false;
 
     }
 }
@@ -242,7 +239,7 @@ class Pawn extends Piece {
 
         Piece moveToPiece = board[to.getFile()][to.getRank()];
         //If the pawn is trying to move backwards return false
-        if ((getColor() == Color.black && verticalChange > 0) || (getColor() == Color.white && verticalChange < 0 ))
+        if ((getColor() == Color.black && verticalChange > 0) || (getColor() == Color.white && verticalChange < 0))
             return false;
 
         //If the path your location is completely blank
@@ -263,6 +260,7 @@ class Blank extends Piece {
     public Blank() {
         super(null);
     }
+
     @Override
     boolean canMove(Piece[][] board, Position from, Position to) {
         return false;
