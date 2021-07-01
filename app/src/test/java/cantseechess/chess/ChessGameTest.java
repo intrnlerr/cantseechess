@@ -108,6 +108,22 @@ public class ChessGameTest {
     }
 
     @Test
+    public void pawnMoveTwo() throws IncorrectFENException {
+        var g = new ChessGame("8/3pppp1/3Br3/6p1/1P6/3Rb3/1PPPP3/8 w - - 0 1");
+        assertFalse("square blocked", g.tryMove("b4", Color.white));
+        assertFalse("pawn is not on correct rank to move twice", g.tryMove("b6", Color.white));
+        assertTrue(g.tryMove("c4", Color.white));
+        assertFalse("path is blocked by white piece", g.tryMove("d4", Color.white));
+        assertFalse("path is blocked by black piece", g.tryMove("e4", Color.white));
+
+        assertFalse("square blocked", g.tryMove("g5", Color.black));
+        assertFalse("pawn is not on correct rank to move twice", g.tryMove("g3", Color.black));
+        assertTrue(g.tryMove("f5", Color.black));
+        assertFalse("path is blocked by black piece", g.tryMove("e5", Color.black));
+        assertFalse("path is blocked by white piece", g.tryMove("d5", Color.black));
+    }
+
+    @Test
     public void whiteFirstMoves() {
         var g = new ChessGame();
         assertTrue(g.tryMove("e4", Color.white));
