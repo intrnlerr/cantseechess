@@ -44,11 +44,11 @@ public abstract class Piece {
             return false;
         }
         //If the tile has been reached, and the bishop can move there
-        else if (!search.matchesColor(board[from.getFile()][from.getRank()]) && (searchPos.equals(to))) {
+        else if (!search.matchesColor(this) && (searchPos.equals(to))) {
             return true;
         }
         //If the tile has been reached, and the bishop can't move there
-        else if ((searchPos.equals(to)) && search.matchesColor(board[from.getFile()][from.getRank()])) {
+        else if ((searchPos.equals(to)) && search.matchesColor(this)) {
             return false;
         }
         //The search function will recursively run until it reaches the specified position.
@@ -87,10 +87,10 @@ public abstract class Piece {
             return false;
         }
         //If the tile has been reached, and the rook can move there
-        else if (search.matchesColor(board[from.getFile()][from.getRank()]) && searchPos.equals(to)){
+        else if (search.matchesColor(this) && searchPos.equals(to)){
             return true;
         }
-        else if (search.matchesColor(board[from.getFile()][from.getRank()]) && searchPos.equals(to)) {
+        else if (search.matchesColor(this) && searchPos.equals(to)) {
             return false;
         }
         //The search function will recursively run until it reaches the specified position.
@@ -128,7 +128,7 @@ class King extends Piece {
         
         int verticalChange = Math.abs(to.getFile() - from.getFile());
         int horizontalChange = Math.abs(to.getRank() - from.getRank());
-        if (!board[to.getFile()][to.getRank()].matchesColor(board[from.getFile()][from.getRank()]) && (verticalChange + horizontalChange == 1 || (verticalChange == 1 && horizontalChange == 1))) {
+        if (!board[to.getFile()][to.getRank()].matchesColor(this) && (verticalChange + horizontalChange == 1 || (verticalChange == 1 && horizontalChange == 1))) {
             return true;
         }
         return false;
@@ -146,7 +146,7 @@ class Queen extends Piece {
     boolean canMove(Piece[][] board, Position from, Position to) {
         int horizontalChange = Math.abs(to.getRank() - from.getRank());
         int verticalChange = Math.abs(to.getFile() - from.getFile());
-        if (!board[to.getFile()][to.getRank()].matchesColor(board[from.getFile()][from.getRank()])) {
+        if (!board[to.getFile()][to.getRank()].matchesColor(this)) {
             if ((horizontalChange == verticalChange && searchDiagonal(board, from, to, from))) return true;
             else if ((from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to, from))) return true;
             return false;
@@ -210,7 +210,7 @@ class Knight extends Piece {
 
         boolean movingCorrect = (verticalChange == 2 && horizontalChange == 1) || (verticalChange == 1 && horizontalChange == 2);
 
-        if (!board[to.getFile()][to.getRank()].matchesColor(board[from.getFile()][from.getRank()]) && movingCorrect) {
+        if (!board[to.getFile()][to.getRank()].matchesColor(this) && movingCorrect) {
             return true;
         }
         else return false;
@@ -255,7 +255,7 @@ class Pawn extends Piece {
         }
 
         //If the piece ahead is blank and you clicked to a piece you can actually move to or you are attacking a piece then return true (
-        return Math.abs(verticalChange) <= verticalLimit && horizontalChange == 0 || Math.abs(verticalChange) == 1 && Math.abs(horizontalChange) == 1 && moveToPiece.matchesColor(board[from.getFile()][from.getRank()]);
+        return Math.abs(verticalChange) <= verticalLimit && horizontalChange == 0 || Math.abs(verticalChange) == 1 && Math.abs(horizontalChange) == 1 && moveToPiece.matchesColor(this);
     }
 }
 
