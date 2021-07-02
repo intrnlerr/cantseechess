@@ -46,12 +46,27 @@ public class ChessGameTest {
     }
 
     @Test
-    public void capture() {
-        var g = new ChessGame();
+    public void pawnCapture() throws IncorrectFENException {
+        var g = new ChessGame("8/1p2p3/r1R5/8/8/r1R5/1P2P3/8 w - - 0 1");
         assertFalse(g.tryMove("exf3", Color.white));
         assertFalse(g.tryMove("exf7", Color.white));
         assertFalse(g.tryMove("exf7", Color.black));
         assertFalse(g.tryMove("exf3", Color.black));
+
+        assertFalse(g.tryMove("bxc3", Color.white));
+        assertTrue(g.tryMove("bxa3", Color.white));
+
+        assertFalse(g.tryMove("bxa6", Color.black));
+        assertTrue(g.tryMove("bxc6", Color.black));
+    }
+
+    @Test
+    public void knightCapture() {
+        var g = new ChessGame();
+        assertFalse(g.tryMove("Nxa1", Color.black));
+        assertFalse(g.tryMove("Nxa2", Color.black));
+        assertFalse(g.tryMove("Nxc2", Color.black));
+        assertFalse(g.tryMove("Nxa8", Color.black));
     }
 
     @Test
