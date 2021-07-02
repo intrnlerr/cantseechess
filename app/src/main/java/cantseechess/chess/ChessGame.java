@@ -155,9 +155,22 @@ public class ChessGame {
         Optional<Class<?>> pieceClass = Optional.empty();
         Position endpoint = null;
         if (pieceType >= 'a' && pieceType < 'i') {
+            var fromFile = pieceType - 'a';
             // pawn move
-            endpoint = new Position(move);
-            pieceClass = Optional.of(Pawn.class);
+            if (move.charAt(1) == 'x') {
+                // pawn capture
+                endpoint = new Position(move.substring(2));
+            } else {
+                endpoint = new Position(move);
+            }
+            for (int rank = 0; rank < 8; ++rank) {
+                var piece = getPiece(rank, fromFile);
+                if (piece.getColor() == turnColor && piece instanceof Pawn) {
+                    return piece.canMove(board_pieces, new Position(rank, fromFile), endpoint);
+                }
+            }
+            return false;
+            // pieceClass = Optional.of(Pawn.class);
         } else {
             switch (pieceType) {
                 case 'n':
