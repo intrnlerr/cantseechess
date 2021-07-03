@@ -1,6 +1,6 @@
 package cantseechess;
 
-import cantseechess.chess.ChessGame;
+import cantseechess.chess.Color;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 
 public class BotListener extends ListenerAdapter {
-    private final HashMap<String, ChessGame> games = new HashMap<>();
+    private final HashMap<String, Player> games = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
 
     // gets user id from mention
@@ -49,8 +49,8 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 var game = challenge.accept();
-                games.put(challenge.challenged, game);
-                games.put(challenge.challenger, game);
+                games.put(challenge.challenged, new Player(game, Color.white));
+                games.put(challenge.challenger, new Player(game, Color.black));
                 challenges.remove(event.getAuthor().getId());
                 event.getChannel().sendMessage("game").queue();
             } else if (args[0].equals("!decline")) {
@@ -62,7 +62,8 @@ public class BotListener extends ListenerAdapter {
                 event.getChannel().sendMessage("challenge declined.").queue();
             }
         } else if (games.containsKey(event.getAuthor().getId())) {
-            // TODO: game logic
+            var player = games.get(event.getAuthor().getId());
+            player.makeMove(content);
         }
     }
 }
