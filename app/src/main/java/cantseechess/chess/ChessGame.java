@@ -139,17 +139,21 @@ public class ChessGame {
 
     // returns whether the move was valid or not
     public boolean tryMove(String move, Color turnColor) {
+        return getMove(move, turnColor).isPresent();
+    }
+
+    public Optional<Move> getMove(String move, Color turnColor) {
         // parse algebraic notation
         if (move.matches("\\A(O-O|0-0)\\z")) {
             if (castling.canCastleKingside(turnColor)) {
                 // TODO: actually castle
-                return true;
+                return Optional.empty();
             }
-            return false;
+            return Optional.empty();
         }
         if (move.matches("\\A(O-O-O|0-0-0)\\z")) {
             // TODO: queenside castle
-            return true;
+            return Optional.empty();
         }
         var pieceType = move.charAt(0);
         Optional<Class<?>> pieceClass = Optional.empty();
@@ -166,11 +170,13 @@ public class ChessGame {
             for (int rank = 0; rank < 8; ++rank) {
                 var piece = getPiece(rank, fromFile);
                 if (piece.getColor() == turnColor && piece instanceof Pawn) {
-                    return piece.canMove(board_pieces, new Position(rank, fromFile), endpoint);
+                    if (piece.canMove(board_pieces, new Position(rank, fromFile), endpoint)) {
+                        return Optional.of(new Move(new Position(rank, fromFile), endpoint));
+                    }
+                    return Optional.empty();
                 }
             }
-            return false;
-            // pieceClass = Optional.of(Pawn.class);
+            return Optional.empty();
         } else {
             switch (pieceType) {
                 case 'n':
@@ -200,7 +206,7 @@ public class ChessGame {
             }
         }
         if (pieceClass.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
         for (int rank = 0; rank < 8; ++rank) {
             for (int file = 0; file < 8; ++file) {
@@ -208,13 +214,18 @@ public class ChessGame {
                 if (piece.getColor() == turnColor && pieceClass.get().isInstance(piece)) {
                     if (board_pieces[file][rank].canMove(board_pieces, new Position(rank, file), endpoint)) {
                         // TODO: make move :)
-                        return true;
+                        return Optional.of(new Move(new Position(rank, file), endpoint));
                     }
                 }
             }
         }
 
-        return false;
+        return Optional.empty();
+    }
+
+    public void makeMove(Move m) {
+        board_pieces[m.to.getFile()][m.to.getRank()] = getPiece(m.from);
+        board_pieces[m.from.getFile()][m.from.getRank()] = new Blank();
     }
 
     public Piece getPiece(Position position) {
@@ -223,5 +234,15 @@ public class ChessGame {
 
     private Piece getPiece(int rank, int file) {
         return board_pieces[file][rank];
+    }
+
+    public static class Move {
+        final Position from;
+        final Position to;
+
+        private Move(Position from, Position to) {
+            this.to = to;
+            this.from = from;
+        }
     }
 }
