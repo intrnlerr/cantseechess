@@ -191,7 +191,13 @@ public class ChessGame {
                     break;
 
             }
-            endpoint = new Position(move.substring(1));
+            var p = move.charAt(1);
+            if (p == 'x') {
+                // capture
+                endpoint = new Position(move.substring(2));
+            } else {
+                endpoint = new Position(move.substring(1));
+            }
         }
         if (pieceClass.isEmpty()) {
             return false;
