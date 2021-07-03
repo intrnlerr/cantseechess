@@ -61,12 +61,20 @@ public class ChessGameTest {
     }
 
     @Test
-    public void knightCapture() {
-        var g = new ChessGame();
+    public void knightCapture() throws IncorrectFENException {
+        var g = new ChessGame("1n6/8/p1P5/5p2/2R1PP2/4NP2/8/8 w - - 0 1");
         assertFalse(g.tryMove("Nxa1", Color.black));
         assertFalse(g.tryMove("Nxa2", Color.black));
         assertFalse(g.tryMove("Nxc2", Color.black));
         assertFalse(g.tryMove("Nxa8", Color.black));
+        assertFalse(g.tryMove("Nxa6", Color.black));
+        assertTrue(g.tryMove("Nxc6", Color.black));
+
+        assertFalse(g.tryMove("Nxc4", Color.white));
+        assertFalse(g.tryMove("Nxe4", Color.white));
+        assertFalse(g.tryMove("Nxf4", Color.white));
+        assertFalse(g.tryMove("Nxf3", Color.white));
+        assertTrue(g.tryMove("Nxf5", Color.white));
     }
 
     @Test
