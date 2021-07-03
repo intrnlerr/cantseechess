@@ -251,8 +251,14 @@ class Pawn extends Piece {
             }
         }
 
+        if (horizontalChange != 0) {
+            if (moveToPiece.isBlank() || moveToPiece.matchesColor(this)) {
+                return false;
+            }
+        }
+
         //If the piece ahead is blank and you clicked to a piece you can actually move to or you are attacking a piece then return true (
-        return Math.abs(verticalChange) <= verticalLimit && horizontalChange == 0 || Math.abs(verticalChange) == 1 && Math.abs(horizontalChange) == 1 && moveToPiece.matchesColor(this);
+        return Math.abs(verticalChange) <= verticalLimit && horizontalChange == 0 || Math.abs(verticalChange) == 1 && Math.abs(horizontalChange) == 1 && !moveToPiece.matchesColor(this);
     }
 }
 
