@@ -78,6 +78,42 @@ public class ChessGameTest {
     }
 
     @Test
+    public void rook() throws IncorrectFENException {
+        var g = new ChessGame("8/1p4r1/8/8/8/8/1R4P1/8 w - - 0 1");
+
+        assertTrue(g.tryMove("Rxb7", Color.white));
+        assertTrue(g.tryMove("Rb3", Color.white));
+        assertTrue(g.tryMove("Ra2", Color.white));
+        assertTrue(g.tryMove("Rb1", Color.white));
+        assertTrue(g.tryMove("Rc2", Color.white));
+        assertFalse(g.tryMove("Ra1", Color.white));
+        assertFalse(g.tryMove("Ra3", Color.white));
+        assertFalse(g.tryMove("Rc3", Color.white));
+        assertFalse(g.tryMove("Rc1", Color.white));
+        assertFalse(g.tryMove("Rg2", Color.white));
+        assertFalse(g.tryMove("Rf8", Color.white));
+        assertFalse(g.tryMove("Rh6", Color.white));
+        assertFalse(g.tryMove("Rf6", Color.white));
+        assertFalse(g.tryMove("Rf8", Color.white));
+        assertFalse(g.tryMove("Rxg2", Color.white));
+
+        assertTrue(g.tryMove("Rxg2", Color.black));
+        assertTrue(g.tryMove("Rg6", Color.black));
+        assertTrue(g.tryMove("Rg8", Color.black));
+        assertTrue(g.tryMove("Rf7", Color.black));
+        assertTrue(g.tryMove("Rh7", Color.black));
+        assertFalse(g.tryMove("Ra1", Color.black));
+        assertFalse(g.tryMove("Ra3", Color.black));
+        assertFalse(g.tryMove("Rc3", Color.black));
+        assertFalse(g.tryMove("Rc1", Color.black));
+        assertFalse(g.tryMove("Rf8", Color.black));
+        assertFalse(g.tryMove("Rh6", Color.black));
+        assertFalse(g.tryMove("Rf6", Color.black));
+        assertFalse(g.tryMove("Rf8", Color.black));
+        assertFalse(g.tryMove("Rxb7", Color.black));
+    }
+
+    @Test
     public void castling() {
         var g = new ChessGame();
         assertFalse(g.tryMove("O-O", Color.white));
