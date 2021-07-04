@@ -123,6 +123,26 @@ public class ChessGameTest {
     }
 
     @Test
+    public void invalidNotation() {
+        var g = new ChessGame();
+        assertFalse(g.tryMove("", Color.white));
+        assertFalse(g.tryMove("0", Color.white));
+        assertFalse(g.tryMove("a", Color.white));
+        assertFalse(g.tryMove("b", Color.white));
+        assertFalse(g.tryMove("c", Color.white));
+        assertFalse(g.tryMove("d", Color.white));
+        assertFalse(g.tryMove("e", Color.white));
+        assertFalse(g.tryMove("q", Color.white));
+        assertFalse(g.tryMove("R", Color.white));
+        assertFalse(g.tryMove("N", Color.white));
+        assertFalse(g.tryMove("P", Color.white));
+        assertFalse(g.tryMove("Q", Color.white));
+        assertFalse(g.tryMove("K", Color.white));
+        assertFalse(g.tryMove("R", Color.white));
+        assertFalse(g.tryMove("??", Color.white));
+    }
+
+    @Test
     public void promotion() throws IncorrectFENException {
         var g = new ChessGame("8/PPPPP3/8/8/8/8/ppppp3/8 w - - 0 1");
         assertTrue(g.tryMove("a8=Q", Color.white));
