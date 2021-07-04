@@ -114,6 +114,49 @@ public class ChessGameTest {
     }
 
     @Test
+    public void queen() throws IncorrectFENException {
+        var g = new ChessGame("8/8/2Q2p2/8/8/2P2q2/8/8 w - - 0 1");
+
+        assertTrue(g.tryMove("Qxf6", Color.white));
+        assertTrue(g.tryMove("Qxf3", Color.white));
+        assertTrue(g.tryMove("Qd6", Color.white));
+        assertTrue(g.tryMove("Qb6", Color.white));
+        assertTrue(g.tryMove("Qa6", Color.white));
+        assertTrue(g.tryMove("Qc5", Color.white));
+        assertTrue(g.tryMove("Qc7", Color.white));
+        assertTrue(g.tryMove("Qb5", Color.white));
+        assertTrue(g.tryMove("Qb7", Color.white));
+        assertTrue(g.tryMove("Qd7", Color.white));
+        assertFalse(g.tryMove("Qc3", Color.white));
+        assertFalse(g.tryMove("Qc2", Color.white));
+        assertFalse(g.tryMove("Qe5", Color.white));
+        assertFalse(g.tryMove("Qd4", Color.white));
+        assertFalse(g.tryMove("Qc6", Color.white));
+        assertFalse(g.tryMove("Qe3", Color.white));
+        assertFalse(g.tryMove("Qf4", Color.white));
+        assertFalse(g.tryMove("Qc6", Color.white));
+
+        assertTrue(g.tryMove("Qxc3", Color.black));
+        assertTrue(g.tryMove("Qxc6", Color.black));
+        assertTrue(g.tryMove("Qf2", Color.black));
+        assertTrue(g.tryMove("Qf4", Color.black));
+        assertTrue(g.tryMove("Qe4", Color.black));
+        assertTrue(g.tryMove("Qe3", Color.black));
+        assertTrue(g.tryMove("Qe2", Color.black));
+        assertTrue(g.tryMove("Qg4", Color.black));
+        assertTrue(g.tryMove("Qg3", Color.black));
+        assertTrue(g.tryMove("Qg2", Color.black));
+        assertFalse(g.tryMove("Qf6", Color.black));
+        assertFalse(g.tryMove("Qf7", Color.black));
+        assertFalse(g.tryMove("Qe6", Color.black));
+        assertFalse(g.tryMove("Qg6", Color.black));
+        assertFalse(g.tryMove("Qe5", Color.black));
+        assertFalse(g.tryMove("Qd4", Color.black));
+        assertFalse(g.tryMove("Qb7", Color.black));
+        assertFalse(g.tryMove("Qf3", Color.black));
+    }
+
+    @Test
     public void castling() {
         var g = new ChessGame();
         assertFalse(g.tryMove("O-O", Color.white));
