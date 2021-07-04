@@ -277,6 +277,17 @@ public class ChessGame {
         board_pieces[m.from.getFile()][m.from.getRank()] = new Blank();
     }
 
+    public enum EndState {
+        NotOver,
+        Checkmate,
+        Draw,
+    }
+
+    public EndState isGameOver() {
+        // TODO: check for game over!
+        return EndState.NotOver;
+    }
+
     public Piece getPiece(Position position) {
         return board_pieces[position.getFile()][position.getRank()];
     }

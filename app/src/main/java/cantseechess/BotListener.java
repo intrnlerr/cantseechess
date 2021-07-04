@@ -1,5 +1,6 @@
 package cantseechess;
 
+import cantseechess.chess.ChessGame;
 import cantseechess.chess.Color;
 import cantseechess.chess.IllegalMoveException;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 
 public class BotListener extends ListenerAdapter {
-    private final HashMap<String, Player> games = new HashMap<>();
+    private final HashMap<String, Player> players = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
 
     // gets user id from mention
@@ -50,8 +51,8 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 var game = challenge.accept();
-                games.put(challenge.challenged, new Player(game, Color.white));
-                games.put(challenge.challenger, new Player(game, Color.black));
+                players.put(challenge.challenged, new Player(game, Color.white));
+                players.put(challenge.challenger, new Player(game, Color.black));
                 challenges.remove(event.getAuthor().getId());
                 event.getChannel().sendMessage("game").queue();
             } else if (args[0].equals("!decline")) {
@@ -62,14 +63,18 @@ public class BotListener extends ListenerAdapter {
                 }
                 event.getChannel().sendMessage("challenge declined.").queue();
             } else if (args[0].equals("!sp")) {
-                games.put(event.getAuthor().getId(), new SelfPlayer());
+                players.put(event.getAuthor().getId(), new SelfPlayer());
             }
-        } else if (games.containsKey(event.getAuthor().getId())) {
-            var player = games.get(event.getAuthor().getId());
+        } else if (players.containsKey(event.getAuthor().getId())) {
+            var player = players.get(event.getAuthor().getId());
             try {
                 player.makeMove(content);
             } catch (IllegalMoveException e) {
                 event.getChannel().sendMessage(e.getMessage()).queue();
+            }
+            if (player.isGameOver() != ChessGame.EndState.NotOver) {
+                players.remove(event.getAuthor().getId());
+                // TODO: better cleanup, rating adjustment!
             }
         }
     }

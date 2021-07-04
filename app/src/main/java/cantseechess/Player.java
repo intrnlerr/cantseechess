@@ -33,4 +33,8 @@ public class Player {
         var move = currentGame.getMove(moveStr, currentColor);
         currentGame.makeMove(move);
     }
+
+    public ChessGame.EndState isGameOver() {
+        return currentGame.isGameOver();
+    }
 }
