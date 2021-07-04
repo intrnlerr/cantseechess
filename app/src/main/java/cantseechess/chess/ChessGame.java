@@ -148,6 +148,9 @@ public class ChessGame {
     }
 
     public Move getMove(String move, Color turnColor) throws IllegalMoveException {
+        if (move.length() < 2) {
+            throw new IllegalMoveException("Bad move formatting");
+        }
         // parse algebraic notation
         if (move.matches("\\A(O-O|0-0)\\z")) {
             if (castling.canCastleKingside(turnColor)) {
