@@ -227,7 +227,46 @@ public class ChessGame {
         throw new IllegalMoveException("Illegal move");
     }
 
-        return Optional.empty();
+    public String getFEN() {
+        var builder = new StringBuilder();
+        var blanks = 0;
+        for (int rank = 7; rank >= 0; --rank) {
+            for (int file = 0; file < 8; ++file) {
+                var piece = board_pieces[file][rank];
+                if (piece.isBlank()) {
+                    ++blanks;
+                } else {
+                    if (blanks > 0) {
+                        builder.append(blanks);
+                        blanks = 0;
+                    }
+                    char p = '?';
+                    if (piece instanceof Pawn) {
+                        p = 'p';
+                    } else if (piece instanceof Rook) {
+                        p = 'r';
+                    } else if (piece instanceof King) {
+                        p = 'k';
+                    } else if (piece instanceof Queen) {
+                        p = 'q';
+                    } else if (piece instanceof Knight) {
+                        p = 'n';
+                    } else if (piece instanceof Bishop) {
+                        p = 'b';
+                    }
+                    builder.append(piece.getColor() == Color.white ? Character.toUpperCase(p) : p);
+                }
+            }
+            if (blanks > 0) {
+                builder.append(blanks);
+                blanks = 0;
+            }
+            if (rank > 0) {
+                builder.append('/');
+            }
+        }
+        // TODO: turn color, half clock, en passant, etc needs to be in the FEN.
+        return builder.toString();
     }
 
     public void makeMove(Move m) {
