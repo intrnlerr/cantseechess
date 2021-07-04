@@ -74,45 +74,29 @@ public abstract class Piece {
     }
 
     @Untested
-    protected boolean searchStraight(Piece[][] board, Position from, Position to, Position sp) {
-
-        if (to.equals(from)) return false;
-        Piece search = board[sp.getFile()][sp.getRank()];
-
-        //Otherwise it would directly change the original search position which was causing bugs
-        Position searchPos = new Position(sp.getRank(), sp.getFile());
-
-        //If the piece that the search function is currently selecting is not a blank piece then return false, as something is blocking the rook's way
-        if ((!search.isBlank() && !searchPos.equals(to)) && !searchPos.equals(from)) {
+    protected boolean searchStraight(Piece[][] board, Position from, Position to) {
+        if (to.equals(from) || board[to.getFile()][to.getRank()].matchesColor(this)) {
             return false;
         }
-        //If the tile has been reached, and the rook can move there
-        else if (search.matchesColor(this) && searchPos.equals(to)) {
-            return true;
-        } else if (search.matchesColor(this) && searchPos.equals(to)) {
-            return false;
+
+        if (from.getRank() != to.getRank()) {
+            // search vertically
+            int change = from.getRank() - to.getRank() > 0 ? -1 : 1;
+            for (int rank = from.getRank() + change; rank != to.getRank(); rank += change) {
+                if (!board[from.getFile()][rank].isBlank()) {
+                    return false;
+                }
+            }
+        } else {
+            // search horizontally
+            int change = from.getFile() - to.getFile() > 0 ? -1 : 1;
+            for (int file = from.getFile() + change; file != to.getFile(); file += change) {
+                if (!board[file][from.getRank()].isBlank()) {
+                    return false;
+                }
+            }
         }
-        //The search function will recursively run until it reaches the specified position.
-        else {
-            //Setting search position one downwards
-            if (searchPos.getRank() == from.getRank() && searchPos.getFile() < to.getFile()) {
-                searchPos = new Position(searchPos.getRank(), searchPos.getFile() + 1);
-            }
-            //Setting search position one upwards
-            else if (searchPos.getRank() == from.getRank() && searchPos.getFile() > to.getFile()) {
-                searchPos = new Position(searchPos.getRank(), searchPos.getFile() - 1);
-            }
-            //Setting search position one to the right
-            else if (searchPos.getFile() == from.getFile() && searchPos.getRank() < to.getRank()) {
-                searchPos = new Position(searchPos.getRank() + 1, searchPos.getFile());
-            }
-            //Setting search position one to the left
-            else if (searchPos.getFile() == from.getFile() && searchPos.getRank() > to.getRank()) {
-                searchPos = new Position(searchPos.getRank() - 1, searchPos.getFile());
-            }
-            //Continue searching.
-            return searchStraight(board, from, to, searchPos);
-        }
+        return true;
     }
 }
 
@@ -147,7 +131,7 @@ class Queen extends Piece {
         int verticalChange = Math.abs(to.getFile() - from.getFile());
         if (!board[to.getFile()][to.getRank()].matchesColor(this)) {
             if ((horizontalChange == verticalChange && searchDiagonal(board, from, to, from))) return true;
-            else if ((from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to, from)))
+            else if ((from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to)))
                 return true;
             return false;
         } else return false;
@@ -165,12 +149,7 @@ class Rook extends Piece {
         boolean movingCorrect = (from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()));
 
         //You're correctly moving
-        if (movingCorrect && searchStraight(board, from, to, from)) {
-            return true;
-        }
-        //You're moving incorrectly
-        return false;
-
+        return movingCorrect && searchStraight(board, from, to);
     }
 
 }
