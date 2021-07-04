@@ -139,25 +139,30 @@ public class ChessGame {
 
     // returns whether the move was valid or not
     public boolean tryMove(String move, Color turnColor) {
-        return getMove(move, turnColor).isPresent();
+        try {
+            getMove(move, turnColor);
+            return true;
+        } catch (IllegalMoveException e) {
+            return false;
+        }
     }
 
-    public Optional<Move> getMove(String move, Color turnColor) {
+    public Move getMove(String move, Color turnColor) throws IllegalMoveException {
         // parse algebraic notation
         if (move.matches("\\A(O-O|0-0)\\z")) {
             if (castling.canCastleKingside(turnColor)) {
                 // TODO: actually castle
-                return Optional.empty();
+                throw new IllegalMoveException("NYI :(");
             }
-            return Optional.empty();
+            throw new IllegalMoveException("Castling is not possible!");
         }
         if (move.matches("\\A(O-O-O|0-0-0)\\z")) {
             // TODO: queenside castle
-            return Optional.empty();
+            throw new IllegalMoveException("NYI :(");
         }
         var pieceType = move.charAt(0);
         Optional<Class<?>> pieceClass = Optional.empty();
-        Position endpoint = null;
+        Position endpoint;
         if (pieceType >= 'a' && pieceType < 'i') {
             var fromFile = pieceType - 'a';
             // pawn move
@@ -171,12 +176,12 @@ public class ChessGame {
                 var piece = getPiece(rank, fromFile);
                 if (piece.getColor() == turnColor && piece instanceof Pawn) {
                     if (piece.canMove(board_pieces, new Position(rank, fromFile), endpoint)) {
-                        return Optional.of(new Move(new Position(rank, fromFile), endpoint));
+                        return new Move(new Position(rank, fromFile), endpoint);
                     }
-                    return Optional.empty();
+                    throw new IllegalMoveException("Illegal pawn move");
                 }
             }
-            return Optional.empty();
+            throw new IllegalMoveException("Illegal pawn move");
         } else {
             switch (pieceType) {
                 case 'n':
@@ -206,19 +211,21 @@ public class ChessGame {
             }
         }
         if (pieceClass.isEmpty()) {
-            return Optional.empty();
+            throw new IllegalMoveException("Invalid piece");
         }
         for (int rank = 0; rank < 8; ++rank) {
             for (int file = 0; file < 8; ++file) {
                 var piece = board_pieces[file][rank];
                 if (piece.getColor() == turnColor && pieceClass.get().isInstance(piece)) {
                     if (board_pieces[file][rank].canMove(board_pieces, new Position(rank, file), endpoint)) {
-                        // TODO: make move :)
-                        return Optional.of(new Move(new Position(rank, file), endpoint));
+                        return new Move(new Position(rank, file), endpoint);
                     }
                 }
             }
         }
+
+        throw new IllegalMoveException("Illegal move");
+    }
 
         return Optional.empty();
     }
