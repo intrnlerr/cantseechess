@@ -1,6 +1,4 @@
-package cantseechess.chess.rating;
-
-import cantseechess.chess.Untested;
+package cantseechess.chess;
 
 import java.util.ArrayList;
 import java.util.List;
