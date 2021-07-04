@@ -2,7 +2,7 @@ package cantseechess;
 
 import cantseechess.chess.ChessGame;
 import cantseechess.chess.Color;
-import cantseechess.chess.rating.Rating;
+import cantseechess.chess.Rating;
 
 public class Player {
     private ChessGame currentGame;
