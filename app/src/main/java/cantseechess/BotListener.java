@@ -1,6 +1,7 @@
 package cantseechess;
 
 import cantseechess.chess.Color;
+import cantseechess.chess.IllegalMoveException;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +64,11 @@ public class BotListener extends ListenerAdapter {
             }
         } else if (games.containsKey(event.getAuthor().getId())) {
             var player = games.get(event.getAuthor().getId());
-            player.makeMove(content);
+            try {
+                player.makeMove(content);
+            } catch (IllegalMoveException e) {
+                event.getChannel().sendMessage(e.getMessage()).queue();
+            }
         }
     }
 }
