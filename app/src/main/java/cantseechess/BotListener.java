@@ -61,6 +61,8 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 event.getChannel().sendMessage("challenge declined.").queue();
+            } else if (args[0].equals("!sp")) {
+                games.put(event.getAuthor().getId(), new SelfPlayer());
             }
         } else if (games.containsKey(event.getAuthor().getId())) {
             var player = games.get(event.getAuthor().getId());
