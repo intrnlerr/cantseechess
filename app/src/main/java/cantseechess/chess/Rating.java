@@ -1,8 +1,6 @@
 package cantseechess.chess;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 
 public class Rating {
     private static final double DEFAULT_RATING = 1500;
