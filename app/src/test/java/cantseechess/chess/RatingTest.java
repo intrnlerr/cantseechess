@@ -12,11 +12,11 @@ import static junit.framework.TestCase.assertEquals;
 public class RatingTest {
     @Test
     public void testCalculateRatings() {
-        var games = new ArrayList<Map.Entry<Rating, Double>>();
+        var games = new ArrayList<Rating.GameEntry>();
         Rating player = new Rating(1500, 200);
-        games.add(new AbstractMap.SimpleEntry<>(new Rating(1400, 30), 1.0));
-        games.add(new AbstractMap.SimpleEntry<>(new Rating(1550, 100), 0.0));
-        games.add(new AbstractMap.SimpleEntry<>(new Rating(1700, 300), 0.0));
+        games.add(new Rating.GameEntry(new Rating(1400, 30), 1.0));
+        games.add(new Rating.GameEntry(new Rating(1550, 100), 0.0));
+        games.add(new Rating.GameEntry(new Rating(1700, 300), 0.0));
         player.calculateRating(games);
         assertEquals(1464, (int) player.getRating());
         assertEquals(151, (int) player.getDeviation());

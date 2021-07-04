@@ -57,12 +57,10 @@ public class Rating {
 
     //takes a list of ratings and score (0 for loss, 0.5 for draw, 1 for win)
     //it work :-D
-    public void calculateRating(List<Entry<Rating, Double>> others) {
-        var l = new ArrayList<Rating>();
-        others.forEach(j -> l.add(j.getKey()));
+    public void calculateRating(List<GameEntry> others) {
         double mu = getMu();
         double phi = getPhi();
-        double v = v(mu, l);
+        double v = v(mu, others);
         double delta = delta(v, mu, others);
         double a = a();
         System.out.println("Delta: " + delta + " v: " + v + " a: " + a);
@@ -112,20 +110,18 @@ public class Rating {
         return 1 / (1 + Math.exp(-1 * g(phij) * (mu - muj)));
     }
 
-    double v(double mu, List<Rating> ratings) {
+    double v(double mu, List<GameEntry> entries) {
         double toReturn = 0;
-        for (Rating r : ratings) {
-            toReturn += Math.pow(g(r.getPhi()), 2) * E(mu, r.getMu(), r.getPhi()) * (1 - E(mu, r.getMu(), r.getPhi()));
+        for (GameEntry r : entries) {
+            toReturn += Math.pow(g(r.rating.getPhi()), 2) * E(mu, r.rating.getMu(), r.rating.getPhi()) * (1 - E(mu, r.rating.getMu(), r.rating.getPhi()));
         }
         return Math.pow(toReturn, -1);
     }
 
-    double delta(double v, double mu, List<Entry<Rating, Double>> others) {
+    double delta(double v, double mu, List<GameEntry> others) {
         double toReturn = 0;
-        for (Entry<Rating, Double> o : others) {
-            var r = o.getKey();
-            var b = o.getValue();
-            toReturn += g(r.getPhi()) * (b - E(mu, r.getMu(), r.getPhi()));
+        for (GameEntry entry : others) {
+            toReturn += g(entry.rating.getPhi()) * (entry.result - E(mu, entry.rating.getMu(), entry.rating.getPhi()));
         }
         return v * toReturn;
     }
@@ -146,4 +142,13 @@ public class Rating {
         return deviation / GLICKO_NUMBER;
     }
 
+    static class GameEntry {
+        public final Rating rating;
+        public final double result;
+
+        GameEntry(Rating rating, double result) {
+            this.rating = rating;
+            this.result = result;
+        }
+    }
 }
