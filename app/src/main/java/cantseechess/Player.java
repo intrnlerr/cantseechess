@@ -9,11 +9,24 @@ public class Player {
     private ChessGame currentGame;
     private Color currentColor;
     private Rating rating;
+    private Player opponent;
+    private final String id;
 
-    public Player(ChessGame game, Color color) {
+    public Player(ChessGame game, Color color, String id) {
         currentGame = game;
         currentColor = color;
+        this.id = id;
         this.rating = new Rating();
+    }
+
+    public void resetGameInfo() {
+        currentGame = null;
+        opponent = null;
+        currentColor = null;
+    }
+
+    public void setOpponent(Player opponent) {
+        this.opponent = opponent;
     }
 
     public Color getColor() {
@@ -36,5 +49,13 @@ public class Player {
 
     public ChessGame.EndState isGameOver() {
         return currentGame.isGameOver();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Rating getRating() {
+        return rating;
     }
 }
