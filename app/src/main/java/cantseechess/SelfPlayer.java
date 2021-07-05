@@ -5,8 +5,8 @@ import cantseechess.chess.Color;
 import cantseechess.chess.IllegalMoveException;
 
 public class SelfPlayer extends Player {
-    public SelfPlayer() {
-        super(new ChessGame(), Color.white);
+    public SelfPlayer(String id) {
+        super(new ChessGame(), Color.white, id);
     }
 
     @Override

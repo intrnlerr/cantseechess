@@ -51,8 +51,12 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 var game = challenge.accept();
-                players.put(challenge.challenged, new Player(game, Color.white));
-                players.put(challenge.challenger, new Player(game, Color.black));
+                var player1 = new Player(game, Color.white, challenge.challenged);
+                var player2 = new Player(game, Color.black, challenge.challenger);
+                player1.setOpponent(player2);
+                player2.setOpponent(player1);
+                players.put(challenge.challenged, player1);
+                players.put(challenge.challenger, player2);
                 challenges.remove(event.getAuthor().getId());
                 event.getChannel().sendMessage("game").queue();
             } else if (args[0].equals("!decline")) {
@@ -63,7 +67,7 @@ public class BotListener extends ListenerAdapter {
                 }
                 event.getChannel().sendMessage("challenge declined.").queue();
             } else if (args[0].equals("!sp")) {
-                players.put(event.getAuthor().getId(), new SelfPlayer());
+                players.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId()));
             }
         } else if (players.containsKey(event.getAuthor().getId())) {
             var player = players.get(event.getAuthor().getId());

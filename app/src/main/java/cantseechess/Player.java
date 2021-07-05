@@ -58,4 +58,8 @@ public class Player {
     public Rating getRating() {
         return rating;
     }
+
+    public Player getOpponent() {
+        return opponent;
+    }
 }
