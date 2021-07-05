@@ -61,7 +61,6 @@ public class Rating {
         double v = v(mu, others);
         double delta = delta(v, mu, others);
         double a = a();
-        System.out.println("Delta: " + delta + " v: " + v + " a: " + a);
         double A = a;
         double B;
         if (Math.pow(delta, 2) > Math.pow(phi, 2) + v) {
