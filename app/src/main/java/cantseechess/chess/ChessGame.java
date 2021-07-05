@@ -279,7 +279,8 @@ public class ChessGame {
 
     public enum EndState {
         NotOver,
-        Checkmate,
+        WhiteWins,
+        BlackWins,
         Draw,
     }
 
