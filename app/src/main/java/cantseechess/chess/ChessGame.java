@@ -300,7 +300,7 @@ public class ChessGame {
         final Position from;
         final Position to;
 
-        private Move(Position from, Position to) {
+        Move(Position from, Position to) {
             this.to = to;
             this.from = from;
         }
