@@ -139,11 +139,11 @@ public class Rating {
         return deviation / GLICKO_NUMBER;
     }
 
-    static class GameEntry {
+    public static class GameEntry {
         public final Rating rating;
         public final double result;
 
-        GameEntry(Rating rating, double result) {
+        public GameEntry(Rating rating, double result) {
             this.rating = rating;
             this.result = result;
         }
