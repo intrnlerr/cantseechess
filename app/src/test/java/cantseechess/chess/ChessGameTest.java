@@ -157,12 +157,18 @@ public class ChessGameTest {
     }
 
     @Test
-    public void castling() {
+    public void castling() throws IncorrectFENException {
         var g = new ChessGame();
         assertFalse(g.tryMove("O-O", Color.white));
         assertFalse(g.tryMove("O-O", Color.black));
         assertFalse(g.tryMove("O-O-O", Color.white));
         assertFalse(g.tryMove("O-O-O", Color.black));
+
+        g = new ChessGame("r3kbnr/pppbqppp/2np4/4p3/4P3/1PN2N2/P1PPBPPP/R1BQK2R w KQkq - 1 6");
+        assertTrue(g.tryMove("O-O", Color.white));
+        assertTrue(g.tryMove("O-O-O", Color.black));
+        assertFalse(g.tryMove("O-O-O", Color.white));
+        assertFalse(g.tryMove("O-O", Color.black));
     }
 
     @Test
