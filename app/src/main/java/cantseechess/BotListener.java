@@ -3,6 +3,8 @@ package cantseechess;
 import cantseechess.chess.ChessGame;
 import cantseechess.chess.Color;
 import cantseechess.chess.IllegalMoveException;
+import cantseechess.chess.Rating;
+import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -10,8 +12,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 
 public class BotListener extends ListenerAdapter {
+    private final RatingStorage ratings;
     private final HashMap<String, Player> players = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
+
+    public BotListener(RatingStorage ratings) {
+        this.ratings = ratings;
+    }
 
     // gets user id from mention
     private String parseMention(String mention) {
@@ -76,9 +83,14 @@ public class BotListener extends ListenerAdapter {
             } catch (IllegalMoveException e) {
                 event.getChannel().sendMessage(e.getMessage()).queue();
             }
-            if (player.isGameOver() != ChessGame.EndState.NotOver) {
+            var endState = player.isGameOver();
+            if (endState != ChessGame.EndState.NotOver) {
                 players.remove(event.getAuthor().getId());
                 // TODO: better cleanup, rating adjustment!
+                if (endState == ChessGame.EndState.Draw) {
+                    ratings.addGame(player, new Rating.GameEntry(player.getOpponent().getRating(), 0.5));
+                    ratings.addGame(player.getOpponent(), new Rating.GameEntry(player.getRating(), 0.5));
+                }
             }
         }
     }

@@ -3,6 +3,7 @@
  */
 package cantseechess;
 
+import cantseechess.storage.HashmapStorage;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 
@@ -39,9 +40,9 @@ public class App {
             System.out.println("no token in token file");
             return;
         }
-
+        var ratings = new HashmapStorage();
         JDA jda = JDABuilder.createDefault(token)
-                .addEventListeners(new BotListener())
+                .addEventListeners(new BotListener(ratings))
                 .build();
         jda.awaitReady();
         System.out.println(new App().getGreeting());
