@@ -85,12 +85,20 @@ public class BotListener extends ListenerAdapter {
             }
             var endState = player.isGameOver();
             if (endState != ChessGame.EndState.NotOver) {
-                players.remove(event.getAuthor().getId());
                 // TODO: better cleanup, rating adjustment!
                 if (endState == ChessGame.EndState.Draw) {
                     ratings.addGame(player, new Rating.GameEntry(player.getOpponent().getRating(), 0.5));
                     ratings.addGame(player.getOpponent(), new Rating.GameEntry(player.getRating(), 0.5));
+                } else if (endState == ChessGame.EndState.WhiteWins) {
+                    ratings.addGame(player.getWhite(), new Rating.GameEntry(player.getBlack().getRating(), 1));
+                    ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 0));
+                } else {
+                    ratings.addGame(player.getWhite(), new Rating.GameEntry(player.getBlack().getRating(), 0));
+                    ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 1));
                 }
+
+                player.getOpponent().resetGameInfo();
+                player.resetGameInfo();
             }
         }
     }

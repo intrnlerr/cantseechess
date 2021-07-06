@@ -25,6 +25,20 @@ public class Player {
         currentColor = null;
     }
 
+    public Player getWhite() {
+        if (currentGame == null) {
+            return null;
+        }
+        return currentColor == Color.white ? this : opponent;
+    }
+
+    public Player getBlack() {
+        if (currentGame == null) {
+            return null;
+        }
+        return currentColor == Color.black ? this : opponent;
+    }
+
     public void setOpponent(Player opponent) {
         this.opponent = opponent;
     }
