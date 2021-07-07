@@ -22,12 +22,12 @@ public class BoardGenerator {
         PGN = PGN.replaceAll("([0-9]+[.])", "");
         if (PGN.charAt(0) == ' ') PGN.substring(1);
         String[] moves = PGN.split(" ");
-        toReturn.add(game.getPieces());
+        toReturn.add(getBoard(game.getPieces()));
         for (int i = 0; i < moves.length; i++) {
             //this is probably right
             Color color = i%2 == 0 ? Color.white : Color.black;
             game.makeMove(game.getMove(moves[i], color));
-            toReturn.add(game.getPieces());
+            toReturn.add(getBoard(game.getPieces()));
         }
         return (BufferedImage[]) toReturn.toArray();
     }
