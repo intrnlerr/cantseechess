@@ -132,6 +132,7 @@ public class ChessGame {
         }
 
     }
+
     //Return a board position from FEN
     private void importFEN(String FEN) throws IncorrectFENException {
         try {
@@ -305,7 +306,7 @@ public class ChessGame {
             for (int j = 0; j < 8; j++) {
                 Piece piece = board_pieces[i][j];
                 if (piece.getColor() != turnColor) continue;
-                for (int ii = 0; ii < 8;ii++) {
+                for (int ii = 0; ii < 8; ii++) {
                     for (int jj = 0; jj < 8; jj++) {
                         Piece testPos = board_pieces[ii][jj];
                         if (piece.canMove(board_pieces, new Position(j, i), new Position(jj, ii))) {
@@ -317,21 +318,22 @@ public class ChessGame {
         }
         return true;
     }
+
     //Checks if either side is in checkmate and returns the respective endstate
     public EndState isInCheckmate() {
         Piece king = findKing(turnColor);
         Position kingPos = findPosition(king);
-        Piece[] piecesAttackingKing = isAttacked(king, kingPos);
+        var piecesAttackingKing = attackingPieces(king, kingPos);
 
         EndState mateState = turnColor == Color.white ? EndState.BlackWins : EndState.WhiteWins;
 
-        if (piecesAttackingKing.length == 0) return EndState.NotOver;
+        if (piecesAttackingKing.size() == 0) return EndState.NotOver;
 
-        if (piecesAttackingKing.length == 2) {
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
-                    Piece p = board_pieces[i][j];
-                    if (king.canMove(board_pieces, kingPos, new Position(j, i)) && isAttacked(p, new Position(j, i)).length == 0)
+        if (piecesAttackingKing.size() == 2) {
+            for (int file = 0; file < 8; file++) {
+                for (int rank = 0; rank < 8; rank++) {
+                    Piece p = board_pieces[file][rank];
+                    if (king.canMove(board_pieces, kingPos, new Position(rank, file)) && attackingPieces(p, new Position(rank, file)).size() == 0)
                         return EndState.NotOver;
 
                 }
@@ -339,13 +341,13 @@ public class ChessGame {
             return mateState;
         }
 
-        Piece attackPiece = piecesAttackingKing[0];
+        Piece attackPiece = piecesAttackingKing.get(0);
         Position attackPiecePos = findPosition(attackPiece);
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                Piece p = board_pieces[i][j];
+        for (int file = 0; file < 8; file++) {
+            for (int rank = 0; rank < 8; rank++) {
+                Piece p = board_pieces[file][rank];
                 //if the piece can capture the piece attacking the king
-                if (p.canMove(board_pieces, new Position(j, i), attackPiecePos)) {
+                if (p.canMove(board_pieces, new Position(rank, file), attackPiecePos)) {
                     return EndState.NotOver;
                 }
             }
@@ -367,8 +369,8 @@ public class ChessGame {
 
     //Finds king of color color
     public Piece findKing(Color color) {
-        for (Piece[] p: board_pieces) {
-            for (Piece piece: p) {
+        for (Piece[] p : board_pieces) {
+            for (Piece piece : p) {
                 if (piece instanceof King && piece.getColor() == color)
                     return piece;
             }
@@ -376,17 +378,17 @@ public class ChessGame {
         return null;
     }
 
-    public Piece[] isAttacked(Piece piece, Position position) {
-        ArrayList toReturn = new ArrayList<Piece>();
+    public ArrayList<Piece> attackingPieces(Piece piece, Position position) {
+        ArrayList<Piece> attackingPieces = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Piece pie = board_pieces[i][j];
                 if (!pie.matchesColor(piece) && !pie.isBlank() && pie.canMove(board_pieces, new Position(j, i), position)) {
-                    toReturn.add(pie);
+                    attackingPieces.add(pie);
                 }
             }
         }
-        return (Piece[]) toReturn.toArray();
+        return attackingPieces;
     }
 
 
