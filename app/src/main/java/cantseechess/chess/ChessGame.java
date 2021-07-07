@@ -300,23 +300,6 @@ public class ChessGame {
         return isInStalemate() ? EndState.Draw : isInCheckmate();
     }
 
-    public boolean testMove(Piece piece, Position position) {
-        /*Piece tilePiece = tile.getPiece();
-        Piece toTilePiece = toTile.getPiece();
-        CHESS_TILES[toTile.getPosition().y][toTile.getPosition().x].testSetPiece(tilePiece);
-        CHESS_TILES[tile.getPosition().y][tile.getPosition().x].testSetPiece(new Blank());
-        boolean toReturn = false;
-        if (isUnderAttack(CHESS_TILES, findKingTile(CHESS_TILES)).length == 0) {
-            toReturn = true;
-        }
-
-        CHESS_TILES[toTile.getPosition().y][toTile.getPosition().x].testSetPiece(toTilePiece);
-        CHESS_TILES[tile.getPosition().y][tile.getPosition().x].testSetPiece(tilePiece);
-
-        return toReturn;*/
-        return true;
-    }
-
     public boolean isInStalemate() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -325,7 +308,7 @@ public class ChessGame {
                 for (int ii = 0; ii < 8;ii++) {
                     for (int jj = 0; jj < 8; jj++) {
                         Piece testPos = board_pieces[ii][jj];
-                        if (piece.canMove(board_pieces, new Position(j, i), new Position(jj, ii)) && testMove(piece, testPos)) {
+                        if (piece.canMove(board_pieces, new Position(j, i), new Position(jj, ii))) {
                             return false;
                         }
                     }
