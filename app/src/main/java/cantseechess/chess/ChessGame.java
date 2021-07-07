@@ -50,8 +50,8 @@ public class ChessGame {
         importFEN(FEN);
     }
 
-    //Return a board position from FEN
-    private void importFEN(String FEN) throws IncorrectFENException {
+    public static Piece[][] FENtoBoard(String FEN) throws IncorrectFENException {
+        Piece[][] toReturn = new Piece[8][8];
         try {
             String[] content = FEN.split(" ");
             int rank = 7;
@@ -59,7 +59,7 @@ public class ChessGame {
             //Set all board pieces to Blank (so they're not null)
             for (int i = 0; i < 8; i++) {
                 for (int j = 0; j < 8; j++) {
-                    board_pieces[i][j] = new Blank();
+                    toReturn[i][j] = new Blank();
                 }
             }
             for (int i = 0; i < content[0].length(); ++i) {
@@ -74,57 +74,68 @@ public class ChessGame {
                         file = 0;
                         break;
                     case 'P':
-                        board_pieces[file][rank] = new Pawn(Color.white);
+                        toReturn[file][rank] = new Pawn(Color.white);
                         ++file;
                         break;
                     case 'N':
-                        board_pieces[file][rank] = new Knight(Color.white);
+                        toReturn[file][rank] = new Knight(Color.white);
                         ++file;
                         break;
                     case 'B':
-                        board_pieces[file][rank] = new Bishop(Color.white);
+                        toReturn[file][rank] = new Bishop(Color.white);
                         ++file;
                         break;
                     case 'R':
-                        board_pieces[file][rank] = new Rook(Color.white);
+                        toReturn[file][rank] = new Rook(Color.white);
                         ++file;
                         break;
                     case 'Q':
-                        board_pieces[file][rank] = new Queen(Color.white);
+                        toReturn[file][rank] = new Queen(Color.white);
                         ++file;
                         break;
                     case 'K':
-                        board_pieces[file][rank] = new King(Color.white);
+                        toReturn[file][rank] = new King(Color.white);
                         ++file;
                         break;
                     case 'p':
-                        board_pieces[file][rank] = new Pawn(Color.black);
+                        toReturn[file][rank] = new Pawn(Color.black);
                         ++file;
                         break;
                     case 'n':
-                        board_pieces[file][rank] = new Knight(Color.black);
+                        toReturn[file][rank] = new Knight(Color.black);
                         ++file;
                         break;
                     case 'b':
-                        board_pieces[file][rank] = new Bishop(Color.black);
+                        toReturn[file][rank] = new Bishop(Color.black);
                         ++file;
                         break;
                     case 'r':
-                        board_pieces[file][rank] = new Rook(Color.black);
+                        toReturn[file][rank] = new Rook(Color.black);
                         ++file;
                         break;
                     case 'q':
-                        board_pieces[file][rank] = new Queen(Color.black);
+                        toReturn[file][rank] = new Queen(Color.black);
                         ++file;
                         break;
                     case 'k':
-                        board_pieces[file][rank] = new King(Color.black);
+                        toReturn[file][rank] = new King(Color.black);
                         ++file;
                         break;
                     default:
                         throw new IncorrectFENException(null);
                 }
             }
+            return toReturn;
+        } catch (Exception e) {
+            throw new IncorrectFENException(e);
+        }
+
+    }
+    //Return a board position from FEN
+    private void importFEN(String FEN) throws IncorrectFENException {
+        try {
+            board_pieces = FENtoBoard(FEN);
+            String[] content = FEN.split(" ");
             //The color of the player whose turn it is
             turnColor = content[1].equalsIgnoreCase("w") ? Color.white : Color.black;
             castling = new Castling(content[2]);
@@ -295,6 +306,10 @@ public class ChessGame {
 
     private Piece getPiece(int rank, int file) {
         return board_pieces[file][rank];
+    }
+
+    public Piece[][] getPieces() {
+        return board_pieces;
     }
 
     public static class Move {
