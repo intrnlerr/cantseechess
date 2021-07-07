@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class BoardGenerator {
     private static BufferedImage wPawn, wKnight, wRook, wBishop, wQueen, wKing, bPawn, bKnight, bRook, bBishop, bQueen, bKing;
@@ -13,6 +14,23 @@ public class BoardGenerator {
     private static BufferedImage BOARD_IMAGE;
     private static final int PIECE_WIDTH = 128;
     private static final int PIECE_HEIGHT = 128;
+
+    @Untested
+    public static final BufferedImage[] getBoard(String PGN, String StartFEN) throws IncorrectFENException, IllegalMoveException {
+        ArrayList toReturn = new ArrayList<BufferedImage>();
+        ChessGame game = new ChessGame(StartFEN);
+        PGN = PGN.replaceAll("([0-9]+[.])", "");
+        if (PGN.charAt(0) == ' ') PGN.substring(1);
+        String[] moves = PGN.split(" ");
+        toReturn.add(game.getPieces());
+        for (int i = 0; i < moves.length; i++) {
+            //this is probably right
+            Color color = i%2 == 0 ? Color.white : Color.black;
+            game.makeMove(game.getMove(moves[i], color));
+            toReturn.add(game.getPieces());
+        }
+        return (BufferedImage[]) toReturn.toArray();
+    }
 
     public static final BufferedImage getBoard(String FEN) throws IncorrectFENException {
         return getBoard(ChessGame.FENtoBoard(FEN));
