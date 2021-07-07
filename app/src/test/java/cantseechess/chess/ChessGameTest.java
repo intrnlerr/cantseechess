@@ -303,4 +303,10 @@ public class ChessGameTest {
         g = new ChessGame("8/8/8/8/k7/1q6/8/K7 w - - 0 1");
         assertEquals(ChessGame.EndState.Draw, g.isGameOver());
     }
+
+    @Test
+    public void insufficientMaterial() throws IncorrectFENException {
+        var g = new ChessGame("8/8/8/2k5/8/2K5/8/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+    }
 }
