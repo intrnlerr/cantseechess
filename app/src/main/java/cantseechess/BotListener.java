@@ -5,6 +5,7 @@ import cantseechess.chess.Color;
 import cantseechess.chess.IllegalMoveException;
 import cantseechess.chess.Rating;
 import cantseechess.storage.RatingStorage;
+import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -101,5 +102,10 @@ public class BotListener extends ListenerAdapter {
                 player.resetGameInfo();
             }
         }
+    }
+
+    @Override
+    public void onShutdown(@NotNull ShutdownEvent event) {
+        ratings.shutdown();
     }
 }
