@@ -14,11 +14,11 @@ public class BoardGenerator {
     private static final int PIECE_WIDTH = 128;
     private static final int PIECE_HEIGHT = 128;
 
-    public static final BufferedImage getBoard(String FEN) throws IOException, IncorrectFENException {
+    public static final BufferedImage getBoard(String FEN) throws IncorrectFENException {
         return getBoard(ChessGame.FENtoBoard(FEN));
     }
 
-    public static final BufferedImage getBoard(Piece[][] board) throws IOException {
+    public static final BufferedImage getBoard(Piece[][] board) {
         if (!piecesInit) initializePieces();
 
         BufferedImage toReturn = BOARD_IMAGE;
@@ -55,9 +55,15 @@ public class BoardGenerator {
         return toReturn;
     }
 
-    private static void initializePieces() throws IOException {
-        BufferedImage pieceArray = ImageIO.read(BoardGenerator.class.getResourceAsStream(PIECE_ARRAY_URL));
-        BOARD_IMAGE = ImageIO.read(BoardGenerator.class.getResourceAsStream(BOARD_URL));
+    private static void initializePieces() {
+        BufferedImage pieceArray;
+        try {
+            pieceArray = ImageIO.read(BoardGenerator.class.getResourceAsStream(PIECE_ARRAY_URL));
+            BOARD_IMAGE = ImageIO.read(BoardGenerator.class.getResourceAsStream(BOARD_URL));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
         BufferedImage[] pieces = new BufferedImage[12];
         for (int i = 0; i < pieces.length; i++) {
             pieces[i] = new BufferedImage(PIECE_WIDTH, PIECE_HEIGHT, pieceArray.getType());
