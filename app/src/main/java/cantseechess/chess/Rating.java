@@ -110,7 +110,7 @@ public class Rating {
     double v(double mu, List<GameEntry> entries) {
         double toReturn = 0;
         for (GameEntry r : entries) {
-            toReturn += Math.pow(g(r.rating.getPhi()), 2) * E(mu, r.rating.getMu(), r.rating.getPhi()) * (1 - E(mu, r.rating.getMu(), r.rating.getPhi()));
+            toReturn += Math.pow(g(r.getPhi()), 2) * E(mu, r.getMu(), r.getPhi()) * (1 - E(mu, r.getMu(), r.getPhi()));
         }
         return Math.pow(toReturn, -1);
     }
@@ -118,7 +118,7 @@ public class Rating {
     double delta(double v, double mu, List<GameEntry> others) {
         double toReturn = 0;
         for (GameEntry entry : others) {
-            toReturn += g(entry.rating.getPhi()) * (entry.result - E(mu, entry.rating.getMu(), entry.rating.getPhi()));
+            toReturn += g(entry.getPhi()) * (entry.result - E(mu, entry.getMu(), entry.getPhi()));
         }
         return v * toReturn;
     }
@@ -140,12 +140,27 @@ public class Rating {
     }
 
     public static class GameEntry {
-        public final Rating rating;
+        public final double rating;
+        public final double deviation;
         public final double result;
 
         public GameEntry(Rating rating, double result) {
-            this.rating = rating;
+            this.rating = rating.getRating();
+            this.deviation = rating.getDeviation();
             this.result = result;
+        }
+        public GameEntry(double rating, double deviation, double result) {
+            this.rating = rating;
+            this.deviation = deviation;
+            this.result = result;
+        }
+
+        double getPhi() {
+            return deviation / GLICKO_NUMBER;
+        }
+
+        double getMu() {
+            return (rating - DEFAULT_RATING) / GLICKO_NUMBER;
         }
     }
 }
