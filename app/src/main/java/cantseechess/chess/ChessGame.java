@@ -1,5 +1,6 @@
 package cantseechess.chess;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class ChessGame {
@@ -296,9 +297,115 @@ public class ChessGame {
     }
 
     public EndState isGameOver() {
-        // TODO: check for game over!
-        return EndState.NotOver;
+        return isInStalemate() ? EndState.Draw : isInCheckmate();
     }
+
+    public boolean testMove(Piece piece, Position position) {
+        /*Piece tilePiece = tile.getPiece();
+        Piece toTilePiece = toTile.getPiece();
+        CHESS_TILES[toTile.getPosition().y][toTile.getPosition().x].testSetPiece(tilePiece);
+        CHESS_TILES[tile.getPosition().y][tile.getPosition().x].testSetPiece(new Blank());
+        boolean toReturn = false;
+        if (isUnderAttack(CHESS_TILES, findKingTile(CHESS_TILES)).length == 0) {
+            toReturn = true;
+        }
+
+        CHESS_TILES[toTile.getPosition().y][toTile.getPosition().x].testSetPiece(toTilePiece);
+        CHESS_TILES[tile.getPosition().y][tile.getPosition().x].testSetPiece(tilePiece);
+
+        return toReturn;*/
+        return true;
+    }
+
+    public boolean isInStalemate() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Piece piece = board_pieces[i][j];
+                if (piece.getColor() != turnColor) continue;
+                for (int ii = 0; ii < 8;ii++) {
+                    for (int jj = 0; jj < 8; jj++) {
+                        Piece testPos = board_pieces[ii][jj];
+                        if (piece.canMove(board_pieces, new Position(j, i), new Position(jj, ii)) && testMove(piece, testPos)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    //Checks if either side is in checkmate and returns the respective endstate
+    public EndState isInCheckmate() {
+        Piece king = findKing(turnColor);
+        Position kingPos = findPosition(king);
+        Piece[] piecesAttackingKing = isAttacked(king, kingPos);
+
+        EndState mateState = turnColor == Color.white ? EndState.BlackWins : EndState.WhiteWins;
+
+        if (piecesAttackingKing.length == 0) return EndState.NotOver;
+
+        if (piecesAttackingKing.length == 2) {
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    Piece p = board_pieces[i][j];
+                    if (king.canMove(board_pieces, kingPos, new Position(j, i)) && isAttacked(p, new Position(j, i)).length == 0)
+                        return EndState.NotOver;
+
+                }
+            }
+            return mateState;
+        }
+
+        Piece attackPiece = piecesAttackingKing[0];
+        Position attackPiecePos = findPosition(attackPiece);
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Piece p = board_pieces[i][j];
+                //if the piece can capture the piece attacking the king
+                if (p.canMove(board_pieces, new Position(j, i), attackPiecePos)) {
+                    return EndState.NotOver;
+                }
+            }
+        }
+
+        return mateState;
+    }
+
+    public Position findPosition(Piece piece) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (board_pieces[i][j] == piece) {
+                    return new Position(j, i);
+                }
+            }
+        }
+        return null;
+    }
+
+    //Finds king of color color
+    public Piece findKing(Color color) {
+        for (Piece[] p: board_pieces) {
+            for (Piece piece: p) {
+                if (piece instanceof King && piece.getColor() == color)
+                    return piece;
+            }
+        }
+        return null;
+    }
+
+    public Piece[] isAttacked(Piece piece, Position position) {
+        ArrayList toReturn = new ArrayList<Piece>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Piece pie = board_pieces[i][j];
+                if (!pie.matchesColor(piece) && !pie.isBlank() && pie.canMove(board_pieces, new Position(j, i), position)) {
+                    toReturn.add(pie);
+                }
+            }
+        }
+        return (Piece[]) toReturn.toArray();
+    }
+
 
     public Piece getPiece(Position position) {
         return board_pieces[position.getFile()][position.getRank()];
