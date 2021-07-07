@@ -293,4 +293,14 @@ public class ChessGameTest {
         assertFalse(g.tryMove("Bc7", Color.black));
         assertFalse(g.tryMove("Bc8", Color.black));
     }
+
+    @Test
+    public void isGameOver() throws IncorrectFENException {
+        var g = new ChessGame("rnbqkbnr/pp3Qpp/3p4/2p1p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4");
+        assertEquals(ChessGame.EndState.WhiteWins, g.isGameOver());
+        g = new ChessGame("r1b1k1nr/pppp1ppp/2n5/2b1p3/N3P3/3P4/PPP2qPP/RNBQKB1R w KQkq - 0 6");
+        assertEquals(ChessGame.EndState.BlackWins, g.isGameOver());
+        g = new ChessGame("8/8/8/8/k7/1q6/8/K7 w - - 0 1");
+        assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+    }
 }
