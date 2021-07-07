@@ -1,0 +1,3 @@
+# cantseechess
+bot
+read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e read ,e 
