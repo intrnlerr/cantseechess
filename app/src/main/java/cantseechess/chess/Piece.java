@@ -108,14 +108,28 @@ class King extends Piece {
     @Untested
     @Override
     boolean canMove(Piece[][] board, Position from, Position to) {
-
         int verticalChange = Math.abs(to.getFile() - from.getFile());
         int horizontalChange = Math.abs(to.getRank() - from.getRank());
-        if (!board[to.getFile()][to.getRank()].matchesColor(this) && (verticalChange + horizontalChange == 1 || (verticalChange == 1 && horizontalChange == 1))) {
-            return true;
+        // check if king moves more than one square or is trying to capture a friendly piece
+        if (verticalChange > 1 || horizontalChange > 1 || board[to.getFile()][to.getRank()].matchesColor(this)) {
+            return false;
         }
-        return false;
-
+        // this is terrible as all hell, but it works :)
+        // hopefully this has no side-effects
+        var toPiece = board[to.getFile()][to.getRank()];
+        board[to.getFile()][to.getRank()] = new Blank();
+        for(int file = 0; file < 8; ++file) {
+            for (int rank = 0; rank < 8; ++rank) {
+                var piece = board[file][rank];
+                // check if moving to the target square would put the king in check
+                if (!piece.matchesColor(this) && piece.canMove(board, new Position(rank, file), to)) {
+                    board[to.getFile()][to.getRank()] = toPiece;
+                    return false;
+                }
+            }
+        }
+        board[to.getFile()][to.getRank()] = toPiece;
+        return true;
     }
 }
 
