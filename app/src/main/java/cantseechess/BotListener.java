@@ -48,7 +48,7 @@ public class BotListener extends ListenerAdapter {
                         event.getChannel().sendMessage("already challenged!").queue();
                         return;
                     }
-                    challenges.put(challengedId, new Challenge(event.getAuthor().getId(), challengedId));
+                    challenges.put(challengedId, new Challenge(event.getAuthor().getId(), challengedId, event.getChannel()));
                     var action = event.getChannel().sendMessage("challenge created...");
                     action.queue();
                 }
@@ -76,7 +76,10 @@ public class BotListener extends ListenerAdapter {
                 event.getChannel().sendMessage("challenge declined.").queue();
             } else if (args[0].equals("!sp")) {
                 players.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId()));
+            } else if (args[0].equals("!help")) {
+                //TODO help command
             }
+
         } else if (players.containsKey(event.getAuthor().getId())) {
             var player = players.get(event.getAuthor().getId());
             try {
