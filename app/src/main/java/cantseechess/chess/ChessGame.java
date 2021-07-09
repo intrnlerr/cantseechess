@@ -396,6 +396,14 @@ public class ChessGame {
         return board_pieces[position.getFile()][position.getRank()];
     }
 
+    // will not throw an IndexOutOfBoundsException
+    private Piece getPieceSafe(int file, int rank) {
+        if (file < 0 || file > 7 || rank < 0 || rank > 7) {
+            return null;
+        }
+        return board_pieces[file][rank];
+    }
+
     private Piece getPiece(int rank, int file) {
         return board_pieces[file][rank];
     }
