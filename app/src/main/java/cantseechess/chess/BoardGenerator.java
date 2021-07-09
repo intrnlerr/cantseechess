@@ -16,11 +16,13 @@ public class BoardGenerator {
     private static final int PIECE_HEIGHT = 128;
 
     @Untested
-    public static final BufferedImage[] getBoard(String PGN, String StartFEN) throws IncorrectFENException, IllegalMoveException {
-        ArrayList toReturn = new ArrayList<BufferedImage>();
+    public static BufferedImage[] getBoard(String PGN, String StartFEN) throws IncorrectFENException, IllegalMoveException {
+        ArrayList<BufferedImage> toReturn = new ArrayList<>();
         ChessGame game = new ChessGame(StartFEN);
         PGN = PGN.replaceAll("([0-9]+[.])", "");
-        if (PGN.charAt(0) == ' ') PGN.substring(1);
+        if (PGN.charAt(0) == ' ') {
+            PGN = PGN.substring(1);
+        }
         String[] moves = PGN.split(" ");
         toReturn.add(getBoard(game.getPieces()));
         for (int i = 0; i < moves.length; i++) {
@@ -32,11 +34,11 @@ public class BoardGenerator {
         return (BufferedImage[]) toReturn.toArray();
     }
 
-    public static final BufferedImage getBoard(String FEN) throws IncorrectFENException {
+    public static BufferedImage getBoard(String FEN) throws IncorrectFENException {
         return getBoard(ChessGame.FENtoBoard(FEN));
     }
 
-    public static final BufferedImage getBoard(Piece[][] board) {
+    public static BufferedImage getBoard(Piece[][] board) {
         if (!piecesInit) initializePieces();
 
         BufferedImage toReturn = BOARD_IMAGE;
