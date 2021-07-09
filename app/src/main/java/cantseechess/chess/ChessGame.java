@@ -185,6 +185,10 @@ public class ChessGame {
             if (move.charAt(1) == 'x') {
                 // pawn capture
                 endpoint = new Position(move.substring(2));
+                var enPassant = checkEnPassant(endpoint, turnColor);
+                if (enPassant != null) {
+                    return enPassant;
+                }
             } else {
                 endpoint = new Position(move);
             }
@@ -243,6 +247,34 @@ public class ChessGame {
         throw new IllegalMoveException("Illegal move");
     }
 
+    private Move checkEnPassant(Position endpoint, Color turnColor) {
+        if (!endpoint.equals(enPassantSquare)) {
+            return null;
+        }
+        if (turnColor == Color.white) {
+            // the pawn that captures en passant can only be on a square
+            // which is up and to the left or up and to the right of the endpoint
+            var pawn = getPieceSafe(endpoint.getFile() - 1, endpoint.getRank() - 1);
+            if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
+                return new Move(new Position(endpoint.getFile() - 1, endpoint.getRank() - 1), endpoint);
+            }
+            pawn = getPieceSafe(endpoint.getFile() + 1, endpoint.getRank() - 1);
+            if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
+                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() + 1), endpoint);
+            }
+        } else {
+            var pawn = getPieceSafe(endpoint.getFile() - 1, endpoint.getRank() + 1);
+            if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
+                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() - 1), endpoint);
+            }
+            pawn = getPieceSafe(endpoint.getFile() + 1, endpoint.getRank() + 1);
+            if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
+                return new Move(new Position(endpoint.getRank() + 1, endpoint.getFile() + 1), endpoint);
+            }
+        }
+        return null;
+    }
+
     public String getFEN() {
         var builder = new StringBuilder();
         var blanks = 0;
@@ -286,6 +318,14 @@ public class ChessGame {
     }
 
     public void makeMove(Move m) {
+        enPassantSquare = null;
+        if (board_pieces[m.from.getFile()][m.from.getRank()] instanceof Pawn) {
+            // assume this move is legal
+            var rankDiff = m.to.getRank() - m.from.getRank();
+            if (rankDiff == 2 || rankDiff == -2) {
+                enPassantSquare = new Position(m.to.getRank() - (rankDiff / 2), m.to.getFile());
+            }
+        }
         board_pieces[m.to.getFile()][m.to.getRank()] = getPiece(m.from);
         board_pieces[m.from.getFile()][m.from.getRank()] = new Blank();
     }
