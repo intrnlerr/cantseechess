@@ -216,10 +216,18 @@ public class ChessGameTest {
     }
 
     @Test
-    public void enPassant() throws IncorrectFENException {
-        var g = new ChessGame("k7/8/8/1pP5/8/8/8/K7 w - b6 0 2");
+    public void enPassant() throws IncorrectFENException, IllegalMoveException {
+        var g = new ChessGame("k7/8/8/1pPp4/8/8/8/K7 w - b6 0 2");
         assertTrue(g.tryMove("cxb6", Color.white));
-        // TODO: add more en passant cases
+        assertFalse(g.tryMove("cxd6", Color.white));
+        g = new ChessGame("7k/8/8/8/PpPp4/8/8/K7 b - c3 0 1");
+        assertTrue(g.tryMove("bxc3", Color.black));
+        assertTrue(g.tryMove("dxc3", Color.black));
+        assertFalse(g.tryMove("bxa3", Color.black));
+        g = new ChessGame("7k/8/8/8/1p6/8/P7/K7 w - - 0 1");
+        var move = g.getMove("a4", Color.white);
+        g.makeMove(move);
+        assertTrue(g.tryMove("bxa3", Color.black));
     }
 
     @Test
