@@ -11,4 +11,6 @@ public interface RatingStorage {
     void addGame(Player player, Rating.GameEntry entry);
 
     void shutdown();
+
+    Rating getRating(String id);
 }

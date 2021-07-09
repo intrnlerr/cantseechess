@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 public class BotListener extends ListenerAdapter {
     private final RatingStorage ratings;
-    private final HashMap<String, Player> players = new HashMap<>();
+    private final HashMap<String, Player> currentPlayers = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
 
     public BotListener(RatingStorage ratings) {
@@ -83,8 +83,8 @@ public class BotListener extends ListenerAdapter {
                 var player2 = new Player(game, Color.black, challenge.challenger);
                 player1.setOpponent(player2);
                 player2.setOpponent(player1);
-                players.put(challenge.challenged, player1);
-                players.put(challenge.challenger, player2);
+                currentPlayers.put(challenge.challenged, player1);
+                currentPlayers.put(challenge.challenger, player2);
                 challenges.remove(event.getAuthor().getId());
                 event.getChannel().sendMessage("game").queue();
             } else if (args[0].equals("!decline")) {
@@ -95,19 +95,29 @@ public class BotListener extends ListenerAdapter {
                 }
                 event.getChannel().sendMessage("challenge declined.").queue();
             } else if (args[0].equals("!sp")) {
-                players.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId()));
+                currentPlayers.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId()));
             } else if (args[0].equals("!help")) {
                 //TODO help command
             } else if (args[0].equals("!resign")) {
-                var player = players.get(event.getAuthor().getId());
+                var player = currentPlayers.get(event.getAuthor().getId());
                 if (player.isPlayingGame()) {
                     endGame(player,
                             player.getColor() == Color.white ?
                                     ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins);
                 }
+            } else if (args[0].equals("!stats")) {
+                var target = event.getAuthor().getId();
+                if (args.length > 1) {
+                    target = parseMention(args[1]);
+                }
+                var rating = ratings.getRating(target);
+                if (rating != null) {
+                    event.getChannel().sendMessage("rating: " + rating.getRating() +
+                            " rd: " + rating.getDeviation()).queue();
+                }
             }
-        } else if (players.containsKey(event.getAuthor().getId())) {
-            var player = players.get(event.getAuthor().getId());
+        } else if (currentPlayers.containsKey(event.getAuthor().getId())) {
+            var player = currentPlayers.get(event.getAuthor().getId());
             try {
                 player.makeMove(content);
             } catch (IllegalMoveException e) {

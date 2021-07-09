@@ -68,4 +68,15 @@ public class HashmapStorage implements RatingStorage {
             System.out.println("ratings could not opened for writing!");
         }
     }
+
+    @Override
+    public Rating getRating(String id) {
+        var games = entries.get(id);
+        if (games == null) {
+            return null;
+        }
+        var rating = new Rating();
+        rating.calculateRating(games);
+        return rating;
+    }
 }
