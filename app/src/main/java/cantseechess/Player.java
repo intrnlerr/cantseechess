@@ -76,4 +76,8 @@ public class Player {
     public Player getOpponent() {
         return opponent;
     }
+
+    public boolean isPlayingGame() {
+        return currentGame != null;
+    }
 }

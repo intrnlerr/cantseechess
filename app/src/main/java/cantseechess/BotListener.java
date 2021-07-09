@@ -33,6 +33,26 @@ public class BotListener extends ListenerAdapter {
         return null;
     }
 
+    private void endGame(Player player, ChessGame.EndState endState) {
+        if (endState == ChessGame.EndState.NotOver) {
+            return;
+        }
+        // TODO: better cleanup, rating adjustment!
+        if (endState == ChessGame.EndState.Draw) {
+            ratings.addGame(player, new Rating.GameEntry(player.getOpponent().getRating(), 0.5));
+            ratings.addGame(player.getOpponent(), new Rating.GameEntry(player.getRating(), 0.5));
+        } else if (endState == ChessGame.EndState.WhiteWins) {
+            ratings.addGame(player.getWhite(), new Rating.GameEntry(player.getBlack().getRating(), 1));
+            ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 0));
+        } else {
+            ratings.addGame(player.getWhite(), new Rating.GameEntry(player.getBlack().getRating(), 0));
+            ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 1));
+        }
+
+        player.getOpponent().resetGameInfo();
+        player.resetGameInfo();
+    }
+
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         var content = event.getMessage().getContentRaw();
@@ -78,8 +98,14 @@ public class BotListener extends ListenerAdapter {
                 players.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId()));
             } else if (args[0].equals("!help")) {
                 //TODO help command
+            } else if (args[0].equals("!resign")) {
+                var player = players.get(event.getAuthor().getId());
+                if (player.isPlayingGame()) {
+                    endGame(player,
+                            player.getColor() == Color.white ?
+                                    ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins);
+                }
             }
-
         } else if (players.containsKey(event.getAuthor().getId())) {
             var player = players.get(event.getAuthor().getId());
             try {
@@ -88,22 +114,7 @@ public class BotListener extends ListenerAdapter {
                 event.getChannel().sendMessage(e.getMessage()).queue();
             }
             var endState = player.isGameOver();
-            if (endState != ChessGame.EndState.NotOver) {
-                // TODO: better cleanup, rating adjustment!
-                if (endState == ChessGame.EndState.Draw) {
-                    ratings.addGame(player, new Rating.GameEntry(player.getOpponent().getRating(), 0.5));
-                    ratings.addGame(player.getOpponent(), new Rating.GameEntry(player.getRating(), 0.5));
-                } else if (endState == ChessGame.EndState.WhiteWins) {
-                    ratings.addGame(player.getWhite(), new Rating.GameEntry(player.getBlack().getRating(), 1));
-                    ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 0));
-                } else {
-                    ratings.addGame(player.getWhite(), new Rating.GameEntry(player.getBlack().getRating(), 0));
-                    ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 1));
-                }
-
-                player.getOpponent().resetGameInfo();
-                player.resetGameInfo();
-            }
+            endGame(player, endState);
         }
     }
 
