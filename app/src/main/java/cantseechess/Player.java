@@ -6,11 +6,11 @@ import cantseechess.chess.IllegalMoveException;
 import cantseechess.chess.Rating;
 
 public class Player {
+    private final String id;
+    private final Rating rating;
     private ChessGame currentGame;
     private Color currentColor;
-    private Rating rating;
     private Player opponent;
-    private final String id;
 
     public Player(ChessGame game, Color color, String id) {
         currentGame = game;

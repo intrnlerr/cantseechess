@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HashmapStorage implements RatingStorage {
-    private HashMap<String, ArrayList<Rating.GameEntry>> entries = new HashMap<>();
+    private final HashMap<String, ArrayList<Rating.GameEntry>> entries = new HashMap<>();
 
     public HashmapStorage() {
         // try read from file

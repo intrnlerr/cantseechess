@@ -3,8 +3,8 @@ package cantseechess.chess;
 import java.util.Objects;
 
 public class Position {
-    private int file;
-    private int rank;
+    private final int file;
+    private final int rank;
 
     public Position(String position) {
         if (position.length() < 2) {
