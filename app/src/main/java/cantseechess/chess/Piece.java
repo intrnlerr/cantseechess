@@ -37,7 +37,7 @@ public abstract class Piece {
         int verticalChange = to.getFile() - from.getFile();
 
         //Otherwise it would directly change the original search position
-        Position searchPos = new Position(sp.getRank(), sp.getFile());
+        Position searchPos = new Position(sp.getFile(), sp.getRank());
 
         //If the piece that the search function is currently selecting is not a blank piece then return false, as something is blocking the bishop's way
         if ((!search.isBlank() && !searchPos.equals(to)) && !searchPos.equals(from)) {
@@ -55,19 +55,19 @@ public abstract class Piece {
         else {
             //Setting search position one up-right
             if (horizontalChange == -verticalChange && verticalChange < 0) {
-                searchPos = new Position(searchPos.getRank() + 1, searchPos.getFile() - 1);
+                searchPos = new Position(searchPos.getFile() - 1, searchPos.getRank() + 1);
             }
             //Setting search position one up-left
             else if (horizontalChange == verticalChange && verticalChange < 0) {
-                searchPos = new Position(searchPos.getRank() - 1, searchPos.getFile() - 1);
+                searchPos = new Position(searchPos.getFile() - 1, searchPos.getRank() - 1);
             }
             //Setting search position one down-right
             else if (horizontalChange == verticalChange && verticalChange > 0) {
-                searchPos = new Position(searchPos.getRank() + 1, searchPos.getFile() + 1);
+                searchPos = new Position(searchPos.getFile() + 1, searchPos.getRank() + 1);
             }
             //Setting search position one down-left
             else {
-                searchPos = new Position(searchPos.getRank() - 1, searchPos.getFile() + 1);
+                searchPos = new Position(searchPos.getFile() + 1, searchPos.getRank() - 1);
             }
             return searchDiagonal(board, from, to, searchPos);
         }
@@ -122,7 +122,7 @@ class King extends Piece {
             for (int rank = 0; rank < 8; ++rank) {
                 var piece = board[file][rank];
                 // check if moving to the target square would put the king in check
-                if (!piece.matchesColor(this) && piece.canMove(board, new Position(rank, file), to)) {
+                if (!piece.matchesColor(this) && piece.canMove(board, new Position(file, rank), to)) {
                     board[to.getFile()][to.getRank()] = toPiece;
                     return false;
                 }

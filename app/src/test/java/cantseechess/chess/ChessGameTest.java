@@ -9,39 +9,39 @@ public class ChessGameTest {
     public void constructorTest() {
         var b = new ChessGame();
         assertTrue(b.getPiece(new Position(0, 0)) instanceof Rook);
-        assertTrue(b.getPiece(new Position(0, 1)) instanceof Knight);
-        assertTrue(b.getPiece(new Position(0, 2)) instanceof Bishop);
-        assertTrue(b.getPiece(new Position(0, 3)) instanceof Queen);
-        assertTrue(b.getPiece(new Position(0, 4)) instanceof King);
-        assertTrue(b.getPiece(new Position(0, 5)) instanceof Bishop);
-        assertTrue(b.getPiece(new Position(0, 6)) instanceof Knight);
-        assertTrue(b.getPiece(new Position(0, 7)) instanceof Rook);
+        assertTrue(b.getPiece(new Position(1, 0)) instanceof Knight);
+        assertTrue(b.getPiece(new Position(2, 0)) instanceof Bishop);
+        assertTrue(b.getPiece(new Position(3, 0)) instanceof Queen);
+        assertTrue(b.getPiece(new Position(4, 0)) instanceof King);
+        assertTrue(b.getPiece(new Position(5, 0)) instanceof Bishop);
+        assertTrue(b.getPiece(new Position(6, 0)) instanceof Knight);
+        assertTrue(b.getPiece(new Position(7, 0)) instanceof Rook);
 
         for (int file = 0; file < 7; ++file) {
-            assertEquals(Color.white, b.getPiece(new Position(0, file)).getColor());
+            assertEquals(Color.white, b.getPiece(new Position(file, 0)).getColor());
         }
         //check pawns
         for (int file = 0; file < 7; ++file) {
-            assertTrue(b.getPiece(new Position(1, file)) instanceof Pawn);
-            assertEquals(Color.white, b.getPiece(new Position(1, file)).getColor());
+            assertTrue(b.getPiece(new Position(file, 1)) instanceof Pawn);
+            assertEquals(Color.white, b.getPiece(new Position(file, 1)).getColor());
         }
 
-        assertTrue(b.getPiece(new Position(7, 0)) instanceof Rook);
-        assertTrue(b.getPiece(new Position(7, 1)) instanceof Knight);
-        assertTrue(b.getPiece(new Position(7, 2)) instanceof Bishop);
-        assertTrue(b.getPiece(new Position(7, 3)) instanceof Queen);
-        assertTrue(b.getPiece(new Position(7, 4)) instanceof King);
-        assertTrue(b.getPiece(new Position(7, 5)) instanceof Bishop);
-        assertTrue(b.getPiece(new Position(7, 6)) instanceof Knight);
+        assertTrue(b.getPiece(new Position(0, 7)) instanceof Rook);
+        assertTrue(b.getPiece(new Position(1, 7)) instanceof Knight);
+        assertTrue(b.getPiece(new Position(2, 7)) instanceof Bishop);
+        assertTrue(b.getPiece(new Position(3, 7)) instanceof Queen);
+        assertTrue(b.getPiece(new Position(4, 7)) instanceof King);
+        assertTrue(b.getPiece(new Position(5, 7)) instanceof Bishop);
+        assertTrue(b.getPiece(new Position(6, 7)) instanceof Knight);
         assertTrue(b.getPiece(new Position(7, 7)) instanceof Rook);
 
         for (int file = 0; file < 7; ++file) {
-            assertEquals(Color.black, b.getPiece(new Position(7, file)).getColor());
+            assertEquals(Color.black, b.getPiece(new Position(file, 7)).getColor());
         }
         //check pawns
         for (int file = 0; file < 7; ++file) {
-            assertTrue(b.getPiece(new Position(6, file)) instanceof Pawn);
-            assertEquals(Color.black, b.getPiece(new Position(6, file)).getColor());
+            assertTrue(b.getPiece(new Position(file, 6)) instanceof Pawn);
+            assertEquals(Color.black, b.getPiece(new Position(file, 6)).getColor());
         }
     }
 

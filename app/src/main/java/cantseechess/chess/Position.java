@@ -3,8 +3,8 @@ package cantseechess.chess;
 import java.util.Objects;
 
 public class Position {
-    private int rank;
     private int file;
+    private int rank;
 
     public Position(String position) {
         if (position.length() < 2) {
@@ -23,7 +23,7 @@ public class Position {
         rank = position.charAt(1) - '1';
     }
 
-    public Position(int rank, int file) {
+    public Position(int file, int rank) {
         this.rank = rank;
         this.file = file;
     }

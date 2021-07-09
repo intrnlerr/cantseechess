@@ -193,10 +193,10 @@ public class ChessGame {
                 endpoint = new Position(move);
             }
             for (int rank = 0; rank < 8; ++rank) {
-                var piece = getPiece(rank, fromFile);
+                var piece = getPiece(fromFile, rank);
                 if (piece.getColor() == turnColor && piece instanceof Pawn) {
-                    if (piece.canMove(board_pieces, new Position(rank, fromFile), endpoint)) {
-                        return new Move(new Position(rank, fromFile), endpoint);
+                    if (piece.canMove(board_pieces, new Position(fromFile, rank), endpoint)) {
+                        return new Move(new Position(fromFile, rank), endpoint);
                     }
                     throw new IllegalMoveException("Illegal pawn move");
                 }
@@ -237,8 +237,8 @@ public class ChessGame {
             for (int file = 0; file < 8; ++file) {
                 var piece = board_pieces[file][rank];
                 if (piece.getColor() == turnColor && pieceClass.get().isInstance(piece)) {
-                    if (board_pieces[file][rank].canMove(board_pieces, new Position(rank, file), endpoint)) {
-                        return new Move(new Position(rank, file), endpoint);
+                    if (board_pieces[file][rank].canMove(board_pieces, new Position(file, rank), endpoint)) {
+                        return new Move(new Position(file, rank), endpoint);
                     }
                 }
             }
@@ -256,20 +256,20 @@ public class ChessGame {
             // which is up and to the left or up and to the right of the endpoint
             var pawn = getPieceSafe(endpoint.getFile() - 1, endpoint.getRank() - 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getFile() - 1, endpoint.getRank() - 1), endpoint);
+                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() - 1), endpoint);
             }
             pawn = getPieceSafe(endpoint.getFile() + 1, endpoint.getRank() - 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() + 1), endpoint);
+                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() - 1), endpoint);
             }
         } else {
             var pawn = getPieceSafe(endpoint.getFile() - 1, endpoint.getRank() + 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() - 1), endpoint);
+                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() + 1), endpoint);
             }
             pawn = getPieceSafe(endpoint.getFile() + 1, endpoint.getRank() + 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getRank() + 1, endpoint.getFile() + 1), endpoint);
+                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() + 1), endpoint);
             }
         }
         return null;
@@ -323,7 +323,7 @@ public class ChessGame {
             // assume this move is legal
             var rankDiff = m.to.getRank() - m.from.getRank();
             if (rankDiff == 2 || rankDiff == -2) {
-                enPassantSquare = new Position(m.to.getRank() - (rankDiff / 2), m.to.getFile());
+                enPassantSquare = new Position(m.to.getFile(), m.to.getRank() - (rankDiff / 2));
             }
         }
         board_pieces[m.to.getFile()][m.to.getRank()] = getPiece(m.from);
@@ -349,7 +349,7 @@ public class ChessGame {
                 for (int ii = 0; ii < 8; ii++) {
                     for (int jj = 0; jj < 8; jj++) {
                         Piece testPos = board_pieces[ii][jj];
-                        if (piece.canMove(board_pieces, new Position(j, i), new Position(jj, ii))) {
+                        if (piece.canMove(board_pieces, new Position(i, j), new Position(ii, jj))) {
                             return false;
                         }
                     }
@@ -373,7 +373,7 @@ public class ChessGame {
             for (int file = 0; file < 8; file++) {
                 for (int rank = 0; rank < 8; rank++) {
                     Piece p = board_pieces[file][rank];
-                    if (king.canMove(board_pieces, kingPos, new Position(rank, file)) && attackingPieces(p, new Position(rank, file)).size() == 0)
+                    if (king.canMove(board_pieces, kingPos, new Position(file, rank)) && attackingPieces(p, new Position(file, rank)).size() == 0)
                         return EndState.NotOver;
 
                 }
@@ -387,7 +387,7 @@ public class ChessGame {
             for (int rank = 0; rank < 8; rank++) {
                 Piece p = board_pieces[file][rank];
                 //if the piece can capture the piece attacking the king
-                if (p.canMove(board_pieces, new Position(rank, file), attackPiecePos)) {
+                if (p.canMove(board_pieces, new Position(file, rank), attackPiecePos)) {
                     return EndState.NotOver;
                 }
             }
@@ -400,7 +400,7 @@ public class ChessGame {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if (board_pieces[i][j] == piece) {
-                    return new Position(j, i);
+                    return new Position(i, j);
                 }
             }
         }
@@ -423,7 +423,7 @@ public class ChessGame {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Piece pie = board_pieces[i][j];
-                if (!pie.matchesColor(piece) && !pie.isBlank() && pie.canMove(board_pieces, new Position(j, i), position)) {
+                if (!pie.matchesColor(piece) && !pie.isBlank() && pie.canMove(board_pieces, new Position(i, j), position)) {
                     attackingPieces.add(pie);
                 }
             }
@@ -444,7 +444,7 @@ public class ChessGame {
         return board_pieces[file][rank];
     }
 
-    private Piece getPiece(int rank, int file) {
+    private Piece getPiece(int file, int rank) {
         return board_pieces[file][rank];
     }
 
