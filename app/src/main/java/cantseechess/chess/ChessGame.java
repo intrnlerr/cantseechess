@@ -342,21 +342,62 @@ public class ChessGame {
     }
 
     public boolean isInStalemate() {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                Piece piece = board_pieces[i][j];
+        boolean legalMove = false;
+        boolean checkmatingPiece = false;
+        int knights = 0;
+        int bishops = 0;
+        Position blackBishop = null;
+        Position whiteBishop = null;
+        for (int file = 0; file < 8; file++) {
+            for (int rank = 0; rank < 8; rank++) {
+                Piece piece = board_pieces[file][rank];
+                if (piece instanceof Pawn) {
+                    checkmatingPiece = true;
+                } else if (piece instanceof Queen) {
+                    checkmatingPiece = true;
+                } else if (piece instanceof Rook) {
+                    checkmatingPiece = true;
+                } else if (piece instanceof Knight) {
+                    ++knights;
+                } else if (piece instanceof Bishop) {
+                    ++bishops;
+                    if (piece.getColor() == Color.white) {
+                        whiteBishop = new Position(file, rank);
+                    } else {
+                        blackBishop = new Position(file, rank);
+                    }
+                }
                 if (piece.getColor() != turnColor) continue;
+                if (legalMove) {
+                    continue;
+                }
                 for (int ii = 0; ii < 8; ii++) {
                     for (int jj = 0; jj < 8; jj++) {
                         Piece testPos = board_pieces[ii][jj];
-                        if (piece.canMove(board_pieces, new Position(i, j), new Position(ii, jj))) {
-                            return false;
+                        if (piece.canMove(board_pieces, new Position(file, rank), new Position(ii, jj))) {
+                            legalMove = true;
+                            break;
                         }
                     }
                 }
             }
         }
-        return true;
+        if (!legalMove) {
+            return true;
+        }
+        if (checkmatingPiece) {
+            return false;
+        }
+        if ((knights == 0 && bishops == 0) || (knights == 1 && bishops == 0) || (knights == 0 && bishops == 1)) {
+            return true;
+        }
+        if (knights == 0 && bishops == 2) {
+            // calculate if the bishops lie on the same colored square
+            return (whiteBishop.getRank() + whiteBishop.getFile()) % 2 ==
+                    (blackBishop.getRank() + blackBishop.getFile()) % 2;
+
+        }
+        return false;
     }
 
     //Checks if either side is in checkmate and returns the respective endstate
