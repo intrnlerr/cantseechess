@@ -314,7 +314,23 @@ public class ChessGameTest {
 
     @Test
     public void insufficientMaterial() throws IncorrectFENException {
-        var g = new ChessGame("8/8/8/2k5/8/2K5/8/8 w - - 0 1");
+        var g = new ChessGame("8/1k6/8/8/8/8/1K4P1/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.NotOver, g.isGameOver());
+        g = new ChessGame("8/8/8/2k5/8/2K5/8/8 w - - 0 1");
         assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+        g = new ChessGame("8/1k1n4/8/8/8/8/1K6/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+        g = new ChessGame("8/1k6/8/8/8/8/1K1N4/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+        g = new ChessGame("8/1k1b4/8/8/8/8/1K6/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+        g = new ChessGame("8/1k6/8/8/8/8/1K1B4/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+        g = new ChessGame("8/1k6/2b5/8/8/8/1KB5/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.Draw, g.isGameOver());
+        g = new ChessGame("8/1kb5/8/8/8/8/1KB5/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.NotOver, g.isGameOver());
+        g = new ChessGame("8/1kbn4/8/8/8/8/1K6/8 w - - 0 1");
+        assertEquals(ChessGame.EndState.NotOver, g.isGameOver());
     }
 }
