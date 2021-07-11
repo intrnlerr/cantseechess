@@ -9,6 +9,8 @@ public class ChessGame {
     //Number of half moves since last capture/pawn move
     private int halfmoveClock = 0;
     private int moves = 1;
+    // counts the number of half-moves that have not been a capture or a pawn move
+    private int fiftyMoveRuleCounter = 0;
     //The square which player turnColor can en passant to
     private Position enPassantSquare = null;
     //Availability to castle
@@ -326,6 +328,16 @@ public class ChessGame {
                 enPassantSquare = new Position(m.to.getFile(), m.to.getRank() - (rankDiff / 2));
             }
         }
+        if (!getPiece(m.to).isBlank()) {
+            ++fiftyMoveRuleCounter;
+        } else {
+            // captures reset the count
+            fiftyMoveRuleCounter = 0;
+        }
+        if (getPiece(m.from) instanceof Pawn) {
+            // pawn moves also reset the count
+            fiftyMoveRuleCounter = 0;
+        }
         board_pieces[m.to.getFile()][m.to.getRank()] = getPiece(m.from);
         board_pieces[m.from.getFile()][m.from.getRank()] = new Blank();
     }
@@ -342,6 +354,9 @@ public class ChessGame {
     }
 
     public boolean isInStalemate() {
+        if (fiftyMoveRuleCounter >= 100) {
+            return true;
+        }
         boolean legalMove = false;
         boolean checkmatingPiece = false;
         int knights = 0;
