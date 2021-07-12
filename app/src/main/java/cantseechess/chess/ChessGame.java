@@ -183,6 +183,7 @@ public class ChessGame {
         Position endpoint;
         if (pieceType >= 'a' && pieceType < 'i') {
             var fromFile = pieceType - 'a';
+            char promotionType = '?';
             // pawn move
             if (move.charAt(1) == 'x') {
                 // pawn capture
@@ -191,13 +192,26 @@ public class ChessGame {
                 if (enPassant != null) {
                     return enPassant;
                 }
+                if (move.length() > 4 && move.charAt(4) == '=') {
+                    promotionType = move.charAt(5);
+                }
             } else {
                 endpoint = new Position(move);
+                if (move.length() > 2 && move.charAt(2) == '=') {
+                    promotionType = move.charAt(3);
+                }
             }
             for (int rank = 0; rank < 8; ++rank) {
                 var piece = getPiece(fromFile, rank);
                 if (piece.getColor() == turnColor && piece instanceof Pawn) {
                     if (piece.canMove(board_pieces, new Position(fromFile, rank), endpoint)) {
+                        if (endpoint.getRank() == 0 || endpoint.getRank() == 7) {
+                            var promotion = Promotion.getFromChar(promotionType);
+                            if (promotion == Promotion.NotPromotion) {
+                                throw new IllegalMoveException("Illegal promotion type");
+                            }
+                            return new Move(new Position(fromFile, rank), endpoint, promotion);
+                        }
                         return new Move(new Position(fromFile, rank), endpoint);
                     }
                     throw new IllegalMoveException("Illegal pawn move");
@@ -511,10 +525,18 @@ public class ChessGame {
     public static class Move {
         final Position from;
         final Position to;
+        final Promotion promotion;
 
         Move(Position from, Position to) {
             this.to = to;
             this.from = from;
+            this.promotion = Promotion.NotPromotion;
+        }
+
+        Move(Position from, Position to, Promotion promotion) {
+            this.to = to;
+            this.from = from;
+            this.promotion = promotion;
         }
     }
 }
