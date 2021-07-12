@@ -354,6 +354,23 @@ public class ChessGame {
         }
         board_pieces[m.to.getFile()][m.to.getRank()] = getPiece(m.from);
         board_pieces[m.from.getFile()][m.from.getRank()] = new Blank();
+        if (m.promotion != Promotion.NotPromotion) {
+            switch (m.promotion) {
+                case Queen:
+                    board_pieces[m.to.getFile()][m.to.getRank()] = new Queen(getPiece(m.to).getColor());
+                    break;
+                case Rook:
+                    board_pieces[m.to.getFile()][m.to.getRank()] = new Rook(getPiece(m.to).getColor());
+                    break;
+                case Bishop:
+                    board_pieces[m.to.getFile()][m.to.getRank()] = new Bishop(getPiece(m.to).getColor());
+                    break;
+                case Knight:
+                    board_pieces[m.to.getFile()][m.to.getRank()] = new Knight(getPiece(m.to).getColor());
+                    break;
+            }
+
+        }
     }
 
     public enum EndState {
