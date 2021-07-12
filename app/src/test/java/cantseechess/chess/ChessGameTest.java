@@ -5,6 +5,11 @@ import org.junit.Test;
 import static junit.framework.TestCase.*;
 
 public class ChessGameTest {
+    private void assertPiece(ChessGame g, String pos, Color color, Class<?> pclass) {
+        var p = g.getPiece(new Position(pos));
+        assertTrue(pclass.isInstance(p) && p.getColor() == color);
+    }
+
     @Test
     public void constructorTest() {
         var b = new ChessGame();
@@ -192,19 +197,41 @@ public class ChessGameTest {
     }
 
     @Test
-    public void promotion() throws IncorrectFENException {
+    public void promotion() throws IncorrectFENException, IllegalMoveException {
         var g = new ChessGame("8/PPPPP3/8/8/8/8/ppppp3/8 w - - 0 1");
-        assertTrue(g.tryMove("a8=Q", Color.white));
-        assertTrue(g.tryMove("b8=N", Color.white));
-        assertTrue(g.tryMove("c8=R", Color.white));
-        assertTrue(g.tryMove("d8=B", Color.white));
-        assertFalse(g.tryMove("e8=K", Color.white));
+
 
         assertTrue(g.tryMove("a1=Q", Color.black));
         assertTrue(g.tryMove("b1=N", Color.black));
         assertTrue(g.tryMove("c1=R", Color.black));
         assertTrue(g.tryMove("d1=B", Color.black));
         assertFalse(g.tryMove("e1=K", Color.black));
+
+        g.makeMove(g.getMove("a8=Q", Color.white));
+        assertPiece(g, "a8", Color.white, Queen.class);
+
+        g.makeMove(g.getMove("a1=Q", Color.black));
+        assertPiece(g, "a1", Color.black, Queen.class);
+
+        g.makeMove(g.getMove("b8=N", Color.white));
+        assertPiece(g, "b8", Color.white, Knight.class);
+
+        g.makeMove(g.getMove("b1=N", Color.black));
+        assertPiece(g, "b1", Color.black, Knight.class);
+
+        g.makeMove(g.getMove("c8=R", Color.white));
+        assertPiece(g, "c8", Color.white, Rook.class);
+
+        g.makeMove(g.getMove("c1=R", Color.black));
+        assertPiece(g, "c1", Color.black, Rook.class);
+
+        g.makeMove(g.getMove("d8=B", Color.white));
+        assertPiece(g, "d8", Color.white, Bishop.class);
+
+        g.makeMove(g.getMove("d1=B", Color.black));
+        assertPiece(g, "d1", Color.black, Bishop.class);
+
+        assertFalse(g.tryMove("e8=K", Color.white));
     }
 
     @Test
