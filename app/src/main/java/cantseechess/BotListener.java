@@ -5,6 +5,8 @@ import cantseechess.chess.Color;
 import cantseechess.chess.IllegalMoveException;
 import cantseechess.chess.Rating;
 import cantseechess.storage.RatingStorage;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -36,10 +38,16 @@ public class BotListener extends ListenerAdapter {
         return null;
     }
 
-    private void endGame(Player player, ChessGame.EndState endState) {
+    private void endGame(Player player, ChessGame.EndState endState, Guild guild) {
         if (endState == ChessGame.EndState.NotOver) {
             return;
         }
+        // this looks so gnarly
+        var channel = guild.getTextChannelById(player.getChannel());
+        channel.createPermissionOverride(guild.getMemberById(player.getId()))
+                .setDeny(Permission.MESSAGE_WRITE).queue();
+        channel.createPermissionOverride(guild.getMemberById(player.getOpponent().getId()))
+                .setDeny(Permission.MESSAGE_WRITE).queue();
         // return channel
         availableChannels.push(player.getChannel());
         // TODO: better cleanup, rating adjustment!
@@ -86,20 +94,29 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 // TODO: we should queue up the game when there are no available channels instead of failing
-                var assignedChannel = availableChannels.poll();
-                if (assignedChannel == null) {
+                var channelId = availableChannels.poll();
+                if (channelId == null) {
                     event.getChannel().sendMessage("no available boards!").queue();
                     return;
                 }
+                var guild = event.getGuild();
+                var channel = guild.getTextChannelById(channelId);
+                if (channel == null) {
+                    throw new NullPointerException("channelId is not a real channel?");
+                }
+                channel.createPermissionOverride(guild.getMemberById(challenge.challenged))
+                        .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
+                channel.createPermissionOverride(guild.getMemberById(challenge.challenger))
+                        .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
                 var game = challenge.accept();
-                var player1 = new Player(game, Color.white, challenge.challenged, assignedChannel);
-                var player2 = new Player(game, Color.black, challenge.challenger, assignedChannel);
+                var player1 = new Player(game, Color.white, challenge.challenged, channelId);
+                var player2 = new Player(game, Color.black, challenge.challenger, channelId);
                 player1.setOpponent(player2);
                 player2.setOpponent(player1);
                 currentPlayers.put(challenge.challenged, player1);
                 currentPlayers.put(challenge.challenger, player2);
                 challenges.remove(event.getAuthor().getId());
-                event.getGuild().getTextChannelById(assignedChannel)
+                event.getGuild().getTextChannelById(channelId)
                         .sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
             } else if (args[0].equals("!decline")) {
                 var challenge = challenges.remove(event.getAuthor().getId());
@@ -117,7 +134,8 @@ public class BotListener extends ListenerAdapter {
                 if (player.isPlayingGame()) {
                     endGame(player,
                             player.getColor() == Color.white ?
-                                    ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins);
+                                    ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins,
+                            event.getGuild());
                 }
             } else if (args[0].equals("!stats")) {
                 var target = event.getAuthor().getId();
@@ -141,7 +159,7 @@ public class BotListener extends ListenerAdapter {
                 event.getChannel().sendMessage(e.getMessage()).queue();
             }
             var endState = player.isGameOver();
-            endGame(player, endState);
+            endGame(player, endState, event.getGuild());
         }
     }
 
