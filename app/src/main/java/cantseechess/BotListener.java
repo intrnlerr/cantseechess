@@ -44,9 +44,9 @@ public class BotListener extends ListenerAdapter {
         }
         // this looks so gnarly
         var channel = guild.getTextChannelById(player.getChannel());
-        channel.createPermissionOverride(guild.getMemberById(player.getId()))
+        channel.putPermissionOverride(guild.getMemberById(player.getId()))
                 .setDeny(Permission.MESSAGE_WRITE).queue();
-        channel.createPermissionOverride(guild.getMemberById(player.getOpponent().getId()))
+        channel.putPermissionOverride(guild.getMemberById(player.getOpponent().getId()))
                 .setDeny(Permission.MESSAGE_WRITE).queue();
         // return channel
         availableChannels.push(player.getChannel());
@@ -104,9 +104,9 @@ public class BotListener extends ListenerAdapter {
                 if (channel == null) {
                     throw new NullPointerException("channelId is not a real channel?");
                 }
-                channel.createPermissionOverride(guild.getMemberById(challenge.challenged))
+                channel.putPermissionOverride(guild.getMemberById(challenge.challenged))
                         .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
-                channel.createPermissionOverride(guild.getMemberById(challenge.challenger))
+                channel.putPermissionOverride(guild.getMemberById(challenge.challenger))
                         .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
                 var game = challenge.accept();
                 var player1 = new Player(game, Color.white, challenge.challenged, channelId);
