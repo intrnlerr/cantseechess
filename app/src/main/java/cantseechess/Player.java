@@ -1,9 +1,6 @@
 package cantseechess;
 
-import cantseechess.chess.ChessGame;
-import cantseechess.chess.Color;
-import cantseechess.chess.IllegalMoveException;
-import cantseechess.chess.Rating;
+import cantseechess.chess.*;
 
 public class Player {
     private final String id;
@@ -85,5 +82,9 @@ public class Player {
 
     public String getChannel() {
         return assignedChannel;
+    }
+
+    public ChessGame getCurrentGame() {
+        return currentGame;
     }
 }

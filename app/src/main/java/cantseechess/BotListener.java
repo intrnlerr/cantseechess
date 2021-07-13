@@ -1,9 +1,6 @@
 package cantseechess;
 
-import cantseechess.chess.ChessGame;
-import cantseechess.chess.Color;
-import cantseechess.chess.IllegalMoveException;
-import cantseechess.chess.Rating;
+import cantseechess.chess.*;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -13,6 +10,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 
@@ -48,6 +48,16 @@ public class BotListener extends ListenerAdapter {
                 .setDeny(Permission.MESSAGE_WRITE).queue();
         channel.putPermissionOverride(guild.getMemberById(player.getOpponent().getId()))
                 .setDeny(Permission.MESSAGE_WRITE).queue();
+        var image = BoardGenerator.getBoard(player.getCurrentGame().getPieces());
+        try {
+            // export.png could be overwritten before the file is sent
+            var imageFile = new File("export.png");
+            ImageIO.write(image, "PNG", imageFile);
+            channel.sendFile(imageFile).queue();
+        } catch (IOException e) {
+            System.out.println("could not render image :(");
+                    e.printStackTrace();
+        }
         // return channel
         availableChannels.push(player.getChannel());
         // TODO: better cleanup, rating adjustment!
