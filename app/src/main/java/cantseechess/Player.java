@@ -11,11 +11,13 @@ public class Player {
     private ChessGame currentGame;
     private Color currentColor;
     private Player opponent;
+    private final String assignedChannel;
 
-    public Player(ChessGame game, Color color, String id) {
+    public Player(ChessGame game, Color color, String id, String assignedChannel) {
         currentGame = game;
         currentColor = color;
         this.id = id;
+        this.assignedChannel = assignedChannel;
         this.rating = new Rating();
     }
 
@@ -79,5 +81,9 @@ public class Player {
 
     public boolean isPlayingGame() {
         return currentGame != null;
+    }
+
+    public String getChannel() {
+        return assignedChannel;
     }
 }

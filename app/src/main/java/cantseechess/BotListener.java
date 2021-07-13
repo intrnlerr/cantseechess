@@ -6,14 +6,17 @@ import cantseechess.chess.IllegalMoveException;
 import cantseechess.chess.Rating;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 
 public class BotListener extends ListenerAdapter {
     private final RatingStorage ratings;
+    private final ArrayDeque<String> availableChannels = new ArrayDeque<>();
     private final HashMap<String, Player> currentPlayers = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
 
@@ -37,6 +40,8 @@ public class BotListener extends ListenerAdapter {
         if (endState == ChessGame.EndState.NotOver) {
             return;
         }
+        // return channel
+        availableChannels.push(player.getChannel());
         // TODO: better cleanup, rating adjustment!
         if (endState == ChessGame.EndState.Draw) {
             ratings.addGame(player, new Rating.GameEntry(player.getOpponent().getRating(), 0.5));
@@ -49,7 +54,9 @@ public class BotListener extends ListenerAdapter {
             ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 1));
         }
 
+        currentPlayers.remove(player.getOpponent().getId());
         player.getOpponent().resetGameInfo();
+        currentPlayers.remove(player.getId());
         player.resetGameInfo();
     }
 
@@ -68,7 +75,7 @@ public class BotListener extends ListenerAdapter {
                         event.getChannel().sendMessage("already challenged!").queue();
                         return;
                     }
-                    challenges.put(challengedId, new Challenge(event.getAuthor().getId(), challengedId, event.getChannel()));
+                    challenges.put(challengedId, new Challenge(event.getAuthor().getId(), challengedId));
                     var action = event.getChannel().sendMessage("challenge created...");
                     action.queue();
                 }
@@ -78,15 +85,22 @@ public class BotListener extends ListenerAdapter {
                     event.getChannel().sendMessage("no challenge!").queue();
                     return;
                 }
+                // TODO: we should queue up the game when there are no available channels instead of failing
+                var assignedChannel = availableChannels.poll();
+                if (assignedChannel == null) {
+                    event.getChannel().sendMessage("no available boards!").queue();
+                    return;
+                }
                 var game = challenge.accept();
-                var player1 = new Player(game, Color.white, challenge.challenged);
-                var player2 = new Player(game, Color.black, challenge.challenger);
+                var player1 = new Player(game, Color.white, challenge.challenged, assignedChannel);
+                var player2 = new Player(game, Color.black, challenge.challenger, assignedChannel);
                 player1.setOpponent(player2);
                 player2.setOpponent(player1);
                 currentPlayers.put(challenge.challenged, player1);
                 currentPlayers.put(challenge.challenger, player2);
                 challenges.remove(event.getAuthor().getId());
-                event.getChannel().sendMessage("game").queue();
+                event.getGuild().getTextChannelById(assignedChannel)
+                        .sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
             } else if (args[0].equals("!decline")) {
                 var challenge = challenges.remove(event.getAuthor().getId());
                 if (challenge == null) {
@@ -95,7 +109,7 @@ public class BotListener extends ListenerAdapter {
                 }
                 event.getChannel().sendMessage("challenge declined.").queue();
             } else if (args[0].equals("!sp")) {
-                currentPlayers.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId()));
+                currentPlayers.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId(), event.getChannel().getId()));
             } else if (args[0].equals("!help")) {
                 //TODO help command
             } else if (args[0].equals("!resign")) {
@@ -118,6 +132,9 @@ public class BotListener extends ListenerAdapter {
             }
         } else if (currentPlayers.containsKey(event.getAuthor().getId())) {
             var player = currentPlayers.get(event.getAuthor().getId());
+            if (!player.getChannel().equals(event.getChannel().getId())) {
+                return;
+            }
             try {
                 player.makeMove(content);
             } catch (IllegalMoveException e) {
@@ -126,6 +143,17 @@ public class BotListener extends ListenerAdapter {
             var endState = player.isGameOver();
             endGame(player, endState);
         }
+    }
+
+    @Override
+    public void onGuildReady(@NotNull GuildReadyEvent event) {
+        for (var channel : event.getGuild().getTextChannels()) {
+            if (channel.canTalk() && channel.getName().startsWith("board")) {
+                availableChannels.add(channel.getId());
+            }
+        }
+        System.out.println("found " + availableChannels.size() + " boards");
+        // TODO: what if there are no boards?
     }
 
     @Override
