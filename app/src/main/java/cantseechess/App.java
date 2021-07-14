@@ -3,15 +3,26 @@
  */
 package cantseechess;
 
+import cantseechess.chess.BoardGenerator;
 import cantseechess.storage.HashmapStorage;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Emoji;
+import net.dv8tion.jda.api.entities.Emote;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class App {
     public String getGreeting() {
@@ -34,8 +45,9 @@ public class App {
         return null;
     }
 
+
     public static void main(String[] args) throws Exception {
-        String token = getToken();
+        String token = "ODY0MzY3ODk1ODAyMTUwOTMz.YO0bVQ.sO-GsjFeX14VEyxN_SI0aUyKyc4";
         if (token == null || token.isBlank()) {
             System.out.println("no token in token file");
             return;
@@ -45,6 +57,8 @@ public class App {
                 .addEventListeners(new BotListener(ratings))
                 .build();
         jda.awaitReady();
+        //TODO dont do this
+        BoardGenerator.serverEmojis = jda.getGuildById(864636208147988510L).getEmotes().toArray(Emote[]::new);
         System.out.println(new App().getGreeting());
     }
 }
