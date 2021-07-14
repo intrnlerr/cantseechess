@@ -11,6 +11,9 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.*;
@@ -44,10 +47,20 @@ public class BotListener extends ListenerAdapter {
         }
         // this looks so gnarly
         var channel = guild.getTextChannelById(player.getChannel());
-        channel.createPermissionOverride(guild.getMemberById(player.getId()))
+        channel.putPermissionOverride(guild.getMemberById(player.getId()))
                 .setDeny(Permission.MESSAGE_WRITE).queue();
-        channel.createPermissionOverride(guild.getMemberById(player.getOpponent().getId()))
+        channel.putPermissionOverride(guild.getMemberById(player.getOpponent().getId()))
                 .setDeny(Permission.MESSAGE_WRITE).queue();
+        var image = BoardGenerator.getBoard(player.getCurrentGame().getPieces());
+        try {
+            // export.png could be overwritten before the file is sent
+            var imageFile = new File("export.png");
+            ImageIO.write(image, "PNG", imageFile);
+            channel.sendFile(imageFile).queue();
+        } catch (IOException e) {
+            System.out.println("could not render image :(");
+                    e.printStackTrace();
+        }
         // return channel
         availableChannels.push(player.getChannel());
         // TODO: better cleanup, rating adjustment!
@@ -104,9 +117,9 @@ public class BotListener extends ListenerAdapter {
                 if (channel == null) {
                     throw new NullPointerException("channelId is not a real channel?");
                 }
-                channel.createPermissionOverride(guild.getMemberById(challenge.challenged))
+                channel.putPermissionOverride(guild.getMemberById(challenge.challenged))
                         .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
-                channel.createPermissionOverride(guild.getMemberById(challenge.challenger))
+                channel.putPermissionOverride(guild.getMemberById(challenge.challenger))
                         .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
                 var game = challenge.accept();
                 var player1 = new Player(game, Color.white, challenge.challenged, channelId);
