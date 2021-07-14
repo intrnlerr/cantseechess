@@ -55,6 +55,7 @@ public class ChessGame {
                 kingSideBlack = false;
             }
         }
+
         public void clearQueenside(Color color) {
             if (color == Color.white) {
                 queenSideWhite = false;
@@ -326,20 +327,20 @@ public class ChessGame {
             // which is up and to the left or up and to the right of the endpoint
             var pawn = getPieceSafe(endpoint.getFile() - 1, endpoint.getRank() - 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() - 1), endpoint);
+                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() - 1), endpoint, SpecialMove.EnPassant);
             }
             pawn = getPieceSafe(endpoint.getFile() + 1, endpoint.getRank() - 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() - 1), endpoint);
+                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() - 1), endpoint, SpecialMove.EnPassant);
             }
         } else {
             var pawn = getPieceSafe(endpoint.getFile() - 1, endpoint.getRank() + 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() + 1), endpoint);
+                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() + 1), endpoint, SpecialMove.EnPassant);
             }
             pawn = getPieceSafe(endpoint.getFile() + 1, endpoint.getRank() + 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() + 1), endpoint);
+                return new Move(new Position(endpoint.getFile() + 1, endpoint.getRank() + 1), endpoint, SpecialMove.EnPassant);
             }
         }
         return null;
@@ -441,6 +442,10 @@ public class ChessGame {
                     board_pieces[m.to.getFile() + 1][m.to.getRank()] = board_pieces[0][m.to.getRank()];
                     board_pieces[0][m.to.getRank()] = new Blank();
                     castling.clearCastling(m.to.getRank() == 0 ? Color.white : Color.black);
+                    break;
+                case EnPassant:
+                    var offset = movedPiece.getColor() == Color.white ? -1 : 1;
+                    board_pieces[m.to.getFile()][m.to.getRank() + offset] = new Blank();
                     break;
             }
 
