@@ -4,6 +4,7 @@ enum SpecialMove {
     NotSpecial,
     KingsideCastle,
     QueensideCastle,
+    EnPassant,
     Queen,
     Rook,
     Bishop,
