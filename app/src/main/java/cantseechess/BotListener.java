@@ -13,8 +13,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.*;
 
 public class BotListener extends ListenerAdapter {
     private final RatingStorage ratings;
@@ -117,8 +117,7 @@ public class BotListener extends ListenerAdapter {
                 currentPlayers.put(challenge.challenged, player1);
                 currentPlayers.put(challenge.challenger, player2);
                 challenges.remove(event.getAuthor().getId());
-                event.getGuild().getTextChannelById(channelId)
-                        .sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
+                channel.sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
             } else if (args[0].equals("!decline")) {
                 var challenge = challenges.remove(event.getAuthor().getId());
                 if (challenge == null) {
@@ -151,8 +150,8 @@ public class BotListener extends ListenerAdapter {
             } else if (args[0].equals("!import")) {
                 StringBuilder PGN = new StringBuilder();
                 if (args.length > 1) {
-                    for (int i = 1; i < args.length-1; i++) PGN.append(args[i] + " ");
-                    PGN.append(args[args.length-1]);
+                    for (int i = 1; i < args.length - 1; i++) PGN.append(args[i] + " ");
+                    PGN.append(args[args.length - 1]);
                 } else {
                     event.getChannel().sendMessage("Please enter the PGN you would like to import").queue();
                     return;
@@ -161,8 +160,7 @@ public class BotListener extends ListenerAdapter {
                     BoardMessage message = new BoardMessage(event.getMessage().getTextChannel(), PGN.toString());
                     boardMessages.add(message);
                 } catch (IncorrectFENException | IllegalMoveException e) {
-                    event.getChannel().sendMessage("Please enter a correct PGN");
-                    return;
+                    event.getChannel().sendMessage("Please enter a correct PGN").queue();
                 }
             }
         } else if (currentPlayers.containsKey(event.getAuthor().getId())) {
@@ -195,9 +193,9 @@ public class BotListener extends ListenerAdapter {
     @Override
     public void onButtonClick(ButtonClickEvent event) {
         event.deferEdit().queue();
-        for(BoardMessage m: boardMessages) {
+        for (BoardMessage m : boardMessages) {
             if (m.getMessage().equals(event.getMessage())) {
-                switch(event.getComponentId()){
+                switch (event.getComponentId()) {
                     case "First":
                         m.first();
                         break;

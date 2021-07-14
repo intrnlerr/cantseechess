@@ -67,7 +67,7 @@ public class Analysis implements Runnable {
             send("isready");
             String line;
             stockfishReader.readLine(); //read first line
-            while ((line = stockfishReader.readLine()) != "readyok") {
+            while (!(line = stockfishReader.readLine()).equals("readyok")) {
                 System.out.println("here");
                 if (line.contains("bestmove")) break;
                 if (!line.contains("cp")) continue;
