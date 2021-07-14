@@ -47,7 +47,7 @@ public class App {
 
 
     public static void main(String[] args) throws Exception {
-        String token = "ODY0MzY3ODk1ODAyMTUwOTMz.YO0bVQ.sO-GsjFeX14VEyxN_SI0aUyKyc4";
+        String token = getToken();
         if (token == null || token.isBlank()) {
             System.out.println("no token in token file");
             return;
