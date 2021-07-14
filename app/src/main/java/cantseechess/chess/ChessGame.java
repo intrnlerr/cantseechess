@@ -542,18 +542,18 @@ public class ChessGame {
     public static class Move {
         final Position from;
         final Position to;
-        final Promotion promotion;
+        final SpecialMove specialMove;
 
         Move(Position from, Position to) {
             this.to = to;
             this.from = from;
-            this.promotion = Promotion.NotPromotion;
+            this.specialMove = SpecialMove.NotSpecial;
         }
 
-        Move(Position from, Position to, Promotion promotion) {
+        Move(Position from, Position to, SpecialMove specialMove) {
             this.to = to;
             this.from = from;
-            this.promotion = promotion;
+            this.specialMove = specialMove;
         }
     }
 }
