@@ -6,7 +6,7 @@ import java.util.TimerTask;
 import java.util.function.Consumer;
 
 //http://wbec-ridderkerk.nl/html/UCIProtocol.html stockfish stuff
-public class Analysis {
+public class Analysis implements Runnable {
     private BufferedReader stockfishReader;
     private OutputStreamWriter stockfishWriter;
     //The max amount of time stockfish should calculate the score
@@ -34,7 +34,6 @@ public class Analysis {
 
         this.FEN = FEN;
         this.received = received;
-        run();
     }
 
     public String getScore() {
@@ -43,6 +42,7 @@ public class Analysis {
 
     public void stop() {
         send("stop");
+        send("quit");
         fish.destroy();
         stop = true;
     }
@@ -58,14 +58,17 @@ public class Analysis {
     }
 
     //Runs the timer event, collecting the most recent analysis from stockfish
-    private void run() {
+    @Override
+    public void run() {
         send("position fen " + FEN);
         send("go movetime " + maxTime);
 
-        long startTime = System.currentTimeMillis();
         try {
+            send("isready");
             String line;
-            while (!stop && (line = stockfishReader.readLine()) != null && System.currentTimeMillis() - startTime < maxTime) {
+            stockfishReader.readLine(); //read first line
+            while ((line = stockfishReader.readLine()) != "readyok") {
+                System.out.println("here");
                 if (line.contains("bestmove")) break;
                 if (!line.contains("cp")) continue;
                 String cp = getScore(line);
@@ -87,9 +90,9 @@ public class Analysis {
             }
         }
         if (cp == null || cp == 0) return "0.0";
-        int multiplier = FEN.split(" ")[1].equals("w") ? 1 : -1;
-        double score = Math.round(multiplier * cp / 10.0) / 10.0;
-        String symbol = score > 0 ? "+" : "";
-        return symbol + score;
+        //int multiplier = FEN.split(" ")[1].equals("w") ? 1 : -1;
+        double score = Math.round(cp / 10.0) / 10.0;
+        //String symbol = score > 0 ? "+" : "";
+        return score + "";
     }
 }
