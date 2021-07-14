@@ -1,13 +1,15 @@
 package cantseechess.chess;
 
-enum Promotion {
-    NotPromotion,
+enum SpecialMove {
+    NotSpecial,
+    KingsideCastle,
+    QueensideCastle,
     Queen,
     Rook,
     Bishop,
     Knight;
 
-    public static Promotion getFromChar(char c) {
+    public static SpecialMove getPromotionFromChar(char c) {
         switch (c) {
             case 'Q':
                 return Queen;
@@ -18,6 +20,6 @@ enum Promotion {
             case 'B':
                 return Bishop;
         }
-        return NotPromotion;
+        return NotSpecial;
     }
 }
