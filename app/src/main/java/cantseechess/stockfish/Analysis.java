@@ -7,20 +7,27 @@ import java.util.function.Consumer;
 
 //http://wbec-ridderkerk.nl/html/UCIProtocol.html stockfish stuff
 public class Analysis {
-    private final BufferedReader stockfishReader;
-    private final OutputStreamWriter stockfishWriter;
+    private BufferedReader stockfishReader;
+    private OutputStreamWriter stockfishWriter;
     //The max amount of time stockfish should calculate the score
     private final int maxTime = 5000;
 
     private Timer timer = new Timer();
     private Consumer<String> received;
     private String FEN;
+    private String score;
     private boolean stop = false;
+    private Process fish;
     //send out an analysis which gets processed by the bot and the bot edits the message containing the analysis.
     //if the (next) or (previous) buttons are clicked, then the Analysis class restarts and looks at those states instead.
 
-    public Analysis(String FEN, Consumer<String> received) throws IOException {
-        Process fish = Runtime.getRuntime().exec(this.getClass().getClassLoader().getResource("stockfish.exe").getPath());
+    public Analysis(String FEN, Consumer<String> received) {
+        try {
+            fish = Runtime.getRuntime().exec(this.getClass().getClassLoader().getResource("stockfish.exe").getPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
         InputStreamReader fishReader = new InputStreamReader(fish.getInputStream());
         stockfishReader = new BufferedReader(fishReader);
         stockfishWriter = new OutputStreamWriter(fish.getOutputStream());
@@ -30,27 +37,28 @@ public class Analysis {
         run();
     }
 
+    public String getScore() {
+        return score;
+    }
 
-    public void stop() throws IOException {
+    public void stop() {
         send("stop");
+        fish.destroy();
         stop = true;
     }
 
-    public void restart(String FEN) throws IOException {
-        stop();
-        stop = false;
-        this.FEN = FEN;
-        run();
-    }
-
     //Send string str to stockfish
-    private void send(String str) throws IOException{
-        stockfishWriter.write(str + "\n");
-        stockfishWriter.flush();
+    private void send(String str) {
+        try {
+            stockfishWriter.write(str + "\n");
+            stockfishWriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //Runs the timer event, collecting the most recent analysis from stockfish
-    private void run() throws IOException{
+    private void run() {
         send("position fen " + FEN);
         send("go movetime " + maxTime);
 
@@ -62,6 +70,7 @@ public class Analysis {
                 if (!line.contains("cp")) continue;
                 String cp = getScore(line);
                 received.accept(cp);
+                score = cp;
             }
         } catch (IOException e) {
             e.printStackTrace();
