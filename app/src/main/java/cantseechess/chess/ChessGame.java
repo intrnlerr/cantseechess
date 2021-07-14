@@ -433,13 +433,13 @@ public class ChessGame {
                     break;
                 case KingsideCastle:
                     // move the rook
-                    board_pieces[m.to.getFile() - 1][0] = board_pieces[7][0];
-                    board_pieces[7][0] = new Blank();
+                    board_pieces[m.to.getFile() - 1][m.to.getRank()] = board_pieces[7][m.to.getRank()];
+                    board_pieces[7][m.to.getRank()] = new Blank();
                     castling.clearCastling(m.to.getRank() == 0 ? Color.white : Color.black);
                     break;
                 case QueensideCastle:
-                    board_pieces[m.to.getFile() + 1][0] = board_pieces[0][0];
-                    board_pieces[0][0] = new Blank();
+                    board_pieces[m.to.getFile() + 1][m.to.getRank()] = board_pieces[0][m.to.getRank()];
+                    board_pieces[0][m.to.getRank()] = new Blank();
                     castling.clearCastling(m.to.getRank() == 0 ? Color.white : Color.black);
                     break;
             }
