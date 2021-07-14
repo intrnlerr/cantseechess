@@ -29,7 +29,7 @@ public class BoardMessage {
     private Message message;
     private long lastUpdateTime = 0;
     private Consumer<String> score;
-    private int currIndex = 0;
+    private int currIndex;
     private static final int UPDATE_TIME = 1000;
     private final BoardState[] BOARD_STATES;
     private final TextChannel channel;
@@ -39,6 +39,7 @@ public class BoardMessage {
     public BoardMessage(TextChannel channel, String PGN) throws IncorrectFENException, IllegalMoveException {
         BOARD_STATES = new BoardGenerator().getBoard(PGN, Optional.empty());
         this.channel = channel;
+        currIndex = BOARD_STATES.length-1;
         updateEmbed(BOARD_STATES[currIndex]);
     }
 
@@ -66,8 +67,8 @@ public class BoardMessage {
                     .setActionRow(
                             Button.secondary("First", "First"),
                             Button.secondary("Previous", "Previous"),
-                            Button.secondary("Next", "Next"),
-                            Button.secondary("Last", "Last"))
+                            Button.secondary("Next", "Next").withDisabled(true),
+                            Button.secondary("Last", "Last").withDisabled(true))
                     .queue(this::setMessage);
         }
         else {
