@@ -1,26 +1,26 @@
 package cantseechess;
 
-import cantseechess.chess.ChessGame;
-import cantseechess.chess.Color;
-import cantseechess.chess.IllegalMoveException;
-import cantseechess.chess.Rating;
+import cantseechess.chess.*;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.*;
 
 public class BotListener extends ListenerAdapter {
     private final RatingStorage ratings;
     private final ArrayDeque<String> availableChannels = new ArrayDeque<>();
     private final HashMap<String, Player> currentPlayers = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
+    private final ArrayList<BoardMessage> boardMessages = new ArrayList<>(); //TODO store this :(
 
     public BotListener(RatingStorage ratings) {
         this.ratings = ratings;
@@ -147,6 +147,23 @@ public class BotListener extends ListenerAdapter {
                     event.getChannel().sendMessage("rating: " + rating.getRating() +
                             " rd: " + rating.getDeviation()).queue();
                 }
+            } else if (args[0].equals("!import")) {
+                StringBuilder PGN = new StringBuilder();
+                if (args.length > 1) {
+                    for (int i = 1; i < args.length-1; i++) PGN.append(args[i] + " ");
+                    PGN.append(args[args.length-1]);
+                } else {
+                    event.getChannel().sendMessage("Please enter the PGN you would like to import").queue();
+                    return;
+                }
+                try {
+                    System.out.println("Creating message");
+                    BoardMessage message = new BoardMessage(event.getMessage().getTextChannel(), PGN.toString());
+                    boardMessages.add(message);
+                } catch (IncorrectFENException | IllegalMoveException e) {
+                    event.getChannel().sendMessage("Please enter a correct PGN");
+                    return;
+                }
             }
         } else if (currentPlayers.containsKey(event.getAuthor().getId())) {
             var player = currentPlayers.get(event.getAuthor().getId());
@@ -172,6 +189,29 @@ public class BotListener extends ListenerAdapter {
         }
         System.out.println("found " + availableChannels.size() + " boards");
         // TODO: what if there are no boards?
+    }
+
+    @Override
+    public void onButtonClick(ButtonClickEvent event) {
+        event.deferEdit().queue();
+        for(BoardMessage m: boardMessages) {
+            if (m.getMessage().equals(event.getMessage())) {
+                switch(event.getComponentId()){
+                    case "First":
+                        m.first();
+                        break;
+                    case "Previous":
+                        m.previous();
+                        break;
+                    case "Next":
+                        m.next();
+                        break;
+                    case "Last":
+                        m.last();
+                        break;
+                }
+            }
+        }
     }
 
     @Override
