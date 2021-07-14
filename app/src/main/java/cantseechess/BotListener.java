@@ -104,9 +104,9 @@ public class BotListener extends ListenerAdapter {
                 if (channel == null) {
                     throw new NullPointerException("channelId is not a real channel?");
                 }
-                channel.putPermissionOverride(guild.getMemberById(challenge.challenged))
+                channel.putPermissionOverride(guild.retrieveMemberById(challenge.challenged).complete())
                         .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
-                channel.putPermissionOverride(guild.getMemberById(challenge.challenger))
+                channel.putPermissionOverride(guild.retrieveMemberById(challenge.challenger).complete())
                         .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
                 var game = challenge.accept();
                 var player1 = new Player(game, Color.white, challenge.challenged, channelId);
