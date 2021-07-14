@@ -157,7 +157,6 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 try {
-                    System.out.println("Creating message");
                     BoardMessage message = new BoardMessage(event.getMessage().getTextChannel(), PGN.toString());
                     boardMessages.add(message);
                 } catch (IncorrectFENException | IllegalMoveException e) {
@@ -209,6 +208,8 @@ public class BotListener extends ListenerAdapter {
                     case "Last":
                         m.last();
                         break;
+                    case "Analyze":
+                        m.doAnalysis = !m.doAnalysis;
                 }
             }
         }
