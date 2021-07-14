@@ -3,6 +3,7 @@ package cantseechess;
 import cantseechess.chess.*;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -44,9 +45,9 @@ public class BotListener extends ListenerAdapter {
         }
         // this looks so gnarly
         var channel = guild.getTextChannelById(player.getChannel());
-        channel.putPermissionOverride(guild.getMemberById(player.getId()))
+        channel.putPermissionOverride(guild.retrieveMemberById(player.getId()).complete())
                 .setDeny(Permission.MESSAGE_WRITE).queue();
-        channel.putPermissionOverride(guild.getMemberById(player.getOpponent().getId()))
+        channel.putPermissionOverride(guild.retrieveMemberById(player.getOpponent().getId()).complete())
                 .setDeny(Permission.MESSAGE_WRITE).queue();
         // return channel
         availableChannels.push(player.getChannel());
@@ -171,8 +172,9 @@ public class BotListener extends ListenerAdapter {
             }
             try {
                 player.makeMove(content);
-            } catch (IllegalMoveException e) {
-                event.getChannel().sendMessage(e.getMessage()).queue();
+                event.getMessage().addReaction("U+2705").queue();
+            } catch (IllegalMoveException | IllegalArgumentException e) {
+                event.getMessage().addReaction("U+26D4").queue();
             }
             var endState = player.isGameOver();
             endGame(player, endState, event.getGuild());
