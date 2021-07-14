@@ -20,6 +20,7 @@ public class BoardGenerator {
         return new BoardState(FEN, state);
     }
 
+    //TODO make it so you can have spaces after a number
     public static BoardState[] getBoard(String PGN, Optional<String> startFEN) throws IncorrectFENException, IllegalMoveException {
         ChessGame game;
         if (startFEN.isPresent())
