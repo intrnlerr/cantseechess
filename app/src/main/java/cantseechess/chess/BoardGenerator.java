@@ -1,47 +1,135 @@
 package cantseechess.chess;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.util.ArrayList;
+import net.dv8tion.jda.api.entities.Emote;
+
+import java.util.Optional;
 
 public class BoardGenerator {
-    private static BufferedImage wPawn, wKnight, wRook, wBishop, wQueen, wKing, bPawn, bKnight, bRook, bBishop, bQueen, bKing;
-    private static boolean piecesInit = false;
-    private static final String PIECE_ARRAY_URL = "/ChessPiecesArray.png";
-    private static final String BOARD_URL = "/Chessboard.png";
-    private static BufferedImage BOARD_IMAGE;
-    private static final int PIECE_WIDTH = 128;
-    private static final int PIECE_HEIGHT = 128;
+    //private static BufferedImage wPawn, wKnight, wRook, wBishop, wQueen, wKing, bPawn, bKnight, bRook, bBishop, bQueen, bKing;
+    //private static boolean piecesInit = false;
+    //private static final String PIECE_ARRAY_URL = "/ChessPiecesArray.png";
+    //private static final String BOARD_URL = "/Chessboard.png";
+    //private static BufferedImage BOARD_IMAGE;
+    //private static final int PIECE_WIDTH = 128;
+    //private static final int PIECE_HEIGHT = 128;
 
-    @Untested
-    public static BufferedImage[] getBoard(String PGN, String StartFEN) throws IncorrectFENException, IllegalMoveException {
-        ArrayList<BufferedImage> toReturn = new ArrayList<>();
-        ChessGame game = new ChessGame(StartFEN);
-        PGN = PGN.replaceAll("([0-9]+[.])", "");
-        if (PGN.charAt(0) == ' ') {
-            PGN = PGN.substring(1);
-        }
-        String[] moves = PGN.split(" ");
-        toReturn.add(getBoard(game.getPieces()));
-        for (int i = 0; i < moves.length; i++) {
-            //this is probably right
-            Color color = i%2 == 0 ? Color.white : Color.black;
-            game.makeMove(game.getMove(moves[i], color));
-            toReturn.add(getBoard(game.getPieces()));
-        }
-        return (BufferedImage[]) toReturn.toArray();
+    public static Emote[] serverEmojis;
+    //private final Optional<String> PGN;
+    //private final  Optional<String> startFEN;
+    public BoardGenerator(/*Optional<String> PGN, Optional<String> startFEN*/) {
+       // this.PGN = PGN;
+        //this.startFEN = startFEN;
     }
 
-    public static BufferedImage getBoard(String FEN) throws IncorrectFENException {
+    public BoardState getBoard(String FEN, Piece[][] pieces) throws IncorrectFENException {
+        System.out.println("why");
+        Emote[][] state = new Emote[8][8];
+        for (int file = 0; file < 8; file++) {
+            for (int rank = 0; rank < 8; rank++) {
+                state[7-file][rank] = getEmote(pieces[rank][file], file, rank);
+            }
+        }
+        return new BoardState(FEN, state);
+    }
+
+    public BoardState[] getBoard(String PGN, Optional<String> startFEN) throws IncorrectFENException, IllegalMoveException {
+        ChessGame game;
+        if (startFEN.isPresent())
+            game = new ChessGame(startFEN.get());
+        else game = new ChessGame();
+
+        PGN = PGN.replaceAll("([0-9]+[.])", "");
+        if (PGN.charAt(0) == ' ') PGN = PGN.substring(1);
+        String[] moves = PGN.split(" ");
+
+
+        BoardState[] states = new BoardState[moves.length+1];
+        states[0] = getBoard(startFEN.orElseGet(game::getFEN), game.getPieces());
+
+        System.out.println(states[0].toString());
+        for (int i = 0; i < moves.length; i++) {
+            Color color = i%2 == 0 ? Color.white : Color.black;
+            game.makeMove(game.getMove(moves[i], color));
+            String FEN = game.getFEN();
+            states[i+1] = getBoard(FEN, game.getPieces());
+            System.out.println(states[i + 1].toString());
+        }
+        return states;
+    }
+
+    private static Emote getEmote(Piece p, int file, int rank) {
+        StringBuilder toReturn = new StringBuilder();
+        String pieceType = "";
+        String pieceColor = "";
+        String boardColor = "l";
+        if (!(p instanceof Blank)) {
+
+            pieceType += p instanceof Knight ? "n" : Character.toLowerCase(p.toString().charAt(0));
+
+            pieceColor += p.getColor() == Color.white ? "l" : "d";
+
+        }
+
+        if ((file & 1) != (rank & 1)) {
+            boardColor = "d";
+        }
+
+        toReturn.append(pieceType)
+                .append(pieceColor)
+                .append(boardColor);
+
+        if (toReturn.toString().length() == 1) {
+            toReturn.append("_");
+        }
+
+        for (Emote e: serverEmojis) {
+            if (e.getName().equals(toReturn.toString())) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    /*@Untested
+    public BoardState[] getBoard(String PGN, Optional<String> startFEN) throws IncorrectFENException, IllegalMoveException {
+        ChessGame game;
+        if (startFEN.isPresent())
+             game = new ChessGame(startFEN.get());
+        else game = new ChessGame();
+
+        PGN = PGN.replaceAll("([0-9]+[.])", "");
+        if (PGN.charAt(0) == ' ') PGN = PGN.substring(1);
+        String[] moves = PGN.split(" ");
+
+        BoardState[] states = new BoardState[moves.length+1];
+        states[0] = new BoardState(startFEN.orElseGet(game::getFEN), BoardGenerator.getBoard(game.getPieces()));
+        try {
+            ImageIO.write(states[0].image, "png", new File("crabdance.png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < moves.length; i++) {
+            Color color = i%2 == 0 ? Color.white : Color.black;
+            game.makeMove(game.getMove(moves[i], color));
+            String FEN = game.getFEN();
+            states[i+1] = new BoardState(FEN, getBoard(game.getPieces()));
+            try {
+                ImageIO.write(states[i+1].image, "png", new File("test" + i + ".png"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return states;
+    }
+
+    public static final BufferedImage getBoard(String FEN) throws IncorrectFENException {
         return getBoard(ChessGame.FENtoBoard(FEN));
     }
 
-    public static BufferedImage getBoard(Piece[][] board) {
+    public static final BufferedImage getBoard(Piece[][] board) {
         if (!piecesInit) initializePieces();
 
-        BufferedImage toReturn = BOARD_IMAGE;
+        BufferedImage toReturn = new BufferedImage(BOARD_IMAGE.getColorModel(),  BOARD_IMAGE.copyData(null), BOARD_IMAGE.isAlphaPremultiplied(), null);
         Graphics2D gr = toReturn.createGraphics();
         for (int i = 7; i >= 0; i--) {
             for (int j = 0; j < 8; j++) {
@@ -108,5 +196,5 @@ public class BoardGenerator {
         bRook = pieces[10];
         bPawn = pieces[11];
         piecesInit = true;
-    }
+    }*/
 }
