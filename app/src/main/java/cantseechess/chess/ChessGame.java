@@ -37,6 +37,31 @@ public class ChessGame {
         public boolean canCastleQueenside(Color c) {
             return c == Color.white ? queenSideWhite : queenSideBlack;
         }
+
+        void clearCastling(Color c) {
+            if (c == Color.white) {
+                kingSideWhite = false;
+                queenSideWhite = false;
+            } else {
+                kingSideBlack = false;
+                queenSideBlack = false;
+            }
+        }
+
+        public void clearKingside(Color color) {
+            if (color == Color.white) {
+                kingSideWhite = false;
+            } else {
+                kingSideBlack = false;
+            }
+        }
+        public void clearQueenside(Color color) {
+            if (color == Color.white) {
+                queenSideWhite = false;
+            } else {
+                queenSideBlack = false;
+            }
+        }
     }
 
     public ChessGame() {
@@ -162,6 +187,34 @@ public class ChessGame {
         }
     }
 
+    private Move getCastle(boolean isKingSide, Color color) throws IllegalMoveException {
+        Piece king = findKing(color);
+        Position kingPos = findPosition(king);
+        if (kingPos.getRank() != 0 && kingPos.getRank() != 7) {
+            throw new IllegalMoveException("(castling should already fail before this!)");
+        }
+        if (attackingPieces(king, kingPos).size() > 0) {
+            throw new IllegalMoveException("Cannot castle while in check.");
+        }
+        var direction = isKingSide ? 1 : -1;
+        var endFile = isKingSide ? 6 : 2;
+        for (int file = kingPos.getFile() + direction; file != endFile; file += direction) {
+            if (!getPiece(file, kingPos.getRank()).isBlank()) {
+                throw new IllegalMoveException("Cannot castle through a piece.");
+            }
+            var attackers = attackingPieces(king, new Position(file, kingPos.getRank()));
+            if (attackers.size() > 0) {
+                throw new IllegalMoveException("Cannot castle through check.");
+            }
+        }
+        if (attackingPieces(king, new Position(endFile, kingPos.getRank())).size() > 0) {
+            throw new IllegalMoveException("Cannot castle into check.");
+        }
+        return new Move(kingPos,
+                new Position(endFile, kingPos.getRank()),
+                isKingSide ? SpecialMove.KingsideCastle : SpecialMove.QueensideCastle);
+    }
+
     public Move getMove(String move, Color turnColor) throws IllegalMoveException {
         if (move.length() < 2) {
             throw new IllegalMoveException("Bad move formatting");
@@ -169,14 +222,14 @@ public class ChessGame {
         // parse algebraic notation
         if (move.matches("\\A(O-O|0-0)\\z")) {
             if (castling.canCastleKingside(turnColor)) {
-                // TODO: actually castle
-                throw new IllegalMoveException("NYI :(");
+                return getCastle(true, turnColor);
             }
             throw new IllegalMoveException("Castling is not possible!");
         }
         if (move.matches("\\A(O-O-O|0-0-0)\\z")) {
-            // TODO: queenside castle
-            throw new IllegalMoveException("NYI :(");
+            if (castling.canCastleQueenside(turnColor)) {
+                return getCastle(false, turnColor);
+            }
         }
         var pieceType = move.charAt(0);
         Optional<Class<?>> pieceClass = Optional.empty();
@@ -206,8 +259,8 @@ public class ChessGame {
                 if (piece.getColor() == turnColor && piece instanceof Pawn) {
                     if (piece.canMove(board_pieces, new Position(fromFile, rank), endpoint)) {
                         if (endpoint.getRank() == 0 || endpoint.getRank() == 7) {
-                            var promotion = Promotion.getFromChar(promotionType);
-                            if (promotion == Promotion.NotPromotion) {
+                            var promotion = SpecialMove.getPromotionFromChar(promotionType);
+                            if (promotion == SpecialMove.NotSpecial) {
                                 throw new IllegalMoveException("Illegal promotion type");
                             }
                             return new Move(new Position(fromFile, rank), endpoint, promotion);
@@ -342,20 +395,29 @@ public class ChessGame {
                 enPassantSquare = new Position(m.to.getFile(), m.to.getRank() - (rankDiff / 2));
             }
         }
-        if (!getPiece(m.to).isBlank()) {
+        var movedPiece = getPiece(m.to);
+        if (!movedPiece.isBlank()) {
             ++fiftyMoveRuleCounter;
         } else {
             // captures reset the count
             fiftyMoveRuleCounter = 0;
         }
-        if (getPiece(m.from) instanceof Pawn) {
+        if (movedPiece instanceof Pawn) {
             // pawn moves also reset the count
             fiftyMoveRuleCounter = 0;
+        } else if (movedPiece instanceof King) {
+            castling.clearCastling(movedPiece.getColor());
+        } else if (movedPiece instanceof Rook) {
+            if (m.from.getFile() == 7) {
+                castling.clearKingside(movedPiece.getColor());
+            } else if (m.from.getFile() == 0) {
+                castling.clearQueenside(movedPiece.getColor());
+            }
         }
         board_pieces[m.to.getFile()][m.to.getRank()] = getPiece(m.from);
         board_pieces[m.from.getFile()][m.from.getRank()] = new Blank();
-        if (m.promotion != Promotion.NotPromotion) {
-            switch (m.promotion) {
+        if (m.specialMove != SpecialMove.NotSpecial) {
+            switch (m.specialMove) {
                 case Queen:
                     board_pieces[m.to.getFile()][m.to.getRank()] = new Queen(getPiece(m.to).getColor());
                     break;
@@ -367,6 +429,17 @@ public class ChessGame {
                     break;
                 case Knight:
                     board_pieces[m.to.getFile()][m.to.getRank()] = new Knight(getPiece(m.to).getColor());
+                    break;
+                case KingsideCastle:
+                    // move the rook
+                    board_pieces[m.to.getFile() - 1][0] = board_pieces[7][0];
+                    board_pieces[7][0] = new Blank();
+                    castling.clearCastling(m.to.getRank() == 0 ? Color.white : Color.black);
+                    break;
+                case QueensideCastle:
+                    board_pieces[m.to.getFile() + 1][0] = board_pieces[0][0];
+                    board_pieces[0][0] = new Blank();
+                    castling.clearCastling(m.to.getRank() == 0 ? Color.white : Color.black);
                     break;
             }
 
