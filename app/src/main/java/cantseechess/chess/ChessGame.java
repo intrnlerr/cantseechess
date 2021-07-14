@@ -230,6 +230,7 @@ public class ChessGame {
             if (castling.canCastleQueenside(turnColor)) {
                 return getCastle(false, turnColor);
             }
+            throw new IllegalMoveException("Castling is not possible!");
         }
         var pieceType = move.charAt(0);
         Optional<Class<?>> pieceClass = Optional.empty();

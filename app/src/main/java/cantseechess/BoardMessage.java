@@ -37,7 +37,7 @@ public class BoardMessage {
 
 
     public BoardMessage(TextChannel channel, String PGN) throws IncorrectFENException, IllegalMoveException {
-        BOARD_STATES = new BoardGenerator().getBoard(PGN, Optional.empty());
+        BOARD_STATES = new BoardGenerator().getBoard(PGN);
         this.channel = channel;
         currIndex = BOARD_STATES.length-1;
         updateEmbed(BOARD_STATES[currIndex]);
