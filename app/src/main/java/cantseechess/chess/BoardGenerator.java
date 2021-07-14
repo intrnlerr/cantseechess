@@ -2,8 +2,6 @@ package cantseechess.chess;
 
 import net.dv8tion.jda.api.entities.Emote;
 
-import java.util.Optional;
-
 public class BoardGenerator {
     //private static BufferedImage wPawn, wKnight, wRook, wBishop, wQueen, wKing, bPawn, bKnight, bRook, bBishop, bQueen, bKing;
     //private static boolean piecesInit = false;
@@ -14,28 +12,29 @@ public class BoardGenerator {
     //private static final int PIECE_HEIGHT = 128;
 
     public static Emote[] serverEmojis;
+
     //private final Optional<String> PGN;
     //private final  Optional<String> startFEN;
     public BoardGenerator(/*Optional<String> PGN, Optional<String> startFEN*/) {
-       // this.PGN = PGN;
+        // this.PGN = PGN;
         //this.startFEN = startFEN;
     }
 
-    public BoardState getBoard(String FEN, Piece[][] pieces) throws IncorrectFENException {
+    public BoardState getBoardFromFEN(String FEN, Piece[][] pieces) {
         System.out.println("why");
         Emote[][] state = new Emote[8][8];
         for (int file = 0; file < 8; file++) {
             for (int rank = 0; rank < 8; rank++) {
-                state[7-file][rank] = getEmote(pieces[rank][file], file, rank);
+                state[7 - file][rank] = getEmote(pieces[rank][file], file, rank);
             }
         }
         return new BoardState(FEN, state);
     }
 
-    public BoardState[] getBoard(String PGN, Optional<String> startFEN) throws IncorrectFENException, IllegalMoveException {
+    public BoardState[] getBoard(String PGN, String startFEN) throws IncorrectFENException, IllegalMoveException {
         ChessGame game;
-        if (startFEN.isPresent())
-            game = new ChessGame(startFEN.get());
+        if (startFEN != null)
+            game = new ChessGame(startFEN);
         else game = new ChessGame();
 
         PGN = PGN.replaceAll("([0-9]+[.])", "");
@@ -43,18 +42,22 @@ public class BoardGenerator {
         String[] moves = PGN.split(" ");
 
 
-        BoardState[] states = new BoardState[moves.length+1];
-        states[0] = getBoard(startFEN.orElseGet(game::getFEN), game.getPieces());
+        BoardState[] states = new BoardState[moves.length + 1];
+        states[0] = getBoardFromFEN(startFEN != null ? startFEN : game.getFEN(), game.getPieces());
 
         System.out.println(states[0].toString());
         for (int i = 0; i < moves.length; i++) {
-            Color color = i%2 == 0 ? Color.white : Color.black;
+            Color color = i % 2 == 0 ? Color.white : Color.black;
             game.makeMove(game.getMove(moves[i], color));
             String FEN = game.getFEN();
-            states[i+1] = getBoard(FEN, game.getPieces());
+            states[i + 1] = getBoardFromFEN(FEN, game.getPieces());
             System.out.println(states[i + 1].toString());
         }
         return states;
+    }
+
+    public BoardState[] getBoard(String PGN) throws IncorrectFENException, IllegalMoveException {
+        return getBoard(PGN, null);
     }
 
     private static Emote getEmote(Piece p, int file, int rank) {
@@ -82,7 +85,7 @@ public class BoardGenerator {
             toReturn.append("_");
         }
 
-        for (Emote e: serverEmojis) {
+        for (Emote e : serverEmojis) {
             if (e.getName().equals(toReturn.toString())) {
                 return e;
             }
