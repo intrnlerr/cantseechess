@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Timer;
 
 public class BotListener extends ListenerAdapter {
     private final RatingStorage ratings;
@@ -22,6 +23,7 @@ public class BotListener extends ListenerAdapter {
     private final HashMap<String, Player> currentPlayers = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
     private final ArrayList<BoardMessage> boardMessages = new ArrayList<>(); //TODO store this :(
+    private final Timer challengeTimeout = new Timer();
 
     public BotListener(RatingStorage ratings) {
         this.ratings = ratings;
@@ -85,6 +87,7 @@ public class BotListener extends ListenerAdapter {
                         return;
                     }
                     challenges.put(challengedId, new Challenge(event.getAuthor().getId(), challengedId));
+                    challengeTimeout.schedule(new CancelChallengeTask(challenges, challengedId), 1000 * 120);
                     var action = event.getChannel().sendMessage("challenge created...");
                     action.queue();
                 }
