@@ -209,8 +209,6 @@ class Knight extends Piece {
 }
 
 class Pawn extends Piece {
-    boolean hasMoved = false;
-
     public Pawn(Color color) {
         super(color);
     }
@@ -226,7 +224,7 @@ class Pawn extends Piece {
         int verticalLimit = 1;
 
         //If you haven't moved yet then you are able to move 2 spaces instead of 1.
-        if (!hasMoved) {
+        if (from.getRank() == 1 || from.getRank() == 6) {
             verticalLimit = 2;
         }
 
