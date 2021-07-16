@@ -217,6 +217,7 @@ public class ChessGameTest {
         g.makeMove(g.getMove("Nf6", Color.black));
         g.makeMove(g.getMove("d4", Color.white));
         g.makeMove(g.getMove("exd4", Color.black));
+        g.makeMove(g.getMove("d5", Color.white));
     }
 
     @Test
