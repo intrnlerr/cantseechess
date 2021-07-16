@@ -118,7 +118,7 @@ class King extends Piece {
         // hopefully this has no side-effects
         var toPiece = board[to.getFile()][to.getRank()];
         board[to.getFile()][to.getRank()] = new Blank();
-        for(int file = 0; file < 8; ++file) {
+        for (int file = 0; file < 8; ++file) {
             for (int rank = 0; rank < 8; ++rank) {
                 var piece = board[file][rank];
                 // check if moving to the target square would put the king in check
@@ -144,11 +144,13 @@ class Queen extends Piece {
         int horizontalChange = Math.abs(to.getRank() - from.getRank());
         int verticalChange = Math.abs(to.getFile() - from.getFile());
         if (!board[to.getFile()][to.getRank()].matchesColor(this)) {
-            if ((horizontalChange == verticalChange && searchDiagonal(board, from, to, from))) return true;
-            else if ((from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to)))
+            if ((horizontalChange == verticalChange && searchDiagonal(board, from, to, from))) {
                 return true;
+            }
+            return (from.getRank() == to.getRank() && !(to.getFile() == from.getFile())) || (from.getFile() == to.getFile() && !(to.getRank() == from.getRank()) && searchStraight(board, from, to));
+        } else {
             return false;
-        } else return false;
+        }
     }
 }
 
@@ -165,7 +167,6 @@ class Rook extends Piece {
         //You're correctly moving
         return movingCorrect && searchStraight(board, from, to);
     }
-
 }
 
 class Bishop extends Piece {
@@ -176,14 +177,10 @@ class Bishop extends Piece {
     @Untested
     @Override
     boolean canMove(Piece[][] board, Position from, Position to) {
-
         int horizontalChange = Math.abs(to.getRank() - from.getRank());
         int verticalChange = Math.abs(to.getFile() - from.getFile());
 
-        if (horizontalChange == verticalChange && searchDiagonal(board, from, to, from)) {
-            return true;
-        } else return false;
-
+        return horizontalChange == verticalChange && searchDiagonal(board, from, to, from);
     }
 }
 
@@ -195,16 +192,12 @@ class Knight extends Piece {
     @Untested
     @Override
     boolean canMove(Piece[][] board, Position from, Position to) {
-
         int horizontalChange = Math.abs(to.getRank() - from.getRank());
         int verticalChange = (Math.abs(to.getFile() - from.getFile()));
 
         boolean movingCorrect = (verticalChange == 2 && horizontalChange == 1) || (verticalChange == 1 && horizontalChange == 2);
 
-        if (!board[to.getFile()][to.getRank()].matchesColor(this) && movingCorrect) {
-            return true;
-        } else return false;
-
+        return !board[to.getFile()][to.getRank()].matchesColor(this) && movingCorrect;
     }
 }
 
