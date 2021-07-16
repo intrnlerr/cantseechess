@@ -3,11 +3,14 @@ package cantseechess.chess;
 import net.dv8tion.jda.api.entities.Emote;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 
 public class BoardGenerator {
 
     public static Emote[] boardEmotes;
+    private static final OpeningReader reader = new OpeningReader();
 
     public static BoardState getBoard(String FEN) throws IncorrectFENException {
         Piece[][] pieces = ChessGame.FENtoBoard(FEN);
@@ -21,7 +24,7 @@ public class BoardGenerator {
     }
 
     //TODO make it so you can have spaces after a number
-    public static BoardState[] getBoard(String PGN, Optional<String> startFEN) throws IncorrectFENException, IllegalMoveException {
+    public static BoardState[] getBoard(String PGN, Optional<String> startFEN, Consumer<String> opening) throws IncorrectFENException, IllegalMoveException {
         ChessGame game;
         if (startFEN.isPresent())
             game = new ChessGame(startFEN.get());
@@ -40,6 +43,8 @@ public class BoardGenerator {
             game.makeMove(game.getMove(moves[i], color));
             String FEN = game.getFEN();
             states[i+1] = getBoard(FEN);
+            Optional<String> openingString = reader.getOpening(FEN);
+            if (openingString.isPresent()) opening.accept(openingString.get());
         }
         return states;
     }

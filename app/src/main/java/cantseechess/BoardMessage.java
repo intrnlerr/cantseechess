@@ -1,9 +1,6 @@
 package cantseechess;
 
-import cantseechess.chess.BoardGenerator;
-import cantseechess.chess.BoardState;
-import cantseechess.chess.IllegalMoveException;
-import cantseechess.chess.IncorrectFENException;
+import cantseechess.chess.*;
 import cantseechess.stockfish.Analysis;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -31,42 +28,53 @@ public class BoardMessage {
     private final BoardState[] BOARD_STATES;
     private final TextChannel channel;
     private static final String EMBED_TITLE = "Chess Game";
-    public boolean doAnalysis;
+    private String opening = " N/A ";
+    public boolean doAnalysis = false;
 
     public BoardMessage(TextChannel channel, String PGN) throws IncorrectFENException, IllegalMoveException {
-        BOARD_STATES = BoardGenerator.getBoard(PGN, Optional.empty());
+        BOARD_STATES = BoardGenerator.getBoard(PGN, Optional.empty(), this::setOpening);
         this.channel = channel;
         currIndex = BOARD_STATES.length-1;
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                updateEmbed(BOARD_STATES[currIndex]);
-            }
-        };
-        timer.scheduleAtFixedRate(task, 0, UPDATE_TIME+20);
+        updateEmbed(BOARD_STATES[currIndex]);
     }
 
     private void setMessage(Message m) {
         this.message = m;
     }
-
+    private void setOpening(String opening) {
+        System.out.println("Setting opening to " + opening);
+        this.opening = opening;
+    }
     public Message getMessage() {
         return message;
+    }
+
+    public void startAnalysis() {
+        Consumer<String> c = (s -> {
+            BOARD_STATES[currIndex].score = s;
+            updateEmbed(BOARD_STATES[currIndex]);
+        });
+        BOARD_STATES[currIndex].startAnalysis(c);
+    }
+
+    public void updateEmbed() {
+        updateEmbed(BOARD_STATES[currIndex]);
     }
 
     private void updateEmbed(BoardState board) {
         if (System.currentTimeMillis() - lastUpdateTime < UPDATE_TIME) {
             return;
         }
+        if (doAnalysis) startAnalysis();
         lastUpdateTime = System.currentTimeMillis();
-        if (doAnalysis) BOARD_STATES[currIndex].startAnalysis();
-        score = BOARD_STATES[currIndex].getAnalysis();
+
+        score = BOARD_STATES[currIndex].score;
         //TODO put players names in
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setTitle(EMBED_TITLE)
                 .setDescription(board.toString())
-                .addField("Score", score + " ", false)
+                .addField("Score", score + " ", true)
+                .addField("Opening", opening, true)
                 .setFooter(board.FEN);
 
         if (message == null) {
