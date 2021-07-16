@@ -6,8 +6,6 @@ import java.util.Optional;
 public class ChessGame {
     private Piece[][] board_pieces = new Piece[8][8];
     private Color turnColor = Color.white;
-    //Number of half moves since last capture/pawn move
-    private int halfmoveClock = 0;
     private int moves = 1;
     // counts the number of half-moves that have not been a capture or a pawn move
     private int fiftyMoveRuleCounter = 0;
@@ -62,6 +60,12 @@ public class ChessGame {
             } else {
                 queenSideBlack = false;
             }
+        }
+        @Override
+        public String toString() {
+            String toReturn = (kingSideWhite ? "K" : "") + (queenSideWhite ? "Q" : "") + (kingSideBlack ? "k" : "") + (queenSideBlack ? "q" : "");
+            if (toReturn.isEmpty()) toReturn = "-";
+            return toReturn;
         }
     }
 
@@ -151,6 +155,7 @@ public class ChessGame {
                         ++file;
                         break;
                     default:
+                        System.out.println(content[0]);
                         throw new IncorrectFENException(null);
                 }
             }
@@ -170,7 +175,7 @@ public class ChessGame {
             turnColor = content[1].equalsIgnoreCase("w") ? Color.white : Color.black;
             castling = new Castling(content[2]);
             enPassantSquare = content[3].charAt(0) == '-' ? null : new Position(content[3]);
-            halfmoveClock = Integer.parseInt(content[4]);
+            fiftyMoveRuleCounter = Integer.parseInt(content[4]);
             moves = Integer.parseInt(content[5]);
         } catch (Exception e) {
             throw new IncorrectFENException(e);
@@ -384,7 +389,11 @@ public class ChessGame {
                 builder.append('/');
             }
         }
-        // TODO: turn color, half clock, en passant, etc needs to be in the FEN.
+        builder.append(turnColor == Color.white ? " w " : " b ")
+                .append(castling.toString() + " ")
+                .append(enPassantSquare != null ? enPassantSquare.toString() + " " : "- ")
+                .append(fiftyMoveRuleCounter + " ")
+                .append(moves);
         return builder.toString();
     }
 
@@ -450,6 +459,8 @@ public class ChessGame {
             }
 
         }
+        turnColor = turnColor == Color.white ? Color.black : Color.white;
+        moves++;
     }
 
     public enum EndState {
