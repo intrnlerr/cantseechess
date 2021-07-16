@@ -164,6 +164,7 @@ public class BotListener extends ListenerAdapter {
                     boardMessages.add(message);
                 } catch (IncorrectFENException | IllegalMoveException e) {
                     event.getChannel().sendMessage("Please enter a correct PGN").queue();
+                    e.printStackTrace();
                 }
             }
         } else if (currentPlayers.containsKey(event.getAuthor().getId())) {
@@ -213,6 +214,7 @@ public class BotListener extends ListenerAdapter {
                         break;
                     case "Analyze":
                         m.doAnalysis = !m.doAnalysis;
+                        m.startAnalysis();
                 }
             }
         }
