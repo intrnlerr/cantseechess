@@ -3,7 +3,6 @@ package cantseechess;
 import cantseechess.chess.*;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
@@ -24,6 +23,7 @@ public class BotListener extends ListenerAdapter {
     private final HashMap<String, Challenge> challenges = new HashMap<>();
     private final ArrayList<BoardMessage> boardMessages = new ArrayList<>(); //TODO store this :(
     private final Timer challengeTimeout = new Timer();
+    private static final String commandPrefix = "!";
 
     public BotListener(RatingStorage ratings) {
         this.ratings = ratings;
@@ -75,9 +75,9 @@ public class BotListener extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         var content = event.getMessage().getContentRaw();
         System.out.println(content);
-        if (content.startsWith("!")) {
-            var args = content.split(" ");
-            if (args[0].equals("!challenge")) {
+        if (content.startsWith(commandPrefix)) {
+            var args = content.substring(commandPrefix.length()).split(" ");
+            if (args[0].equals("challenge")) {
                 var challengedId = parseMention(args[1]);
                 if (challengedId != null) {
                     System.out.println(challengedId);
@@ -91,7 +91,7 @@ public class BotListener extends ListenerAdapter {
                     var action = event.getChannel().sendMessage("challenge created...");
                     action.queue();
                 }
-            } else if (args[0].equals("!accept")) {
+            } else if (args[0].equals("accept")) {
                 var challenge = challenges.get(event.getAuthor().getId());
                 if (challenge == null) {
                     event.getChannel().sendMessage("no challenge!").queue();
@@ -121,18 +121,18 @@ public class BotListener extends ListenerAdapter {
                 currentPlayers.put(challenge.challenger, player2);
                 challenges.remove(event.getAuthor().getId());
                 channel.sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
-            } else if (args[0].equals("!decline")) {
+            } else if (args[0].equals("decline")) {
                 var challenge = challenges.remove(event.getAuthor().getId());
                 if (challenge == null) {
                     event.getChannel().sendMessage("no challenge to decline!").queue();
                     return;
                 }
                 event.getChannel().sendMessage("challenge declined.").queue();
-            } else if (args[0].equals("!sp")) {
+            } else if (args[0].equals("sp")) {
                 currentPlayers.put(event.getAuthor().getId(), new SelfPlayer(event.getAuthor().getId(), event.getChannel().getId()));
-            } else if (args[0].equals("!help")) {
+            } else if (args[0].equals("help")) {
                 //TODO help command
-            } else if (args[0].equals("!resign")) {
+            } else if (args[0].equals("resign")) {
                 var player = currentPlayers.get(event.getAuthor().getId());
                 if (player.isPlayingGame()) {
                     endGame(player,
@@ -140,7 +140,7 @@ public class BotListener extends ListenerAdapter {
                                     ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins,
                             event.getGuild());
                 }
-            } else if (args[0].equals("!stats")) {
+            } else if (args[0].equals("stats")) {
                 var target = event.getAuthor().getId();
                 if (args.length > 1) {
                     target = parseMention(args[1]);
@@ -150,7 +150,7 @@ public class BotListener extends ListenerAdapter {
                     event.getChannel().sendMessage("rating: " + rating.getRating() +
                             " rd: " + rating.getDeviation()).queue();
                 }
-            } else if (args[0].equals("!import")) {
+            } else if (args[0].equals("import")) {
                 StringBuilder PGN = new StringBuilder();
                 if (args.length > 1) {
                     for (int i = 1; i < args.length - 1; i++) PGN.append(args[i] + " ");
