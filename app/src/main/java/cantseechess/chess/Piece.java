@@ -235,12 +235,14 @@ class Pawn extends Piece {
         if ((getColor() == Color.black && verticalChange > 0) || (getColor() == Color.white && verticalChange < 0))
             return false;
 
-        //If the path your location is completely blank
-        var rankChange = verticalChange > 0 ? -1 : 1;
-        // start at the endpoint and check backwards that the path is clear
-        for (int r = to.getRank(); r != from.getRank(); r += rankChange) {
-            if (!board[from.getFile()][r].isBlank()) {
-                return false;
+        if (verticalChange == 2 || verticalChange == -2) {
+            //If the path your location is completely blank
+            var rankChange = verticalChange > 0 ? -1 : 1;
+            // start at the endpoint and check backwards that the path is clear
+            for (int r = to.getRank(); r != from.getRank(); r += rankChange) {
+                if (!board[from.getFile()][r].isBlank()) {
+                    return false;
+                }
             }
         }
 
