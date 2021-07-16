@@ -217,7 +217,59 @@ public class ChessGameTest {
         g.makeMove(g.getMove("Nf6", Color.black));
         g.makeMove(g.getMove("d4", Color.white));
         g.makeMove(g.getMove("exd4", Color.black));
-        g.makeMove(g.getMove("d5", Color.white));
+        g.makeMove(g.getMove("e5", Color.white));
+    }
+
+    @Test
+    public void evergreen() throws IllegalMoveException {
+        var g = new ChessGame();
+        g.makeMove(g.getMove("e4", Color.white));
+        g.makeMove(g.getMove("e5", Color.black));
+        g.makeMove(g.getMove("Nf3", Color.white));
+        g.makeMove(g.getMove("Nc6", Color.black));
+        g.makeMove(g.getMove("Bc4", Color.white));
+        g.makeMove(g.getMove("Bc5", Color.black));
+        g.makeMove(g.getMove("b4", Color.white));
+        g.makeMove(g.getMove("Bxb4", Color.black));
+        g.makeMove(g.getMove("c3", Color.white));
+        g.makeMove(g.getMove("Ba5", Color.black));
+        g.makeMove(g.getMove("d4", Color.white));
+        g.makeMove(g.getMove("exd4", Color.black));
+        g.makeMove(g.getMove("O-O", Color.white));
+        g.makeMove(g.getMove("d3", Color.black));
+        g.makeMove(g.getMove("Qb3", Color.white));
+        g.makeMove(g.getMove("Qf6", Color.black));
+        g.makeMove(g.getMove("e5", Color.white));
+        g.makeMove(g.getMove("Qg6", Color.black));
+        g.makeMove(g.getMove("Re1", Color.white));
+        g.makeMove(g.getMove("Nge7", Color.black));
+        g.makeMove(g.getMove("Ba3", Color.white));
+        g.makeMove(g.getMove("b5", Color.black));
+        g.makeMove(g.getMove("Qxb5", Color.white));
+        g.makeMove(g.getMove("Rb8", Color.black));
+        g.makeMove(g.getMove("Qa4", Color.white));
+        g.makeMove(g.getMove("Bb6", Color.black));
+        g.makeMove(g.getMove("Nbd2", Color.white));
+        g.makeMove(g.getMove("Bb7", Color.black));
+        g.makeMove(g.getMove("Ne4", Color.white));
+        g.makeMove(g.getMove("Qf5", Color.black));
+        g.makeMove(g.getMove("Bxd3", Color.white));
+        g.makeMove(g.getMove("Qh5", Color.black));
+        g.makeMove(g.getMove("Nf6+", Color.white));
+        g.makeMove(g.getMove("gxf6", Color.black));
+        g.makeMove(g.getMove("exf6", Color.white));
+        g.makeMove(g.getMove("Rg8", Color.black));
+        g.makeMove(g.getMove("Rad1", Color.white));
+        g.makeMove(g.getMove("Qxf3", Color.black));
+        g.makeMove(g.getMove("Rxe7+", Color.white));
+        g.makeMove(g.getMove("Nxe7", Color.black));
+        g.makeMove(g.getMove("Qxd7+", Color.white));
+        g.makeMove(g.getMove("Kxd7", Color.black));
+        g.makeMove(g.getMove("Bf5+", Color.white));
+        g.makeMove(g.getMove("Ke8", Color.black));
+        g.makeMove(g.getMove("Bd7+", Color.white));
+        g.makeMove(g.getMove("Kf8", Color.black));
+        g.makeMove(g.getMove("Bxe7#", Color.white));
     }
 
     @Test
