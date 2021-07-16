@@ -15,7 +15,7 @@ public class ChessGame {
     private Castling castling = new Castling("KQkq");
     private static final String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-    class Castling {
+    static class Castling {
         public boolean kingSideWhite;
         public boolean queenSideWhite;
         public boolean kingSideBlack;

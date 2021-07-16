@@ -3,10 +3,8 @@ package cantseechess.chess;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Base64;
 import java.util.Optional;
 import java.util.TreeMap;
 

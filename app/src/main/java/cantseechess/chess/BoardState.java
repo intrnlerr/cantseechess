@@ -1,10 +1,8 @@
 package cantseechess.chess;
 
 import cantseechess.stockfish.Analysis;
-import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Emote;
 
-import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 
 public class BoardState {

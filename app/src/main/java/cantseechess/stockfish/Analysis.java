@@ -1,8 +1,6 @@
 package cantseechess.stockfish;
 
 import java.io.*;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.function.Consumer;
 
 //http://wbec-ridderkerk.nl/html/UCIProtocol.html stockfish stuff
