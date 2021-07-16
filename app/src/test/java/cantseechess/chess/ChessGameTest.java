@@ -209,6 +209,17 @@ public class ChessGameTest {
     }
 
     @Test
+    public void pawnCapture2() throws IllegalMoveException {
+        var g = new ChessGame();
+        g.makeMove(g.getMove("e4", Color.white));
+        g.makeMove(g.getMove("e5", Color.black));
+        g.makeMove(g.getMove("Nf3", Color.white));
+        g.makeMove(g.getMove("Nf6", Color.black));
+        g.makeMove(g.getMove("d4", Color.white));
+        g.makeMove(g.getMove("exd4", Color.black));
+    }
+
+    @Test
     public void promotion() throws IncorrectFENException, IllegalMoveException {
         var g = new ChessGame("8/PPPPP3/8/8/8/8/ppppp3/8 w - - 0 1");
 
