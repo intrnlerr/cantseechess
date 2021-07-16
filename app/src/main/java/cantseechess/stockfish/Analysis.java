@@ -10,13 +10,10 @@ public class Analysis implements Runnable {
     private BufferedReader stockfishReader;
     private OutputStreamWriter stockfishWriter;
     //The max amount of time stockfish should calculate the score
-    private final int maxTime = 5000;
+    private final int maxTime = 2000;
 
-    private Timer timer = new Timer();
     private Consumer<String> received;
     private String FEN;
-    private String score;
-    private boolean stop = false;
     private Process fish;
     //send out an analysis which gets processed by the bot and the bot edits the message containing the analysis.
     //if the (next) or (previous) buttons are clicked, then the Analysis class restarts and looks at those states instead.
@@ -31,20 +28,8 @@ public class Analysis implements Runnable {
         InputStreamReader fishReader = new InputStreamReader(fish.getInputStream());
         stockfishReader = new BufferedReader(fishReader);
         stockfishWriter = new OutputStreamWriter(fish.getOutputStream());
-
         this.FEN = FEN;
         this.received = received;
-    }
-
-    public String getScore() {
-        return score;
-    }
-
-    public void stop() {
-        send("stop");
-        send("quit");
-        fish.destroy();
-        stop = true;
     }
 
     //Send string str to stockfish
@@ -57,24 +42,27 @@ public class Analysis implements Runnable {
         }
     }
 
-    //Runs the timer event, collecting the most recent analysis from stockfish
+    //Runs the analysis, getting the analysis once stockfish is done calculating it
     @Override
     public void run() {
+        System.out.println("tryin");
         send("position fen " + FEN);
         send("go movetime " + maxTime);
 
         try {
             send("isready");
             String line;
-            stockfishReader.readLine(); //read first line
-            while (!(line = stockfishReader.readLine()).equals("readyok")) {
-                System.out.println("here");
+            //stockfishReader.readLine(); //read first line
+            String cp = "0.0";
+            System.out.println(stockfishReader.readLine());
+            while ((line = stockfishReader.readLine()) != null) {
+                System.out.println(line);
                 if (line.contains("bestmove")) break;
                 if (!line.contains("cp")) continue;
-                String cp = getScore(line);
-                received.accept(cp);
-                score = cp;
+                cp = getScore(line);
             }
+            System.out.println("Got analysis " + cp);
+            received.accept(cp);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,9 +78,9 @@ public class Analysis implements Runnable {
             }
         }
         if (cp == null || cp == 0) return "0.0";
-        //int multiplier = FEN.split(" ")[1].equals("w") ? 1 : -1;
-        double score = Math.round(cp / 10.0) / 10.0;
-        //String symbol = score > 0 ? "+" : "";
-        return score + "";
+        int multiplier = FEN.split(" ")[1].equals("w") ? 1 : -1;
+        double score = Math.round(cp / 10.0) / 10.0 * multiplier;
+        String symbol = score > 0 ? "+" : "";
+        return symbol + score;
     }
 }
