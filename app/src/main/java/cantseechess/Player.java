@@ -59,7 +59,6 @@ public class Player {
         var move = currentGame.getMove(moveStr, currentColor);
         currentGame.makeMove(move);
         currentGame.incrementPGN(moveStr);
-        System.out.println(currentGame.getPGN() + " pgn");
     }
 
     public ChessGame.EndState isGameOver() {

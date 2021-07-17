@@ -48,18 +48,14 @@ public class Analysis implements Runnable {
         send("go movetime " + maxTime);
 
         try {
-            send("isready");
+            send("isready"); //probably dont need this
             String line;
-            //stockfishReader.readLine(); //read first line
             String cp = "0.0";
-            System.out.println(stockfishReader.readLine());
             while ((line = stockfishReader.readLine()) != null) {
-                System.out.println(line);
                 if (line.contains("bestmove")) break;
                 if (!line.contains("cp")) continue;
                 cp = getScore(line);
             }
-            System.out.println("Got analysis " + cp);
             received.accept(cp);
         } catch (IOException e) {
             e.printStackTrace();
