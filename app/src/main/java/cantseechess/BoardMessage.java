@@ -17,10 +17,8 @@ import java.util.function.Consumer;
 
 public class BoardMessage {
     private Message message;
-    private long lastUpdateTime = 0;
     private String score = "N/A";
     private int currIndex;
-    private static final int UPDATE_TIME = 2000;
     private final BoardState[] BOARD_STATES;
     private final TextChannel channel;
     private static final String EMBED_TITLE = "Chess Game";
@@ -39,7 +37,6 @@ public class BoardMessage {
     }
 
     private void setOpening(String opening) {
-        System.out.println("Setting opening to " + opening);
         this.opening = opening;
     }
 
@@ -55,16 +52,8 @@ public class BoardMessage {
         BOARD_STATES[currIndex].startAnalysis(c);
     }
 
-    public void updateEmbed() {
-        updateEmbed(BOARD_STATES[currIndex]);
-    }
-
     private void updateEmbed(BoardState board) {
-        if (System.currentTimeMillis() - lastUpdateTime < UPDATE_TIME) {
-            return;
-        }
         if (doAnalysis) startAnalysis();
-        lastUpdateTime = System.currentTimeMillis();
 
         score = BOARD_STATES[currIndex].score;
         //TODO put players names in

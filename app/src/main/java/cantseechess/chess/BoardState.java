@@ -9,6 +9,7 @@ public class BoardState {
     //TODO change from public
     public Analysis analysis;
     public String score = "N/A";
+    public String opening;
     public final Emote[][] board;
     public final String FEN;
 

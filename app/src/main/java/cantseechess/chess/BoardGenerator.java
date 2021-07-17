@@ -29,9 +29,11 @@ public class BoardGenerator {
             game = new ChessGame(startFEN.get());
         else game = new ChessGame();
 
-        PGN = PGN.replaceAll("([0-9]+[.])", "");
+        PGN = PGN.replaceAll("([0-9]+[.] )", "");
         if (PGN.charAt(0) == ' ') PGN = PGN.substring(1);
         String[] moves = PGN.split(" ");
+
+        //TODO when i get home make sure 1. and 2. etc are removed from the PGN
 
 
         BoardState[] states = new BoardState[moves.length+1];

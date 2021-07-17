@@ -45,6 +45,7 @@ public class BotListener extends ListenerAdapter {
         if (endState == ChessGame.EndState.NotOver) {
             return;
         }
+
         // this looks so gnarly
         var channel = guild.getTextChannelById(player.getChannel());
         channel.putPermissionOverride(guild.retrieveMemberById(player.getId()).complete())
@@ -63,6 +64,12 @@ public class BotListener extends ListenerAdapter {
         } else {
             ratings.addGame(player.getWhite(), new Rating.GameEntry(player.getBlack().getRating(), 0));
             ratings.addGame(player.getBlack(), new Rating.GameEntry(player.getWhite().getRating(), 1));
+        }
+
+        try {
+            boardMessages.add(new BoardMessage(channel, player.getCurrentGame().getPGN()));
+        } catch (IncorrectFENException | IllegalMoveException e) {
+            e.printStackTrace();
         }
 
         currentPlayers.remove(player.getOpponent().getId());
