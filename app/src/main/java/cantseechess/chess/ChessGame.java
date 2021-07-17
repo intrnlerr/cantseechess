@@ -1,5 +1,8 @@
 package cantseechess.chess;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -61,6 +64,7 @@ public class ChessGame {
                 queenSideBlack = false;
             }
         }
+
         @Override
         public String toString() {
             String toReturn = (kingSideWhite ? "K" : "") + (queenSideWhite ? "Q" : "") + (kingSideBlack ? "k" : "") + (queenSideBlack ? "q" : "");
@@ -221,6 +225,84 @@ public class ChessGame {
                 isKingSide ? SpecialMove.KingsideCastle : SpecialMove.QueensideCastle);
     }
 
+    private Position readPosition(Reader reader) throws IOException {
+        var n = new char[2];
+        if (reader.read(n) != 2 || !isFileChar(n[0]) || !isRankChar(n[1])) {
+            throw new IOException("Invalid move");
+        }
+        return new Position(getFileFromChar(n[0]), getRankFromChar(n[1]));
+    }
+
+    private SearchInfo readPieceMove(Reader moveReader) throws IOException {
+        Class<?> pieceClass;
+        switch (moveReader.read()) {
+            case 'n':
+            case 'N':
+                pieceClass = Knight.class;
+                break;
+            case 'K':
+                pieceClass = King.class;
+                break;
+            case 'R':
+                pieceClass = Rook.class;
+                break;
+            case 'Q':
+                pieceClass = Queen.class;
+                break;
+            case 'B':
+                pieceClass = Bishop.class;
+                break;
+            default:
+                throw new IOException("Invalid piece type");
+        }
+        int knownRank = -1;
+        int knownFile = -1;
+        int endFile = -1;
+        Position endpoint = null;
+        while (true) {
+            var r = moveReader.read();
+            if (r == -1) {
+                break;
+            }
+            var cr = (char) r;
+            if (cr == 'x') {
+                endpoint = readPosition(moveReader);
+                break;
+            } else if (isRankChar(cr)) {
+                if (endFile != -1) {
+                    endpoint = new Position(endFile, getRankFromChar(cr));
+                } else {
+                    knownRank = getRankFromChar(cr);
+                }
+            } else if (isFileChar(cr)) {
+                if (knownRank != -1) {
+                    // piece has format like R1a4
+                    var rank = moveReader.read();
+                    if (rank == -1) {
+                        throw new IOException("Invalid move formatting");
+                    }
+                    endpoint = new Position(getFileFromChar(cr), getRankFromChar((char) rank));
+                    break;
+                }
+                if (knownFile == -1) {
+                    knownFile = getFileFromChar(cr);
+                } else {
+                    endFile = getFileFromChar(cr);
+                }
+            } else {
+                break;
+            }
+        }
+        if (endpoint == null && endFile == -1) {
+            endpoint = new Position(knownFile, knownRank);
+            knownFile = -1;
+            knownRank = -1;
+        } else if (endpoint == null) {
+            throw new IOException("No position given");
+        }
+        return new SearchInfo(pieceClass, endpoint, knownFile, knownRank);
+    }
+
     public Move getMove(String move, Color turnColor) throws IllegalMoveException {
         if (move.length() < 2) {
             throw new IllegalMoveException("Bad move formatting");
@@ -278,49 +360,74 @@ public class ChessGame {
                 }
             }
             throw new IllegalMoveException("Illegal pawn move");
-        } else {
-            switch (pieceType) {
-                case 'n':
-                case 'N':
-                    pieceClass = Optional.of(Knight.class);
-                    break;
-                case 'K':
-                    pieceClass = Optional.of(King.class);
-                    break;
-                case 'R':
-                    pieceClass = Optional.of(Rook.class);
-                    break;
-                case 'Q':
-                    pieceClass = Optional.of(Queen.class);
-                    break;
-                case 'B':
-                    pieceClass = Optional.of(Bishop.class);
-                    break;
-
-            }
-            var p = move.charAt(1);
-            if (p == 'x') {
-                // capture
-                endpoint = new Position(move.substring(2));
-            } else {
-                endpoint = new Position(move.substring(1));
-            }
         }
-        if (pieceClass.isEmpty()) {
-            throw new IllegalMoveException("Invalid piece");
+        var moveReader = new StringReader(move);
+        SearchInfo info;
+        try {
+            info = readPieceMove(moveReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalMoveException("Move is formatted incorrectly");
+        }
+        if (info.knownFile != -1 && info.knownRank != -1) {
+            var targetPiece = getPiece(info.knownFile, info.knownRank);
+            var targetPos = new Position(info.knownFile, info.knownRank);
+            if (targetPiece.isBlank() ||
+                    targetPiece.getColor() != turnColor ||
+                    !info.pieceType.isInstance(targetPiece) ||
+                    !targetPiece.canMove(board_pieces, targetPos, info.endpoint)) {
+                throw new IllegalMoveException("Illegal move");
+            }
+            return new Move(targetPos, info.endpoint);
+        } else if (info.knownFile != -1) {
+            for (int rank = 0; rank < 8; ++rank) {
+                var piece = getPiece(info.knownFile, rank);
+                if (piece.getColor() == turnColor && info.pieceType.isInstance(piece)) {
+                    if (board_pieces[info.knownFile][rank].canMove(board_pieces, new Position(info.knownFile, rank), info.endpoint)) {
+                        return new Move(new Position(info.knownFile, rank), info.endpoint);
+                    }
+                }
+            }
+            throw new IllegalMoveException("Illegal move");
+        } else if (info.knownRank != -1) {
+            for (int file = 0; file < 8; ++file) {
+                var piece = board_pieces[file][info.knownRank];
+                if (piece.getColor() == turnColor && info.pieceType.isInstance(piece)) {
+                    if (board_pieces[file][info.knownRank].canMove(board_pieces, new Position(file, info.knownRank), info.endpoint)) {
+                        return new Move(new Position(file, info.knownRank), info.endpoint);
+                    }
+                }
+            }
+            throw new IllegalMoveException("Illegal move");
         }
         for (int rank = 0; rank < 8; ++rank) {
             for (int file = 0; file < 8; ++file) {
                 var piece = board_pieces[file][rank];
-                if (piece.getColor() == turnColor && pieceClass.get().isInstance(piece)) {
-                    if (board_pieces[file][rank].canMove(board_pieces, new Position(file, rank), endpoint)) {
-                        return new Move(new Position(file, rank), endpoint);
+                if (piece.getColor() == turnColor && info.pieceType.isInstance(piece)) {
+                    if (board_pieces[file][rank].canMove(board_pieces, new Position(file, rank), info.endpoint)) {
+                        return new Move(new Position(file, rank), info.endpoint);
                     }
                 }
             }
         }
 
         throw new IllegalMoveException("Illegal move");
+    }
+
+    private int getFileFromChar(char p) {
+        return p - 'a';
+    }
+
+    private boolean isRankChar(char p) {
+        return p >= '1' && p <= '8';
+    }
+
+    private int getRankFromChar(char p) {
+        return p - '1';
+    }
+
+    private boolean isFileChar(char p) {
+        return p >= 'a' && p <= 'h';
     }
 
     private Move checkEnPassant(Position endpoint, Color turnColor) {
@@ -644,6 +751,20 @@ public class ChessGame {
             this.to = to;
             this.from = from;
             this.specialMove = specialMove;
+        }
+    }
+
+    private static class SearchInfo {
+        final Class<?> pieceType;
+        final Position endpoint;
+        final int knownFile;
+        final int knownRank;
+
+        private SearchInfo(Class<?> pieceType, Position endpoint, int knownFile, int knownRank) {
+            this.pieceType = pieceType;
+            this.endpoint = endpoint;
+            this.knownFile = knownFile;
+            this.knownRank = knownRank;
         }
     }
 }
