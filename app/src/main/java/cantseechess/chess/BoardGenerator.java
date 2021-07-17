@@ -22,7 +22,6 @@ public class BoardGenerator {
         return new BoardState(FEN, state);
     }
 
-    //TODO make it so you can have spaces after a number
     public static BoardState[] getBoard(String PGN, Optional<String> startFEN, Consumer<String> opening) throws IncorrectFENException, IllegalMoveException {
         ChessGame game;
         if (startFEN.isPresent())
@@ -32,9 +31,6 @@ public class BoardGenerator {
         PGN = PGN.replaceAll("([0-9]+[.] )", "");
         if (PGN.charAt(0) == ' ') PGN = PGN.substring(1);
         String[] moves = PGN.split(" ");
-
-        //TODO when i get home make sure 1. and 2. etc are removed from the PGN
-
 
         BoardState[] states = new BoardState[moves.length+1];
         states[0] = getBoard(startFEN.orElseGet(game::getFEN));
