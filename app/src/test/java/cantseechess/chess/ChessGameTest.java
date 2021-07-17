@@ -51,7 +51,7 @@ public class ChessGameTest {
     }
 
     @Test
-    public void pawnCapture() throws IncorrectFENException {
+    public void pawnCapture() throws IncorrectFENException, IllegalMoveException {
         var g = new ChessGame("8/1p2p3/r1R5/8/8/r1R5/1P2P3/8 w - - 0 1");
         assertFalse(g.tryMove("exf3", Color.white));
         assertFalse(g.tryMove("exf7", Color.white));
@@ -61,19 +61,23 @@ public class ChessGameTest {
         assertFalse(g.tryMove("bxc3", Color.white));
         assertTrue(g.tryMove("bxa3", Color.white));
 
+        g.makeMove(g.getMove("bxa3", Color.white));
+
         assertFalse(g.tryMove("bxa6", Color.black));
         assertTrue(g.tryMove("bxc6", Color.black));
     }
 
     @Test
     public void knightCapture() throws IncorrectFENException {
-        var g = new ChessGame("1n6/8/p1P5/5p2/2R1PP2/4NP2/8/8 w - - 0 1");
+        var g = new ChessGame("1n6/8/p1P5/5p2/2R1PP2/4NP2/8/8 b - - 0 1");
         assertFalse(g.tryMove("Nxa1", Color.black));
         assertFalse(g.tryMove("Nxa2", Color.black));
         assertFalse(g.tryMove("Nxc2", Color.black));
         assertFalse(g.tryMove("Nxa8", Color.black));
         assertFalse(g.tryMove("Nxa6", Color.black));
         assertTrue(g.tryMove("Nxc6", Color.black));
+
+        g = new ChessGame("1n6/8/p1P5/5p2/2R1PP2/4NP2/8/8 w - - 0 1");
 
         assertFalse(g.tryMove("Nxc4", Color.white));
         assertFalse(g.tryMove("Nxe4", Color.white));
@@ -101,6 +105,8 @@ public class ChessGameTest {
         assertFalse(g.tryMove("Rf6", Color.white));
         assertFalse(g.tryMove("Rf8", Color.white));
         assertFalse(g.tryMove("Rxg2", Color.white));
+
+        g = new ChessGame("8/1p4r1/8/8/8/8/1R4P1/8 b - - 0 1");
 
         assertTrue(g.tryMove("Rxg2", Color.black));
         assertTrue(g.tryMove("Rg6", Color.black));
@@ -140,6 +146,8 @@ public class ChessGameTest {
         assertFalse(g.tryMove("Qe3", Color.white));
         assertFalse(g.tryMove("Qf4", Color.white));
         assertFalse(g.tryMove("Qc6", Color.white));
+
+        g = new ChessGame("8/8/2Q2p2/8/8/2P2q2/8/8 b - - 0 1");
 
         assertTrue(g.tryMove("Qxc3", Color.black));
         assertTrue(g.tryMove("Qxc6", Color.black));
@@ -276,15 +284,14 @@ public class ChessGameTest {
     public void promotion() throws IncorrectFENException, IllegalMoveException {
         var g = new ChessGame("8/PPPPP3/8/8/8/8/ppppp3/8 w - - 0 1");
 
+        g.makeMove(g.getMove("a8=Q", Color.white));
+        assertPiece(g, "a8", Color.white, Queen.class);
 
         assertTrue(g.tryMove("a1=Q", Color.black));
         assertTrue(g.tryMove("b1=N", Color.black));
         assertTrue(g.tryMove("c1=R", Color.black));
         assertTrue(g.tryMove("d1=B", Color.black));
         assertFalse(g.tryMove("e1=K", Color.black));
-
-        g.makeMove(g.getMove("a8=Q", Color.white));
-        assertPiece(g, "a8", Color.white, Queen.class);
 
         g.makeMove(g.getMove("a1=Q", Color.black));
         assertPiece(g, "a1", Color.black, Queen.class);
@@ -315,6 +322,7 @@ public class ChessGameTest {
         var g = new ChessGame("r3r3/6Q1/8/R7/8/2Q3Q1/8/R7 w - - 0 1");
         assertTrue(g.tryMove("Qc3e5", Color.white));
         assertTrue(g.tryMove("R1a3", Color.white));
+        g = new ChessGame("r3r3/6Q1/8/R7/8/2Q3Q1/8/R7 b - - 0 1");
         assertTrue(g.tryMove("Rec8", Color.black));
     }
 
@@ -347,14 +355,14 @@ public class ChessGameTest {
     }
 
     @Test
-    public void pawnMoveTwo() throws IncorrectFENException {
+    public void pawnMoveTwo() throws IncorrectFENException, IllegalMoveException {
         var g = new ChessGame("8/3pppp1/3Br3/6p1/1P6/3Rb3/1PPPP3/8 w - - 0 1");
         assertFalse("square blocked", g.tryMove("b4", Color.white));
         assertFalse("pawn is not on correct rank to move twice", g.tryMove("b6", Color.white));
         assertTrue(g.tryMove("c4", Color.white));
         assertFalse("path is blocked by white piece", g.tryMove("d4", Color.white));
         assertFalse("path is blocked by black piece", g.tryMove("e4", Color.white));
-
+        g.makeMove(g.getMove("c4", Color.white));
         assertFalse("square blocked", g.tryMove("g5", Color.black));
         assertFalse("pawn is not on correct rank to move twice", g.tryMove("g3", Color.black));
         assertTrue(g.tryMove("f5", Color.black));
@@ -387,8 +395,9 @@ public class ChessGameTest {
     }
 
     @Test
-    public void blackFirstMoves() {
+    public void blackFirstMoves() throws IllegalMoveException {
         var g = new ChessGame();
+        g.makeMove(g.getMove("e4", Color.white));
         assertTrue(g.tryMove("e5", Color.black));
         assertFalse(g.tryMove("e4", Color.black));
         assertTrue(g.tryMove("e6", Color.black));
