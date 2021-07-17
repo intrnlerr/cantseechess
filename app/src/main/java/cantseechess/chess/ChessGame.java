@@ -312,6 +312,9 @@ public class ChessGame {
         if (move.length() < 2) {
             throw new IllegalMoveException("Bad move formatting");
         }
+        if (turnColor != this.turnColor) {
+            throw new IllegalMoveException("Can't move on the opponent's turn");
+        }
         // parse algebraic notation
         if (move.matches("\\A(O-O|0-0)\\z")) {
             if (castling.canCastleKingside(turnColor)) {
