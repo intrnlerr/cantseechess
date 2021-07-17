@@ -28,15 +28,14 @@ public class BoardGenerator {
             game = new ChessGame(startFEN.get());
         else game = new ChessGame();
 
-        PGN = PGN.replaceAll("([0-9]+[.] )", "");
-        if (PGN.charAt(0) == ' ') PGN = PGN.substring(1);
-        String[] moves = PGN.split(" ");
+        String[] moves = PGN.replaceAll("([0-9][.] )","").split(" ");
 
         BoardState[] states = new BoardState[moves.length+1];
         states[0] = getBoard(startFEN.orElseGet(game::getFEN));
 
         for (int i = 0; i < moves.length; i++) {
             Color color = i%2 == 0 ? Color.white : Color.black;
+
             game.makeMove(game.getMove(moves[i], color));
             String FEN = game.getFEN();
             states[i+1] = getBoard(FEN);
