@@ -28,6 +28,11 @@ public class Position {
         this.file = file;
     }
 
+    public Position(Position pos) {
+        this.file = pos.file;
+        this.rank = pos.rank;
+    }
+
     public int getFile() {
         return file;
     }

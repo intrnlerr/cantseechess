@@ -32,6 +32,14 @@ public class ChessGame {
             queenSideBlack = str.contains("q");
         }
 
+        Castling(Castling c) {
+            this.kingSideWhite = c.kingSideWhite;
+            this.queenSideWhite = c.queenSideWhite;
+            this.kingSideBlack = c.kingSideBlack;
+            this.queenSideBlack = c.queenSideBlack;
+        }
+
+
         public boolean canCastleKingside(Color c) {
             return c == Color.white ? kingSideWhite : kingSideBlack;
         }
@@ -308,7 +316,7 @@ public class ChessGame {
         return new SearchInfo(pieceClass, endpoint, knownFile, knownRank);
     }
 
-    public Move getMove(String move, Color turnColor) throws IllegalMoveException {
+    private Move getMoveNoCheck(String move, Color turnColor) throws IllegalMoveException {
         if (move.length() < 2) {
             throw new IllegalMoveException("Bad move formatting");
         }
@@ -422,6 +430,70 @@ public class ChessGame {
         throw new IllegalMoveException("Illegal move");
     }
 
+    private void unmakeMove(Move m, Piece capture) {
+        board_pieces[m.from.getFile()][m.from.getRank()] = getPiece(m.to);
+        board_pieces[m.to.getFile()][m.to.getRank()] = capture;
+
+        if (m.specialMove != SpecialMove.NotSpecial) {
+            switch (m.specialMove) {
+                case KingsideCastle:
+                    // move the rook back
+                    board_pieces[7][m.to.getRank()] = board_pieces[m.to.getFile() - 1][m.to.getRank()];
+                    board_pieces[m.to.getFile() - 1][m.to.getRank()] = new Blank();
+                    break;
+                case QueensideCastle:
+                    board_pieces[0][m.to.getRank()] = board_pieces[m.to.getFile() + 1][m.to.getRank()];
+                    board_pieces[m.to.getFile() + 1][m.to.getRank()] = new Blank();
+                    break;
+                case EnPassant:
+                    var pawnColor = getPiece(m.from).getColor();
+                    var enPassantOffset = pawnColor == Color.white ? -1 : 1;
+                    board_pieces[m.to.getFile()][m.to.getRank() + enPassantOffset] = new Pawn(pawnColor.other());
+                    break;
+                case Queen:
+                case Rook:
+                case Bishop:
+                case Knight:
+                    board_pieces[m.to.getFile()][m.to.getRank()] = new Blank();
+                    var pieceColor = getPiece(m.from).getColor();
+                    board_pieces[m.from.getFile()][m.from.getRank()] = new Pawn(pieceColor);
+                    break;
+            }
+        }
+    }
+
+    public Move getMove(String moveStr, Color color) throws IllegalMoveException {
+        // hopefully all of this does not leak any wierd side-effects
+        var move = getMoveNoCheck(moveStr, color);
+        int oldFiftyMoveRule = fiftyMoveRuleCounter;
+        var oldCastling = new Castling(castling);
+        var oldEnPassantSquare = enPassantSquare == null ? null : new Position(enPassantSquare);
+        Piece capture = getPiece(move.to);
+        makeMove(move);
+        var king = findKing(color);
+        // TODO: add kings to all the test case boards without them
+        // this is only here because some test cases don't have kings on the board
+        if (king != null) {
+            var kpos = findPosition(king);
+            if (attackingPieces(king, kpos).size() > 0) {
+                unmakeMove(move, capture);
+                castling = oldCastling;
+                fiftyMoveRuleCounter = oldFiftyMoveRule;
+                enPassantSquare = oldEnPassantSquare;
+                --moves;
+                turnColor = turnColor.other();
+                throw new IllegalMoveException("Move would put king in check");
+            }
+        }
+        unmakeMove(move, capture);
+        castling = oldCastling;
+        fiftyMoveRuleCounter = oldFiftyMoveRule;
+        enPassantSquare = oldEnPassantSquare;
+        --moves;
+        turnColor = turnColor.other();
+        return move;
+    }
+
     private int getFileFromChar(char p) {
         return p - 'a';
     }
@@ -513,7 +585,7 @@ public class ChessGame {
     }
 
     public void incrementPGN(String move) {
-        int turnNumber = (this.moves+1)/2;
+        int turnNumber = (this.moves + 1) / 2;
         //1. e4 e5 2. d4 d5 3. (etc)
         String turnDisplay = turnColor == Color.black ? turnNumber + ". " : "";
         PGN.append(turnDisplay + move + " ");
