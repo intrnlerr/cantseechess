@@ -46,7 +46,7 @@ public class BoardMessage {
 
     public void startAnalysis() {
         Consumer<String> c = (s -> {
-            BOARD_STATES[currIndex].score = s;
+            BOARD_STATES[currIndex].setScore(s);
             updateEmbed(BOARD_STATES[currIndex]);
         });
         BOARD_STATES[currIndex].startAnalysis(c);
@@ -55,7 +55,7 @@ public class BoardMessage {
     private void updateEmbed(BoardState board) {
         if (doAnalysis) startAnalysis();
 
-        score = BOARD_STATES[currIndex].score;
+        score = BOARD_STATES[currIndex].getScore();
         //TODO put players names in
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setTitle(EMBED_TITLE)

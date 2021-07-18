@@ -8,14 +8,26 @@ import java.util.function.Consumer;
 public class BoardState {
     //TODO change from public
     public Analysis analysis;
-    public String score = "N/A";
-    public String opening;
+    private String score = "N/A";
+    private static final String EMPTY_STRING = "N/A";
+    private static final String ANALYZING_STRING = "Analyzing...";
     public final Emote[][] board;
     public final String FEN;
 
     public BoardState(String FEN, Emote[][] board) {
         this.FEN = FEN;
         this.board = board;
+    }
+
+    public void setScore(String score) {
+        this.score = score;
+    }
+
+    public String getScore() {
+        if (!score.equals(EMPTY_STRING) && !score.equals(ANALYZING_STRING)) return score;
+        else if (analysis != null) score = ANALYZING_STRING;
+        else score = EMPTY_STRING;
+        return score;
     }
 
     public void startAnalysis(Consumer<String> score) {
