@@ -43,7 +43,6 @@ public class Analysis implements Runnable {
     //Runs the analysis, getting the analysis once stockfish is done calculating it
     @Override
     public void run() {
-        System.out.println("tryin");
         send("position fen " + FEN);
         send("go movetime " + maxTime);
 
