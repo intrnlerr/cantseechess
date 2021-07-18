@@ -528,7 +528,7 @@ public class ChessGame {
         } else {
             var pawn = getPieceSafe(endpoint.getFile() - 1, endpoint.getRank() + 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
-                return new Move(new Position(endpoint.getRank() - 1, endpoint.getFile() + 1), endpoint, SpecialMove.EnPassant);
+                return new Move(new Position(endpoint.getFile() - 1, endpoint.getRank() + 1), endpoint, SpecialMove.EnPassant);
             }
             pawn = getPieceSafe(endpoint.getFile() + 1, endpoint.getRank() + 1);
             if (pawn instanceof Pawn && pawn.getColor() == turnColor) {
