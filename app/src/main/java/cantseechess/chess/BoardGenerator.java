@@ -28,7 +28,7 @@ public class BoardGenerator {
             game = new ChessGame(startFEN.get());
         else game = new ChessGame();
 
-        String[] moves = PGN.replaceAll("([0-9][.] )","").split(" ");
+        String[] moves = PGN.replaceAll("[0-9]+\\. *","").replaceAll("\n", " ").split(" ");
 
         BoardState[] states = new BoardState[moves.length+1];
         states[0] = getBoard(startFEN.orElseGet(game::getFEN));
