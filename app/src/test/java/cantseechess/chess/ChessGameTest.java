@@ -286,6 +286,7 @@ public class ChessGameTest {
 
         g.makeMove(g.getMove("a8=Q", Color.white));
         assertPiece(g, "a8", Color.white, Queen.class);
+        assertBlank(g, "a7");
 
         assertTrue(g.tryMove("a1=Q", Color.black));
         assertTrue(g.tryMove("b1=N", Color.black));
@@ -295,6 +296,7 @@ public class ChessGameTest {
 
         g.makeMove(g.getMove("a1=Q", Color.black));
         assertPiece(g, "a1", Color.black, Queen.class);
+        assertBlank(g, "a2");
 
         g.makeMove(g.getMove("b8=N", Color.white));
         assertPiece(g, "b8", Color.white, Knight.class);
@@ -315,6 +317,10 @@ public class ChessGameTest {
         assertPiece(g, "d1", Color.black, Bishop.class);
 
         assertFalse(g.tryMove("e8=K", Color.white));
+    }
+
+    private void assertBlank(ChessGame g, String pos) {
+        assertTrue(g.getPiece(new Position(pos)).isBlank());
     }
 
     @Test
@@ -339,6 +345,13 @@ public class ChessGameTest {
         var move = g.getMove("a4", Color.white);
         g.makeMove(move);
         assertTrue(g.tryMove("bxa3", Color.black));
+    }
+
+    @Test
+    public void enPassantPin() throws IncorrectFENException, IllegalMoveException {
+        var g = new ChessGame("8/8/4B3/8/2p5/1k6/3P4/K7 w - - 0 1");
+        g.makeMove(g.getMove("d4", Color.white));
+        assertFalse(g.tryMove("cxd3", Color.black));
     }
 
     @Test
