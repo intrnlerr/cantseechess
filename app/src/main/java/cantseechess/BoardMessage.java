@@ -29,7 +29,7 @@ public class BoardMessage {
         BOARD_STATES = BoardGenerator.getBoard(PGN, Optional.empty(), this::setOpening);
         this.channel = channel;
         currIndex = BOARD_STATES.length - 1;
-        updateEmbed(BOARD_STATES[currIndex]);
+        updateEmbed(currentState());
     }
 
     private void setMessage(Message m) {
@@ -45,17 +45,22 @@ public class BoardMessage {
     }
 
     public void startAnalysis() {
+        BoardState state = currentState();
         Consumer<String> c = (s -> {
-            BOARD_STATES[currIndex].setScore(s);
-            updateEmbed(BOARD_STATES[currIndex]);
+            state.setScore(s);
+            if (currentState() == state) updateEmbed(currentState());
         });
-        BOARD_STATES[currIndex].startAnalysis(c);
+        state.startAnalysis(c);
+    }
+
+    private BoardState currentState() {
+        return BOARD_STATES[currIndex];
     }
 
     private void updateEmbed(BoardState board) {
         if (doAnalysis) startAnalysis();
 
-        score = BOARD_STATES[currIndex].getScore();
+        score = currentState().getScore();
         //TODO put players names in
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setTitle(EMBED_TITLE)

@@ -20,6 +20,8 @@ public class BoardState {
     }
 
     public void setScore(String score) {
+        System.out.println(score);
+        if (this.score != null) return;
         this.score = score;
     }
 
