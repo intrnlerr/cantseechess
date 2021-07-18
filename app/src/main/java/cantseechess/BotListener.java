@@ -18,7 +18,7 @@ import java.util.Timer;
 
 public class BotListener extends ListenerAdapter {
     private final RatingStorage ratings;
-    private final ArrayDeque<String> availableChannels = new ArrayDeque<>();
+    private final HashMap<Guild, ArrayDeque<String>> availableChannels = new HashMap<>();
     private final HashMap<String, Player> currentPlayers = new HashMap<>();
     private final HashMap<String, Challenge> challenges = new HashMap<>();
     private final ArrayList<BoardMessage> boardMessages = new ArrayList<>(); //TODO store this :(
@@ -53,7 +53,7 @@ public class BotListener extends ListenerAdapter {
         channel.putPermissionOverride(guild.retrieveMemberById(player.getOpponent().getId()).complete())
                 .setDeny(Permission.MESSAGE_WRITE).queue();
         // return channel
-        availableChannels.push(player.getChannel());
+        availableChannels.get(guild).add(player.getChannel());
         // TODO: better cleanup, rating adjustment!
         if (endState == ChessGame.EndState.Draw) {
             ratings.addGame(player, new Rating.GameEntry(player.getOpponent().getRating(), 0.5));
@@ -85,6 +85,12 @@ public class BotListener extends ListenerAdapter {
         if (content.startsWith(commandPrefix)) {
             var args = content.substring(commandPrefix.length()).split(" ");
             if (args[0].equals("challenge")) {
+
+                if (availableChannels.get(event.getGuild()).isEmpty()) {
+                    event.getChannel().sendMessage("no available boards!").queue();
+                    return;
+                }
+
                 var challengedId = parseMention(args[1]);
                 if (challengedId != null) {
                     System.out.println(challengedId);
@@ -105,7 +111,7 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 // TODO: we should queue up the game when there are no available channels instead of failing
-                var channelId = availableChannels.poll();
+                var channelId = availableChannels.get(event.getGuild()).poll();
                 if (channelId == null) {
                     event.getChannel().sendMessage("no available boards!").queue();
                     return;
@@ -192,13 +198,12 @@ public class BotListener extends ListenerAdapter {
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
+        availableChannels.put(event.getGuild(), new ArrayDeque<>());
         for (var channel : event.getGuild().getTextChannels()) {
             if (channel.canTalk() && channel.getName().startsWith("board")) {
-                availableChannels.add(channel.getId());
+                availableChannels.get(event.getGuild()).add(channel.getId());
             }
         }
-        System.out.println("found " + availableChannels.size() + " boards");
-        // TODO: what if there are no boards?
     }
 
     @Override
