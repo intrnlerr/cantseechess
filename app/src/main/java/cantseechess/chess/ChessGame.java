@@ -600,7 +600,7 @@ public class ChessGame {
                 enPassantSquare = new Position(m.to.getFile(), m.to.getRank() - (rankDiff / 2));
             }
         }
-        var movedPiece = getPiece(m.to);
+        var movedPiece = getPiece(m.from);
         if (!movedPiece.isBlank()) {
             ++fiftyMoveRuleCounter;
         } else {
