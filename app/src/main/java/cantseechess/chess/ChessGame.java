@@ -382,7 +382,6 @@ public class ChessGame {
         try {
             info = readPieceMove(moveReader);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new IllegalMoveException("Move is formatted incorrectly");
         }
         if (info.knownFile != -1 && info.knownRank != -1) {
