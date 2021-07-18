@@ -47,12 +47,11 @@ public class Analysis implements Runnable {
         send("go movetime " + maxTime);
 
         try {
-            send("isready"); //probably dont need this
             String line;
             String cp = "0.0";
             while ((line = stockfishReader.readLine()) != null) {
                 if (line.contains("bestmove")) break;
-                if (!line.contains("cp")) continue;
+                if (!line.contains("cp") && !line.contains("mate")) continue;
                 cp = getScore(line);
             }
             received.accept(cp);
@@ -68,6 +67,8 @@ public class Analysis implements Runnable {
             if (toParse[i].equals("cp")) {
                 cp = Integer.parseInt(toParse[i + 1]);
                 break;
+            } else if (toParse[i].equals("mate")) {
+                return "#"+Math.abs(Integer.parseInt(toParse[i+1]));
             }
         }
         if (cp == null || cp == 0) return "0.0";
