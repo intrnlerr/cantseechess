@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 public class BoardState {
     //TODO change from public
     public Analysis analysis;
-    private String score = "N/A";
+    private String score;
     private static final String EMPTY_STRING = "N/A";
     private static final String ANALYZING_STRING = "Analyzing...";
     public final Emote[][] board;
@@ -24,10 +24,11 @@ public class BoardState {
     }
 
     public String getScore() {
-        if (!score.equals(EMPTY_STRING) && !score.equals(ANALYZING_STRING)) return score;
-        else if (analysis != null) score = ANALYZING_STRING;
-        else score = EMPTY_STRING;
-        return score;
+        String displayScore;
+        if (score != null) displayScore = score;
+        else if (analysis != null) displayScore = ANALYZING_STRING;
+        else displayScore = EMPTY_STRING;
+        return displayScore;
     }
 
     public void startAnalysis(Consumer<String> score) {
