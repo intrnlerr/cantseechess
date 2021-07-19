@@ -51,11 +51,17 @@ public class App {
         jda.awaitReady();
 
 
-        jda.updateCommands().addCommands(new CommandData("challenge", "Challenge a user to a game of chess").addOption(OptionType.USER, "user", "The user you'd like to challenge.", true),
+        jda.updateCommands().addCommands(new CommandData("challenge", "Challenge a user to a game of chess")
+                        .addOption(OptionType.USER, "user", "The user you'd like to challenge", true)
+                        .addOption(OptionType.STRING, "color", "The color you'd like to play as (white or black), leave blank for random", false)
+                        .addOption(OptionType.STRING, "time", "The time control you'd like to play. Include m for minutes and s for seconds (ex. 3m 30s)", false)
+                        .addOption(OptionType.INTEGER, "increment", "The time increment in seconds to gain each round, leave blank for none", false),
                 new CommandData("accept", "Accept a pending challenge"),
                 new CommandData("decline", "Decline a pending challenge"),
-                new CommandData("stats", "Check your rating and rating deviation").addOption(OptionType.USER, "user", "The user whose stats to view.", false),
-                new CommandData("import", "Import a chess game from a PGN").addOption(OptionType.STRING, "pgn", "Import a chess game from a PGN", true),
+                new CommandData("stats", "Check a user's rating and rating deviation")
+                        .addOption(OptionType.USER, "user", "The user whose stats to view, leave blank to view your own stats", false),
+                new CommandData("import", "Import a chess game from a PGN")
+                        .addOption(OptionType.STRING, "pgn", "Import a chess game from a PGN", true),
                 new CommandData("resign", "Resign from your current game"))
                 .queue();
         BoardGenerator.boardEmotes = jda.getGuildById(864636208147988510L).getEmotes().toArray(Emote[]::new);
