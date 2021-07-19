@@ -5,10 +5,8 @@ import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
@@ -21,7 +19,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
-import javax.net.ssl.SSLHandshakeException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -57,6 +54,7 @@ public class BotListener extends ListenerAdapter {
 
         // this looks so gnarly
         var channel = guild.getTextChannelById(player.getChannel());
+        assert channel != null;
         channel.putPermissionOverride(guild.retrieveMemberById(player.getId()).complete())
                 .setDeny(Permission.MESSAGE_WRITE).queue();
         channel.putPermissionOverride(guild.retrieveMemberById(player.getOpponent().getId()).complete())
@@ -95,10 +93,10 @@ public class BotListener extends ListenerAdapter {
         String gameTimeString = time.orElse("-1s");
 
         int gameTime = 0;
-        for (String s: gameTimeString.split(" ")) {
+        for (String s : gameTimeString.split(" ")) {
             int parsed = Integer.parseInt(s.replaceAll("[^0-9.]", ""));
             if (s.contains("m")) {
-                gameTime += parsed*60;
+                gameTime += parsed * 60;
             } else if (s.contains("s")) {
                 gameTime += parsed;
             }
@@ -117,8 +115,7 @@ public class BotListener extends ListenerAdapter {
             challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, gameTime, gameIncrement));
             challengeTimeout.schedule(new CancelChallengeTask(challenges, challengedId), 1000 * 120);
             return "challenge created with " + "<@!" + challengedId + ">";
-        }
-        else return "unable to find user";
+        } else return "unable to find user";
     }
 
     private String accept(Guild guild, User sender) {
@@ -152,7 +149,7 @@ public class BotListener extends ListenerAdapter {
         Player white = player1.getWhite();
         Player black = player1.getBlack();
         int whiteRating = ratings.getRating(white.getId()) != null ? (int) Math.round(ratings.getRating(white.getId()).getRating()) : (int) Rating.DEFAULT_RATING;
-        int blackRating =  ratings.getRating(black.getId()) != null ? (int) Math.round(ratings.getRating(black.getId()).getRating()) : (int) Rating.DEFAULT_RATING;
+        int blackRating = ratings.getRating(black.getId()) != null ? (int) Math.round(ratings.getRating(black.getId()).getRating()) : (int) Rating.DEFAULT_RATING;
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle("Game Begun!")
                 .addField("White", "<@!" + white.getId() + "> " + whiteRating, true)
@@ -186,7 +183,7 @@ public class BotListener extends ListenerAdapter {
             endGame(player,
                     player.getColor() == Color.white ?
                             ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins,
-                            guild);
+                    guild);
         }
     }
 
@@ -196,13 +193,13 @@ public class BotListener extends ListenerAdapter {
             boardMessages.add(msg);
             return "importing game...";
         } catch (IncorrectFENException | IllegalMoveException e) {
-            return"Please enter a correct PGN";
+            return "Please enter a correct PGN";
         }
     }
 
     @Override
     public void onSlashCommand(@NotNull SlashCommandEvent event) {
-        String reply = "";
+        String reply = "OK";
         switch (event.getName()) {
             case "challenge":
                 try {
@@ -210,7 +207,7 @@ public class BotListener extends ListenerAdapter {
                     var timeOption = Optional.ofNullable(event.getOption("time"));
                     var incrementOption = Optional.ofNullable(event.getOption("time"));
 
-                    var challengedId = event.getOption("user").getAsUser().getId();
+                    var challengedId = Objects.requireNonNull(event.getOption("user")).getAsUser().getId();
                     var color = colorOption.map(option -> Color.valueOf(option.getAsString().toLowerCase()));
                     var time = timeOption.map(OptionMapping::getAsString);
                     var increment = incrementOption.map(option -> Integer.parseInt(option.getAsString().replaceAll("[^0-9.]", "")));
@@ -262,28 +259,36 @@ public class BotListener extends ListenerAdapter {
         if (content.startsWith(commandPrefix)) {
             var args = content.substring(commandPrefix.length()).split(" ");
             String reply = null;
-            if (args[0].equals("challenge")) {
-                if (args.length>=4)
-                    reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.of(Color.valueOf(args[2].toLowerCase())), Optional.of(args[2]), Optional.of(Integer.parseInt(args[4])));
-                else reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.empty(), Optional.empty(), Optional.empty());
-            } else if (args[0].equals("accept")) {
-                reply = accept(event.getGuild(), event.getAuthor());
-            } else if (args[0].equals("decline")) {
-                reply = decline(event.getAuthor());
-            } else if (args[0].equals("resign")) {
-                resign(event.getGuild(), event.getAuthor());
-            } else if (args[0].equals("stats")) {;
-                stats(event.getAuthor(), args.length >= 2 ? Optional.ofNullable(parseMention(args[1])) : Optional.empty());
-            } else if (args[0].equals("import")) {
-                StringBuilder PGN = new StringBuilder();
-                for (int i = 1; i < args.length; i++) {
-                    PGN.append(args[i] + " ");
-                }
-                if (PGN.length() == 0) {
-                    event.getChannel().sendMessage("enter the pgn to import").queue();
-                    return;
-                }
-                imp(event.getTextChannel(), PGN.toString());
+            switch (args[0]) {
+                case "challenge":
+                    if (args.length >= 4)
+                        reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.of(Color.valueOf(args[2].toLowerCase())), Optional.of(args[2]), Optional.of(Integer.parseInt(args[4])));
+                    else
+                        reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.empty(), Optional.empty(), Optional.empty());
+                    break;
+                case "accept":
+                    reply = accept(event.getGuild(), event.getAuthor());
+                    break;
+                case "decline":
+                    reply = decline(event.getAuthor());
+                    break;
+                case "resign":
+                    resign(event.getGuild(), event.getAuthor());
+                    break;
+                case "stats":
+                    stats(event.getAuthor(), args.length >= 2 ? Optional.ofNullable(parseMention(args[1])) : Optional.empty());
+                    break;
+                case "import":
+                    StringBuilder PGN = new StringBuilder();
+                    for (int i = 1; i < args.length; i++) {
+                        PGN.append(args[i]).append(" ");
+                    }
+                    if (PGN.length() == 0) {
+                        event.getChannel().sendMessage("enter the pgn to import").queue();
+                        return;
+                    }
+                    imp(event.getTextChannel(), PGN.toString());
+                    break;
             }
             if (reply != null) {
                 message.reply(reply).queue();
@@ -333,7 +338,7 @@ public class BotListener extends ListenerAdapter {
     public void onTextChannelDelete(@NotNull TextChannelDeleteEvent event) {
         var channels = availableChannels.get(event.getGuild());
         var channel = event.getChannel();
-        if (isBoardChannel(channel) && channels.contains(channel)) {
+        if (isBoardChannel(channel)) {
             channels.remove(channel.getId());
         }
     }
@@ -343,7 +348,7 @@ public class BotListener extends ListenerAdapter {
     public void onTextChannelUpdateName(@NotNull TextChannelUpdateNameEvent event) {
         if (event.getNewName().startsWith("board") && !availableChannels.get(event.getGuild()).contains(event.getChannel().getId())) {
             setAvailable(event.getGuild(), event.getChannel());
-        } else if (!event.getNewName().startsWith("board") && availableChannels.get(event.getGuild()).contains(event.getChannel().getId())) {
+        } else if (!event.getNewName().startsWith("board")) {
             availableChannels.get(event.getGuild()).remove(event.getChannel().getId());
         }
     }
