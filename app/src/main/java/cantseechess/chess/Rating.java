@@ -3,7 +3,7 @@ package cantseechess.chess;
 import java.util.List;
 
 public class Rating {
-    private static final double DEFAULT_RATING = 1500;
+    public static final double DEFAULT_RATING = 1500;
     private static final double DEFAULT_DEVIATION = 350;
     private static final double DEFAULT_VOLATILITY = 0.06;
     private double rating;
