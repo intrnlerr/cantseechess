@@ -4,7 +4,11 @@ import cantseechess.chess.*;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
+import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
+import net.dv8tion.jda.api.events.channel.text.update.TextChannelUpdateNameEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -196,16 +200,56 @@ public class BotListener extends ListenerAdapter {
         }
     }
 
+    //Add all of the guilds that the bot is in to availableChannels and add all of their respective boards
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
         availableChannels.put(event.getGuild(), new ArrayDeque<>());
         for (var channel : event.getGuild().getTextChannels()) {
-            if (channel.canTalk() && channel.getName().startsWith("board")) {
-                availableChannels.get(event.getGuild()).add(channel.getId());
+            if (isBoardChannel(channel)) {
+                setAvailable(event.getGuild(), channel);
             }
         }
     }
 
+    //Returns if the bot can send messages in the channel and the channel starts with "board"
+    private static boolean isBoardChannel(TextChannel channel) {
+        return channel.getName().startsWith("board") && channel.canTalk();
+    }
+
+    //Add a board to availableChannels when it's created
+    @Override
+    public void onTextChannelCreate(@NotNull TextChannelCreateEvent event) {
+        if (isBoardChannel(event.getChannel())) {
+            setAvailable(event.getGuild(), event.getChannel());
+        }
+    }
+
+    //Delete a board from availableChannels when it's deleted
+    @Override
+    public void onTextChannelDelete(@NotNull TextChannelDeleteEvent event) {
+        var channels = availableChannels.get(event.getGuild());
+        var channel = event.getChannel();
+        if (isBoardChannel(channel) && channels.contains(channel)) {
+            channels.remove(channel.getId());
+        }
+    }
+
+    //If a text channel updates its name to "board", then add it to the available channels. If they change it from a board to something else, then remove it.
+    @Override
+    public void onTextChannelUpdateName(@NotNull TextChannelUpdateNameEvent event) {
+        if (event.getNewName().startsWith("board") && !availableChannels.get(event.getGuild()).contains(event.getChannel().getId())) {
+            setAvailable(event.getGuild(), event.getChannel());
+        } else if (!event.getNewName().startsWith("board") && availableChannels.get(event.getGuild()).contains(event.getChannel().getId())) {
+            availableChannels.get(event.getGuild()).remove(event.getChannel().getId());
+        }
+    }
+
+    //Adds channel to the available channels in guild
+    private void setAvailable(Guild guild, TextChannel channel) {
+        availableChannels.get(guild).add(channel.getId());
+    }
+
+    //When a user clicks on a button on a board message, do something accordingly
     @Override
     public void onButtonClick(ButtonClickEvent event) {
         event.deferEdit().queue();
