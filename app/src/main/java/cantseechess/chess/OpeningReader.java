@@ -11,9 +11,6 @@ import java.util.TreeMap;
 public class OpeningReader {
     //Name, FEN
     private  static final TreeMap<String, String> openings = new TreeMap<>();
-    public static void main(String[] args) {
-        System.out.println(new OpeningReader().getOpening("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq -"));
-    }
     public OpeningReader() {
         if (!openings.isEmpty()) return;
         try {
