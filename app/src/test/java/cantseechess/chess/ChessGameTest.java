@@ -458,4 +458,24 @@ public class ChessGameTest {
         g = new ChessGame("8/1kbn4/8/8/8/8/1K6/8 w - - 0 1");
         assertEquals(ChessGame.EndState.NotOver, g.isGameOver());
     }
+
+    @Test
+    public void threefold() throws IllegalMoveException {
+        // Carlsen vs Nakamura (2021)
+        var g = new ChessGame();
+        g.makeMove(g.getMove("e4", Color.white));
+        g.makeMove(g.getMove("e5", Color.black));
+        g.makeMove(g.getMove("Ke2", Color.white));
+        g.makeMove(g.getMove("Ke7", Color.black));
+        g.makeMove(g.getMove("Ke1", Color.white));
+        g.makeMove(g.getMove("Ke8", Color.black));
+        g.makeMove(g.getMove("Ke2", Color.white));
+        g.makeMove(g.getMove("Ke7", Color.black));
+        g.makeMove(g.getMove("Ke1", Color.white));
+        g.makeMove(g.getMove("Ke8", Color.black));
+        g.makeMove(g.getMove("Ke2", Color.white));
+        assertTrue(g.isInThreefold());
+        g.makeMove(g.getMove("Ke7", Color.black));
+        assertTrue(g.isInThreefold());
+    }
 }
