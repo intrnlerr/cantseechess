@@ -2,6 +2,7 @@ package cantseechess;
 
 import cantseechess.chess.*;
 import cantseechess.storage.RatingStorage;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -17,7 +18,7 @@ import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.requests.RestAction;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -86,10 +87,25 @@ public class BotListener extends ListenerAdapter {
         player.resetGameInfo();
     }
 
-    private String challenge(Guild guild, User challenger, String challengedId) {
+    private String challenge(Guild guild, User challenger, String challengedId, Optional<Color> color, Optional<String> time, Optional<Integer> increment) {
         if (availableChannels.get(guild).isEmpty()) {
             return "no available boards!";
         }
+
+        String gameTimeString = time.orElse("-1s");
+
+        int gameTime = 0;
+        for (String s: gameTimeString.split(" ")) {
+            int parsed = Integer.parseInt(s.replaceAll("[^0-9.]", ""));
+            if (s.contains("m")) {
+                gameTime += parsed*60;
+            } else if (s.contains("s")) {
+                gameTime += parsed;
+            }
+        }
+        int gameIncrement = increment.orElse(0);
+        //Pick a random color if color isn't supplied
+        Color challengerColor = color.orElse(Math.round(Math.random()) == 1 ? Color.white : Color.black);
 
         //var challengedId = parseMention(args[1]);
         if (challengedId != null) {
@@ -98,9 +114,9 @@ public class BotListener extends ListenerAdapter {
             if (challenges.containsKey(challengedId)) {
                 return "already challenged!";
             }
-            challenges.put(challengedId, new Challenge(challenger.getId(), challengedId));
+            challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, gameTime, gameIncrement));
             challengeTimeout.schedule(new CancelChallengeTask(challenges, challengedId), 1000 * 120);
-            return "challenge created...";
+            return "challenge created with " + "<@!" + challengedId + ">";
         }
         else return "unable to find user";
     }
@@ -125,14 +141,24 @@ public class BotListener extends ListenerAdapter {
         boardChannel.putPermissionOverride(guild.retrieveMemberById(challenge.challenger).complete())
                 .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
         var game = challenge.accept();
-        var player1 = new Player(game, Color.white, challenge.challenged, channelId);
-        var player2 = new Player(game, Color.black, challenge.challenger, channelId);
+        var player1 = new Player(game, challenge.challengerColor.other(), challenge.challenged, channelId);
+        var player2 = new Player(game, challenge.challengerColor, challenge.challenger, channelId);
         player1.setOpponent(player2);
         player2.setOpponent(player1);
         currentPlayers.put(challenge.challenged, player1);
         currentPlayers.put(challenge.challenger, player2);
         challenges.remove(sender.getId());
-        boardChannel.sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
+
+        Player white = player1.getWhite();
+        Player black = player1.getBlack();
+        int whiteRating = ratings.getRating(white.getId()) != null ? (int) Math.round(ratings.getRating(white.getId()).getRating()) : (int) Rating.DEFAULT_RATING;
+        int blackRating =  ratings.getRating(black.getId()) != null ? (int) Math.round(ratings.getRating(black.getId()).getRating()) : (int) Rating.DEFAULT_RATING;
+        EmbedBuilder builder = new EmbedBuilder()
+                .setTitle("Game Begun!")
+                .addField("White", "<@!" + white.getId() + "> " + whiteRating, true)
+                .addField("Black", "<@!" + black.getId() + "> " + blackRating, true);
+        //boardChannel.sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
+        boardChannel.sendMessage(builder.build()).queue();
         return "created game in " + boardChannel.getAsMention();
     }
 
@@ -145,9 +171,7 @@ public class BotListener extends ListenerAdapter {
     }
 
     private String stats(User sender, Optional<String> target) {
-
         var rating = ratings.getRating(target.orElse(sender.getId()));
-
         if (rating != null) {
             return "rating: " + rating.getRating() +
                     " rd: " + rating.getDeviation();
@@ -166,13 +190,13 @@ public class BotListener extends ListenerAdapter {
         }
     }
 
-    private void imp(TextChannel channel, String PGN) {
+    private String imp(TextChannel channel, String PGN) {
         try {
             BoardMessage msg = new BoardMessage(channel, PGN);
             boardMessages.add(msg);
+            return "importing game...";
         } catch (IncorrectFENException | IllegalMoveException e) {
-            channel.sendMessage("Please enter a correct PGN");
-            e.printStackTrace();
+            return"Please enter a correct PGN";
         }
     }
 
@@ -181,8 +205,27 @@ public class BotListener extends ListenerAdapter {
         String reply = "";
         switch (event.getName()) {
             case "challenge":
-                reply = challenge(event.getGuild(), event.getUser(), event.getOption("user").getAsUser().getId());
+                try {
+                    var colorOption = Optional.ofNullable(event.getOption("color"));
+                    var timeOption = Optional.ofNullable(event.getOption("time"));
+                    var incrementOption = Optional.ofNullable(event.getOption("time"));
+
+                    var challengedId = event.getOption("user").getAsUser().getId();
+                    var color = colorOption.map(option -> Color.valueOf(option.getAsString().toLowerCase()));
+                    var time = timeOption.map(OptionMapping::getAsString);
+                    var increment = incrementOption.map(option -> Integer.parseInt(option.getAsString().replaceAll("[^0-9.]", "")));
+
+                    reply = challenge(event.getGuild(), event.getUser(),
+                            challengedId,
+                            color,
+                            time,
+                            increment);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    reply = "incorrect parameters";
+                }
                 break;
+
             case "accept":
                 reply = accept(event.getGuild(), event.getUser());
                 break;
@@ -190,15 +233,22 @@ public class BotListener extends ListenerAdapter {
                 reply = decline(event.getUser());
                 break;
             case "stats":
-                reply = stats(event.getUser(),
-                        Optional.of(event.getOption("user").getAsUser().getId()));
+                var userOption = Optional.ofNullable(event.getOption("user"));
+                var user = userOption.map(option -> option.getAsUser().getId());
+
+                reply = stats(event.getUser(), user);
                 break;
             case "import":
-                imp(event.getTextChannel(), event.getOption("pgn").getAsString());
+                try {
+                    var PGN = Optional.ofNullable(event.getOption("pgn")).map(OptionMapping::getAsString).orElseThrow();
+                    reply = imp(event.getTextChannel(), PGN);
+                } catch (NoSuchElementException e) {
+                    reply = "Enter a PGN";
+                }
                 break;
             case "resign":
                 resign(event.getGuild(), event.getUser());
-                reply = "you lose haha";
+                reply = "are you sure you want to resign?";
                 break;
 
         }
@@ -211,18 +261,19 @@ public class BotListener extends ListenerAdapter {
         var message = event.getMessage();
         if (content.startsWith(commandPrefix)) {
             var args = content.substring(commandPrefix.length()).split(" ");
-
-            String reply;
+            String reply = null;
             if (args[0].equals("challenge")) {
-                message.reply(challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]))).queue();
+                if (args.length>=4)
+                    reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.of(Color.valueOf(args[2].toLowerCase())), Optional.of(args[2]), Optional.of(Integer.parseInt(args[4])));
+                else reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.empty(), Optional.empty(), Optional.empty());
             } else if (args[0].equals("accept")) {
-                message.reply(accept(event.getGuild(), event.getAuthor())).queue();
+                reply = accept(event.getGuild(), event.getAuthor());
             } else if (args[0].equals("decline")) {
-                message.reply((decline(event.getAuthor()))).queue();
+                reply = decline(event.getAuthor());
             } else if (args[0].equals("resign")) {
                 resign(event.getGuild(), event.getAuthor());
-            } else if (args[0].equals("stats")) {
-                stats(event.getAuthor(), args.length >= 2 ? Optional.of(args[1]) : Optional.empty());
+            } else if (args[0].equals("stats")) {;
+                stats(event.getAuthor(), args.length >= 2 ? Optional.ofNullable(parseMention(args[1])) : Optional.empty());
             } else if (args[0].equals("import")) {
                 StringBuilder PGN = new StringBuilder();
                 for (int i = 1; i < args.length; i++) {
@@ -233,6 +284,9 @@ public class BotListener extends ListenerAdapter {
                     return;
                 }
                 imp(event.getTextChannel(), PGN.toString());
+            }
+            if (reply != null) {
+                message.reply(reply).queue();
             }
         } else if (currentPlayers.containsKey(event.getAuthor().getId())) {
             var player = currentPlayers.get(event.getAuthor().getId());
