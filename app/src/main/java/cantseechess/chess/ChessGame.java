@@ -593,15 +593,15 @@ public class ChessGame {
         PGN.append(turnDisplay + move + " ");
     }
 
+    private boolean hasEnemySidePawn(Piece piece, Position pos) {
+        var pawnLeft = getPieceSafe(pos.getFile() - 1, pos.getRank());
+        var pawnRight = getPieceSafe(pos.getFile() + 1, pos.getRank());
+        return pawnLeft instanceof Pawn && !pawnLeft.matchesColor(piece) ||
+                pawnRight instanceof Pawn && !pawnRight.matchesColor(piece);
+    }
+
     public void makeMove(Move m) {
         enPassantSquare = null;
-        if (board_pieces[m.from.getFile()][m.from.getRank()] instanceof Pawn) {
-            // assume this move is legal
-            var rankDiff = m.to.getRank() - m.from.getRank();
-            if (rankDiff == 2 || rankDiff == -2) {
-                enPassantSquare = new Position(m.to.getFile(), m.to.getRank() - (rankDiff / 2));
-            }
-        }
         var movedPiece = getPiece(m.from);
         if (!movedPiece.isBlank()) {
             ++fiftyMoveRuleCounter;
@@ -612,6 +612,10 @@ public class ChessGame {
         if (movedPiece instanceof Pawn) {
             // pawn moves also reset the count
             fiftyMoveRuleCounter = 0;
+            var rankDiff = m.to.getRank() - m.from.getRank();
+            if (rankDiff == 2 || rankDiff == -2 && hasEnemySidePawn(movedPiece, m.to)) {
+                enPassantSquare = new Position(m.to.getFile(), m.to.getRank() - (rankDiff / 2));
+            }
         } else if (movedPiece instanceof King) {
             castling.clearCastling(movedPiece.getColor());
         } else if (movedPiece instanceof Rook) {
