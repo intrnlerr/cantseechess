@@ -18,6 +18,7 @@ public class ChessGame {
     //Availability to castle
     private Castling castling = new Castling("KQkq");
     private static final String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    private ThreefoldChecker threefold = new ThreefoldChecker();
 
     static class Castling {
         public boolean kingSideWhite;
@@ -481,6 +482,7 @@ public class ChessGame {
                 enPassantSquare = oldEnPassantSquare;
                 --moves;
                 turnColor = turnColor.other();
+                threefold.unaddHash();
                 throw new IllegalMoveException("Move would put king in check");
             }
         }
@@ -490,6 +492,7 @@ public class ChessGame {
         enPassantSquare = oldEnPassantSquare;
         --moves;
         turnColor = turnColor.other();
+        threefold.unaddHash();
         return move;
     }
 
@@ -650,10 +653,11 @@ public class ChessGame {
                     board_pieces[m.to.getFile()][m.to.getRank() + offset] = new Blank();
                     break;
             }
-
         }
         turnColor = turnColor == Color.white ? Color.black : Color.white;
         moves++;
+        // jank
+        threefold.addHash(getZobristHash());
     }
 
     public enum EndState {
@@ -663,12 +667,23 @@ public class ChessGame {
         Draw,
     }
 
+    private long getZobristHash() {
+        return threefold.getZobristHash(board_pieces, turnColor, castling, enPassantSquare);
+    }
+
     public EndState isGameOver() {
         return isInStalemate() ? EndState.Draw : isInCheckmate();
     }
 
+    public boolean isInThreefold() {
+        return threefold.repeats(getZobristHash()) >= 2;
+    }
+
     public boolean isInStalemate() {
         if (fiftyMoveRuleCounter >= 100) {
+            return true;
+        }
+        if (threefold.repeats(getZobristHash()) >= 4) {
             return true;
         }
         boolean legalMove = false;
