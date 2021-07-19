@@ -106,7 +106,6 @@ public class BoardMessage {
         return b;
     }
 
-    //TODO make it so you cant click previous or next if currIndex is too low or high
     public void first() {
         updateEmbed(BOARD_STATES[currIndex = 0]);
     }
