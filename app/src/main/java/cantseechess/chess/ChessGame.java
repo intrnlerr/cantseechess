@@ -91,6 +91,14 @@ public class ChessGame {
             e.printStackTrace();
         }
     }
+    public ChessGame(int time, int increment) {
+        try {
+            importFEN(START_FEN);
+        } catch (IncorrectFENException e) {
+            System.err.println("START_FEN was somehow wrong");
+            e.printStackTrace();
+        }
+    }
 
     //Import chess game from fen
     public ChessGame(String FEN) throws IncorrectFENException {
