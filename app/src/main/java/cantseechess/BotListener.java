@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -255,22 +256,17 @@ public class BotListener extends ListenerAdapter {
         event.deferEdit().queue();
         for (BoardMessage m : boardMessages) {
             if (m.getMessage().equals(event.getMessage())) {
-                switch (event.getComponentId()) {
-                    case "First":
-                        m.first();
-                        break;
-                    case "Previous":
-                        m.previous();
-                        break;
-                    case "Next":
-                        m.next();
-                        break;
-                    case "Last":
-                        m.last();
-                        break;
-                    case "Analyze":
-                        m.doAnalysis = !m.doAnalysis;
-                        m.startAnalysis();
+                if (event.getComponentId().equals("Analyze")) {
+                    m.doAnalysis = !m.doAnalysis;
+                    m.startAnalysis();
+                } else {
+                    try {
+                        m.getClass().getMethod(event.getComponentId().toLowerCase()).invoke(m);
+                    } catch (NoSuchMethodException |
+                            InvocationTargetException |
+                            IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
