@@ -8,6 +8,8 @@ import cantseechess.storage.HashmapStorage;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Emote;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -49,6 +51,13 @@ public class App {
         jda.awaitReady();
 
 
+        jda.updateCommands().addCommands(new CommandData("challenge", "Challenge a user to a game of chess").addOption(OptionType.USER, "user", "The user you'd like to challenge.", true),
+                new CommandData("accept", "Accept a pending challenge"),
+                new CommandData("decline", "Decline a pending challenge"),
+                new CommandData("stats", "Check your rating and rating deviation").addOption(OptionType.USER, "user", "The user whose stats to view.", false),
+                new CommandData("import", "Import a chess game from a PGN").addOption(OptionType.STRING, "pgn", "Import a chess game from a PGN", true),
+                new CommandData("resign", "Resign from your current game"))
+                .queue();
         BoardGenerator.boardEmotes = jda.getGuildById(864636208147988510L).getEmotes().toArray(Emote[]::new);
 
         System.out.println(new App().getGreeting());
