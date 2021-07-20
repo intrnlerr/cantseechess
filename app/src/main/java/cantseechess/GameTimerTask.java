@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.TimerTask;
 
+// FIXME: make the clock work with the game refactor
 class GameTimerTask extends TimerTask {
     private final BotListener l;
     private final Guild guild;
@@ -37,9 +38,10 @@ class GameTimerTask extends TimerTask {
     }
 
     private void end(Color loserColor) {
+        /*
         l.endGame(player,
                 loserColor == Color.white ? ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins,
-                guild);
+                guild);*/
     }
 
     @Override
