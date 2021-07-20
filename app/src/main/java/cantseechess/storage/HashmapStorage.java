@@ -1,6 +1,5 @@
 package cantseechess.storage;
 
-import cantseechess.Player;
 import cantseechess.chess.Rating;
 
 import java.io.*;
@@ -9,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class HashmapStorage implements RatingStorage {
-    private final HashMap<String, ArrayList<Rating.GameEntry>> entries = new HashMap<>();
+    private final HashMap<Long, ArrayList<Rating.GameEntry>> entries = new HashMap<>();
 
     public HashmapStorage() {
         // try read from file
@@ -17,7 +16,7 @@ public class HashmapStorage implements RatingStorage {
             var f = new DataInputStream(new FileInputStream("ratings"));
 
             while (f.available() > 0) {
-                var id = f.readUTF();
+                var id = f.readLong();
                 var n_entries = f.readInt();
                 var list = new ArrayList<Rating.GameEntry>();
                 entries.put(id, list);
@@ -36,13 +35,13 @@ public class HashmapStorage implements RatingStorage {
     }
 
     @Override
-    public List<Rating.GameEntry> getGames(Player player) {
-        return entries.get(player.getId());
+    public List<Rating.GameEntry> getGames(long playerId) {
+        return entries.get(playerId);
     }
 
     @Override
-    public void addGame(Player player, Rating.GameEntry entry) {
-        var arr = entries.computeIfAbsent(player.getId(), k -> new ArrayList<>());
+    public void addGame(long playerId, Rating.GameEntry entry) {
+        var arr = entries.computeIfAbsent(playerId, k -> new ArrayList<>());
         arr.add(entry);
     }
 
@@ -53,7 +52,7 @@ public class HashmapStorage implements RatingStorage {
             var out = new DataOutputStream(new FileOutputStream("ratings"));
             entries.forEach((id, games) -> {
                 try {
-                    out.writeUTF(id);
+                    out.writeLong(id);
                     out.writeInt(games.size());
                     for (var game : games) {
                         out.writeDouble(game.rating);
@@ -70,7 +69,7 @@ public class HashmapStorage implements RatingStorage {
     }
 
     @Override
-    public Rating getRating(String id) {
+    public Rating getRating(long id) {
         var games = entries.get(id);
         if (games == null) {
             return null;

@@ -1,16 +1,15 @@
 package cantseechess.storage;
 
-import cantseechess.Player;
 import cantseechess.chess.Rating;
 
 import java.util.List;
 
 public interface RatingStorage {
-    List<Rating.GameEntry> getGames(Player player);
+    List<Rating.GameEntry> getGames(long playerId);
 
-    void addGame(Player player, Rating.GameEntry entry);
+    void addGame(long playerId, Rating.GameEntry entry);
 
     void shutdown();
 
-    Rating getRating(String id);
+    Rating getRating(long id);
 }
