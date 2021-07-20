@@ -47,7 +47,7 @@ public class BotListener extends ListenerAdapter {
         return null;
     }
 
-    private void endGame(Player player, ChessGame.EndState endState, Guild guild) {
+    void endGame(Player player, ChessGame.EndState endState, Guild guild) {
         if (endState == ChessGame.EndState.NotOver) {
             return;
         }
@@ -138,6 +138,7 @@ public class BotListener extends ListenerAdapter {
         boardChannel.putPermissionOverride(guild.retrieveMemberById(challenge.challenger).complete())
                 .setAllow(Permission.MESSAGE_READ, Permission.MESSAGE_WRITE).queue();
         var game = challenge.accept();
+        // TODO: refactor this absolute trashheap
         var player1 = new Player(game, challenge.challengerColor.other(), challenge.challenged, channelId);
         var player2 = new Player(game, challenge.challengerColor, challenge.challenger, channelId);
         player1.setOpponent(player2);
@@ -145,6 +146,12 @@ public class BotListener extends ListenerAdapter {
         currentPlayers.put(challenge.challenged, player1);
         currentPlayers.put(challenge.challenger, player2);
         challenges.remove(sender.getId());
+
+        var task = new GameTimerTask(this, guild, player1, Color.white, challenge.increment, challenge.increment, challenge.time, challenge.time);
+        challengeTimeout.scheduleAtFixedRate(task, 0, 1000);
+
+        player1.setTask(task);
+        player2.setTask(task);
 
         Player white = player1.getWhite();
         Player black = player1.getBlack();

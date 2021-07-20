@@ -9,6 +9,7 @@ public class Player {
     private Color currentColor;
     private Player opponent;
     private final String assignedChannel;
+    private GameTimerTask task;
 
     public Player(ChessGame game, Color color, String id, String assignedChannel) {
         currentGame = game;
@@ -16,6 +17,10 @@ public class Player {
         this.id = id;
         this.assignedChannel = assignedChannel;
         this.rating = new Rating();
+    }
+
+    public void setTask(GameTimerTask task) {
+        this.task = task;
     }
 
     public void resetGameInfo() {
@@ -59,6 +64,7 @@ public class Player {
         var move = currentGame.getMove(moveStr, currentColor);
         currentGame.makeMove(move);
         currentGame.incrementPGN(moveStr);
+        task.onMove();
     }
 
     public ChessGame.EndState isGameOver() {
