@@ -10,11 +10,13 @@ import java.util.HashMap;
 
 public class GameManager {
     private final RatingStorage ratings;
+    private final BoardMessageManager boardMessageManager;
     private final HashMap<Long, OngoingGame> games = new HashMap<>();
     private final HashMap<Guild, ArrayDeque<String>> availableChannels = new HashMap<>();
 
-    public GameManager(RatingStorage ratings) {
+    public GameManager(RatingStorage ratings, BoardMessageManager boardMessageManager) {
         this.ratings = ratings;
+        this.boardMessageManager = boardMessageManager;
     }
 
     public void addGuild(Guild g) {
@@ -38,7 +40,7 @@ public class GameManager {
         }
         var challenged = Long.parseLong(challenge.challenged);
         var challenger = Long.parseLong(challenge.challenger);
-        var game = new TextChannelOngoing(this,
+        var game = new TextChannelOngoing(boardMessageManager, this,
                 channel,
                 challenged,
                 challenger,

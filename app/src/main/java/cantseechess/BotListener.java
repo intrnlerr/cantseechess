@@ -1,10 +1,13 @@
 package cantseechess;
 
-import cantseechess.chess.*;
+import cantseechess.chess.Color;
+import cantseechess.chess.IllegalMoveException;
+import cantseechess.chess.IncorrectFENException;
 import cantseechess.storage.RatingStorage;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.AbstractChannel;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
@@ -17,20 +20,20 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class BotListener extends ListenerAdapter {
     private final RatingStorage ratings;
     private final GameManager gameManager;
     private final HashMap<String, Challenge> challenges = new HashMap<>();
-    private final ArrayList<BoardMessage> boardMessages = new ArrayList<>(); //TODO store this :(
+    private final BoardMessageManager boardMessageManager;
     private final Timer challengeTimeout = new Timer();
     private static final String commandPrefix = "!";
 
     public BotListener(RatingStorage ratings) {
         this.ratings = ratings;
-        this.gameManager = new GameManager(ratings);
+        boardMessageManager = new BoardMessageManager();
+        this.gameManager = new GameManager(ratings, boardMessageManager);
     }
 
     // gets user id from mention
@@ -52,7 +55,6 @@ public class BotListener extends ListenerAdapter {
             return "no available boards!";
         }
          */
-
         String gameTimeString = time.orElse("-1s");
 
         int gameTime = 0;
@@ -87,7 +89,6 @@ public class BotListener extends ListenerAdapter {
             return "no challenge found";
         }
         gameManager.startGame(guild, challenge);
-
         return "created game";
     }
 
@@ -116,7 +117,7 @@ public class BotListener extends ListenerAdapter {
     private String imp(TextChannel channel, String PGN) {
         try {
             BoardMessage msg = new BoardMessage(channel, PGN);
-            boardMessages.add(msg);
+            boardMessageManager.add(msg);
             return "importing game...";
         } catch (IncorrectFENException | IllegalMoveException e) {
             return "Please enter a correct PGN";
@@ -273,22 +274,7 @@ public class BotListener extends ListenerAdapter {
     @Override
     public void onButtonClick(ButtonClickEvent event) {
         event.deferEdit().queue();
-        for (BoardMessage m : boardMessages) {
-            if (m.getMessage().equals(event.getMessage())) {
-                if (event.getComponentId().equals("Analyze")) {
-                    m.doAnalysis = !m.doAnalysis;
-                    m.startAnalysis();
-                } else {
-                    try {
-                        m.getClass().getMethod(event.getComponentId().toLowerCase()).invoke(m);
-                    } catch (NoSuchMethodException |
-                            InvocationTargetException |
-                            IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
+        boardMessageManager.onButtonClick(event.getMessageIdLong(), event.getComponentId());
     }
 
     @Override

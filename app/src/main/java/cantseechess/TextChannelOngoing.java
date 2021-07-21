@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
 public class TextChannelOngoing implements OngoingGame {
+    private final BoardMessageManager boardMessageManager;
     private final GameManager manager;
     private final TextChannel channel;
     private final ChessGame game;
@@ -17,7 +18,8 @@ public class TextChannelOngoing implements OngoingGame {
     private final Rating whiteRating;
     private final Rating blackRating;
 
-    public TextChannelOngoing(GameManager manager, TextChannel channel, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating) {
+    public TextChannelOngoing(BoardMessageManager boardMessageManager, GameManager manager, TextChannel channel, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating) {
+        this.boardMessageManager = boardMessageManager;
         this.manager = manager;
         this.channel = channel;
         this.whitePlayerId = whitePlayerId;
@@ -77,14 +79,12 @@ public class TextChannelOngoing implements OngoingGame {
                 .setDeny(Permission.MESSAGE_WRITE).queue();
         channel.putPermissionOverride(guild.retrieveMemberById(blackPlayerId).complete())
                 .setDeny(Permission.MESSAGE_WRITE).queue();
-        // TODO: display the board message
-        /*
+
         try {
-            boardMessages.add(new BoardMessage(channel, player.getCurrentGame().getPGN()));
+            boardMessageManager.add(new BoardMessage(channel, game.getPGN()));
         } catch (IncorrectFENException | IllegalMoveException e) {
             e.printStackTrace();
         }
-         */
 
         manager.handleGameEnd(this, endState);
     }
