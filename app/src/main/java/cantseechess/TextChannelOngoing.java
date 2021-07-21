@@ -17,6 +17,8 @@ public class TextChannelOngoing implements OngoingGame {
     private final long blackPlayerId;
     private final Rating whiteRating;
     private final Rating blackRating;
+    private long drawSender = -1;
+    private boolean isDrawable = false;
 
     public TextChannelOngoing(BoardMessageManager boardMessageManager, GameManager manager, TextChannel channel, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating) {
         this.boardMessageManager = boardMessageManager;
@@ -53,6 +55,11 @@ public class TextChannelOngoing implements OngoingGame {
         } catch (IllegalMoveException | IllegalArgumentException e) {
             message.addReaction("U+26D4").queue();
         }
+        if ((drawSender != -1 || !isDrawable) && game.isInThreefold()) {
+            isDrawable = true;
+            channel.sendMessage("Threefold repetition: " +
+                    "a draw is now claimable with !draw.").queue();
+        }
         return game.isGameOver();
     }
 
@@ -67,6 +74,17 @@ public class TextChannelOngoing implements OngoingGame {
             return;
         }
         endGame(color == Color.white ? ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins);
+    }
+
+    @Override
+    public void draw(long player) {
+        if (isDrawable && (player != drawSender)) {
+            endGame(ChessGame.EndState.Draw);
+            return;
+        }
+        drawSender = player;
+        isDrawable = true;
+        channel.sendMessage("A draw has been offered, claim it with !draw.").queue();
     }
 
     @Override

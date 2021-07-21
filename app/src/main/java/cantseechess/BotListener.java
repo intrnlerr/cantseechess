@@ -114,6 +114,10 @@ public class BotListener extends ListenerAdapter {
         gameManager.resignGame(channel.getIdLong(), sender);
     }
 
+    private void draw(AbstractChannel channel, User sender) {
+        gameManager.sendDrawRequest(channel, sender);
+    }
+
     private String imp(TextChannel channel, String PGN) {
         try {
             BoardMessage msg = new BoardMessage(channel, PGN);
@@ -215,6 +219,9 @@ public class BotListener extends ListenerAdapter {
                         return;
                     }
                     imp(event.getTextChannel(), PGN.toString());
+                    break;
+                case "draw":
+                    draw(event.getTextChannel(), event.getAuthor());
                     break;
             }
             if (reply != null) {

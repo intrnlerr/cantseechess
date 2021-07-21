@@ -87,4 +87,12 @@ public class GameManager {
         }
         ongoingGame.playerMove(message.getAuthor(), message);
     }
+
+    public void sendDrawRequest(AbstractChannel channel, User sender) {
+        var ongoingGame = games.get(channel.getIdLong());
+        if (ongoingGame == null) {
+            return;
+        }
+        ongoingGame.draw(sender.getIdLong());
+    }
 }

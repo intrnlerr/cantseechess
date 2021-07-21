@@ -10,6 +10,7 @@ public interface OngoingGame {
     ChessGame.EndState playerMove(User sender, Message message);
 
     void resign(long player);
+    void draw(long player);
     void endGame(ChessGame.EndState endState);
 
     GuildChannel getChannel();
