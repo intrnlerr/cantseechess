@@ -40,14 +40,14 @@ public class TextChannelOngoing implements OngoingGame {
 
 
     @Override
-    public ChessGame.EndState playerMove(User sender, Message message) {
+    public void playerMove(User sender, Message message) {
         Color color;
         if (sender.getIdLong() == whitePlayerId) {
             color = Color.white;
         } else if (sender.getIdLong() == blackPlayerId) {
             color = Color.black;
         } else {
-            return null;
+            return;
         }
         try {
             game.makeMove(game.getMove(message.getContentRaw(), color));
@@ -60,7 +60,10 @@ public class TextChannelOngoing implements OngoingGame {
             channel.sendMessage("Threefold repetition: " +
                     "a draw is now claimable with !draw.").queue();
         }
-        return game.isGameOver();
+        var result = game.isGameOver();
+        if (result != ChessGame.EndState.NotOver) {
+            endGame(result);
+        }
     }
 
     @Override

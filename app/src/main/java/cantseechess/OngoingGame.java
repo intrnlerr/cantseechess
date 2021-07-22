@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 
 public interface OngoingGame {
-    ChessGame.EndState playerMove(User sender, Message message);
+    void playerMove(User sender, Message message);
 
     void resign(long player);
     void draw(long player);
