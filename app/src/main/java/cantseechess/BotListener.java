@@ -48,6 +48,41 @@ public class BotListener extends ListenerAdapter {
         return null;
     }
 
+    private String parseChallenge(Guild g, User challenger, String[] args) {
+        var challengedId = parseMention(args[1]);
+        if (challengedId == null) {
+            return "Not a mention";
+        }
+        int time = 10;
+        int increment = 0;
+        Color challengerColor = Math.random() < 0.5 ? Color.white : Color.black;
+        for (int i = 2; i < args.length; ++i) {
+            if (args[i].equals("aswhite")) {
+                challengerColor = Color.white;
+            } else if (args[i].equals("asblack")) {
+                challengerColor = Color.black;
+            } else if (args[i].matches("\\A[0-9]+\\+[0-9]+")) {
+                var timeControl = args[i].split("\\+");
+                try {
+                    time = Integer.parseInt(timeControl[0]);
+                    if (time == 0) {
+                        return "wierd";
+                    }
+                    increment = Integer.parseInt(timeControl[0]);
+                } catch (NumberFormatException e) {
+                    return "Invalid time control";
+                }
+            }
+        }
+
+        if (challenges.containsKey(challengedId)) {
+            return "already challenged!";
+        }
+        challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, time, increment));
+        challengeTimeout.schedule(new CancelChallengeTask(challenges, challengedId), 1000 * 120);
+        return "challenge created with " + "<@!" + challengedId + ">";
+    }
+
     private String challenge(Guild guild, User challenger, String challengedId, Optional<Color> color, Optional<String> time, Optional<Integer> increment) {
         // FIXME: re-implement this check
         /*
@@ -68,7 +103,7 @@ public class BotListener extends ListenerAdapter {
         }
         int gameIncrement = increment.orElse(0);
         //Pick a random color if color isn't supplied
-        Color challengerColor = color.orElse(Math.round(Math.random()) == 1 ? Color.white : Color.black);
+        Color challengerColor = color.orElse(Math.round(Math.random()) < 0.5 ? Color.white : Color.black);
 
         //var challengedId = parseMention(args[1]);
         if (challengedId != null) {
@@ -192,10 +227,13 @@ public class BotListener extends ListenerAdapter {
             String reply = null;
             switch (args[0]) {
                 case "challenge":
-                    if (args.length >= 4)
-                        reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.of(Color.valueOf(args[2].toLowerCase())), Optional.of(args[2]), Optional.of(Integer.parseInt(args[4])));
-                    else
+                    if (args.length > 2) {
+                        reply = parseChallenge(event.getGuild(), event.getAuthor(), args);
+                    } else
                         reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.empty(), Optional.empty(), Optional.empty());
+                    if (args.length <= 2) {
+                        break;
+                    }
                     break;
                 case "accept":
                     reply = accept(event.getGuild(), event.getAuthor());
