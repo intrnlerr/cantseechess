@@ -7,12 +7,14 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.Timer;
 
 public class GameManager {
     private final RatingStorage ratings;
     private final BoardMessageManager boardMessageManager;
     private final HashMap<Long, OngoingGame> games = new HashMap<>();
     private final HashMap<Guild, ArrayDeque<String>> availableChannels = new HashMap<>();
+    private final Timer chessClocks = new Timer();
 
     public GameManager(RatingStorage ratings, BoardMessageManager boardMessageManager) {
         this.ratings = ratings;
@@ -47,6 +49,12 @@ public class GameManager {
                 ratings.getRating(challenged),
                 ratings.getRating(challenger)
         );
+        chessClocks.scheduleAtFixedRate(new ChessClockTask(
+                game,
+                challenge.time,
+                challenge.time,
+                challenge.increment
+        ), 1000, 1000);
         games.put(channel.getIdLong(), game);
     }
 
