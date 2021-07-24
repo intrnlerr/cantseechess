@@ -59,10 +59,13 @@ public class BotListener extends ListenerAdapter {
         int time = 10;
         int increment = 0;
         Color challengerColor = Math.random() < 0.5 ? Color.white : Color.black;
+        String startFen = null;
         for (var arg : args) {
             if (arg.value != null) {
                 if (arg.name.equals("color") || arg.name.equals("c")) {
                     challengerColor = arg.value.equals("w") ? Color.white : Color.black;
+                } else if (arg.name.equals("fen")) {
+                    startFen = arg.value;
                 }
             } else if (arg.name.equals("aswhite")) {
                 challengerColor = Color.white;
@@ -85,7 +88,7 @@ public class BotListener extends ListenerAdapter {
         if (challenges.containsKey(challengedId)) {
             return "already challenged!";
         }
-        challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, time, increment));
+        challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, startFen, time, increment));
         challengeTimeout.schedule(new CancelChallengeTask(challenges, challengedId), 1000 * 120);
         return "challenge created with " + "<@!" + challengedId + ">";
     }
@@ -119,7 +122,7 @@ public class BotListener extends ListenerAdapter {
             if (challenges.containsKey(challengedId)) {
                 return "already challenged!";
             }
-            challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, gameTime, gameIncrement));
+            challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, null, gameTime, gameIncrement));
             challengeTimeout.schedule(new CancelChallengeTask(challenges, challengedId), 1000 * 120);
             return "challenge created with " + "<@!" + challengedId + ">";
         } else return "unable to find user";

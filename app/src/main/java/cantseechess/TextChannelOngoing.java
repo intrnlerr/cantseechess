@@ -20,15 +20,15 @@ public class TextChannelOngoing implements OngoingGame {
     private long drawSender = -1;
     private boolean isDrawable = false;
 
-    public TextChannelOngoing(BoardMessageManager boardMessageManager, GameManager manager, TextChannel channel, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating) {
+    public TextChannelOngoing(BoardMessageManager boardMessageManager, GameManager manager, TextChannel channel, ChessGame game, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating) {
         this.boardMessageManager = boardMessageManager;
         this.manager = manager;
         this.channel = channel;
+        this.game = game;
         this.whitePlayerId = whitePlayerId;
         this.blackPlayerId = blackPlayerId;
         this.whiteRating = whiteRating;
         this.blackRating = blackRating;
-        game = new ChessGame();
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle("Game Begun!")

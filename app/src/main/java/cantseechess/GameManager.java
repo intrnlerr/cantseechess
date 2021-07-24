@@ -1,6 +1,7 @@
 package cantseechess;
 
 import cantseechess.chess.ChessGame;
+import cantseechess.chess.IncorrectFENException;
 import cantseechess.chess.Rating;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.entities.*;
@@ -42,8 +43,21 @@ public class GameManager {
         }
         var challenged = Long.parseLong(challenge.challenged);
         var challenger = Long.parseLong(challenge.challenger);
-        var game = new TextChannelOngoing(boardMessageManager, this,
+        ChessGame chessGame;
+        if (challenge.startFen != null) {
+            try {
+                chessGame = new ChessGame(challenge.startFen);
+            } catch (IncorrectFENException e) {
+                e.printStackTrace();
+                return;
+            }
+        } else {
+            chessGame = new ChessGame();
+        }
+        var game = new TextChannelOngoing(boardMessageManager,
+                this,
                 channel,
+                chessGame,
                 challenged,
                 challenger,
                 ratings.getRating(challenged),
