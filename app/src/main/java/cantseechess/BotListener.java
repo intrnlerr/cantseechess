@@ -48,21 +48,28 @@ public class BotListener extends ListenerAdapter {
         return null;
     }
 
-    private String parseChallenge(Guild g, User challenger, String[] args) {
-        var challengedId = parseMention(args[1]);
+    private String parseChallenge(User challenger, ArgIterator args) {
+        if (!args.hasNext()) {
+            return "Mention the user you want to challenge";
+        }
+        var challengedId = parseMention(args.next().name);
         if (challengedId == null) {
             return "Not a mention";
         }
         int time = 10;
         int increment = 0;
         Color challengerColor = Math.random() < 0.5 ? Color.white : Color.black;
-        for (int i = 2; i < args.length; ++i) {
-            if (args[i].equals("aswhite")) {
+        for (var arg : args) {
+            if (arg.value != null) {
+                if (arg.name.equals("color") || arg.name.equals("c")) {
+                    challengerColor = arg.value.equals("w") ? Color.white : Color.black;
+                }
+            } else if (arg.name.equals("aswhite")) {
                 challengerColor = Color.white;
-            } else if (args[i].equals("asblack")) {
+            } else if (arg.name.equals("asblack")) {
                 challengerColor = Color.black;
-            } else if (args[i].matches("\\A[0-9]+\\+[0-9]+")) {
-                var timeControl = args[i].split("\\+");
+            } else if (arg.name.matches("\\A[0-9]+\\+[0-9]+")) {
+                var timeControl = arg.name.split("\\+");
                 try {
                     time = Integer.parseInt(timeControl[0]);
                     if (time == 0) {
@@ -223,17 +230,11 @@ public class BotListener extends ListenerAdapter {
         var content = event.getMessage().getContentRaw();
         var message = event.getMessage();
         if (content.startsWith(commandPrefix)) {
-            var args = content.substring(commandPrefix.length()).split(" ");
+            var args = new ArgIterator(content.substring(commandPrefix.length()));
             String reply = null;
-            switch (args[0]) {
+            switch (args.next().name) {
                 case "challenge":
-                    if (args.length > 2) {
-                        reply = parseChallenge(event.getGuild(), event.getAuthor(), args);
-                    } else
-                        reply = challenge(event.getGuild(), event.getAuthor(), parseMention(args[1]), Optional.empty(), Optional.empty(), Optional.empty());
-                    if (args.length <= 2) {
-                        break;
-                    }
+                    reply = parseChallenge(event.getAuthor(), args);
                     break;
                 case "accept":
                     reply = accept(event.getGuild(), event.getAuthor());
@@ -245,12 +246,17 @@ public class BotListener extends ListenerAdapter {
                     resign(event.getChannel(), event.getAuthor());
                     break;
                 case "stats":
-                    stats(event.getAuthor(), args.length >= 2 ? Optional.ofNullable(parseMention(args[1])) : Optional.empty());
+                    stats(event.getAuthor(), args.hasNext() ? Optional.ofNullable(parseMention(args.next().name)) : Optional.empty());
                     break;
                 case "import":
                     StringBuilder PGN = new StringBuilder();
-                    for (int i = 1; i < args.length; i++) {
-                        PGN.append(args[i]).append(" ");
+                    while (args.hasNext()) {
+                        var arg = args.next();
+                        PGN.append(arg.name);
+                        if (!arg.isTag()) {
+                            PGN.append('=').append(arg.value);
+                        }
+                        PGN.append(" ");
                     }
                     if (PGN.length() == 0) {
                         event.getChannel().sendMessage("enter the pgn to import").queue();
