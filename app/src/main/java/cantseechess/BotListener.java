@@ -134,6 +134,7 @@ public class BotListener extends ListenerAdapter {
             return "no challenge found";
         }
         gameManager.startGame(guild, challenge);
+        challenges.remove(sender.getId());
         return "created game";
     }
 
