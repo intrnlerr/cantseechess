@@ -322,7 +322,7 @@ public class BotListener extends ListenerAdapter {
 
     //Adds channel to the available channels in guild
     private void setAvailable(Guild guild, TextChannel channel) {
-        gameManager.addChannel(guild, channel.getId());
+        gameManager.addChannel(guild, channel.getIdLong());
     }
 
     //When a user clicks on a button on a board message, do something accordingly

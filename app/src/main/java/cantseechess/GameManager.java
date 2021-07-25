@@ -6,7 +6,6 @@ import cantseechess.chess.Rating;
 import cantseechess.storage.RatingStorage;
 import net.dv8tion.jda.api.entities.*;
 
-import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Timer;
 
@@ -14,7 +13,7 @@ public class GameManager {
     private final RatingStorage ratings;
     private final BoardMessageManager boardMessageManager;
     private final HashMap<Long, OngoingGame> games = new HashMap<>();
-    private final HashMap<Guild, ArrayDeque<String>> availableChannels = new HashMap<>();
+    private final HashMap<Guild, GuildBoardData> availableChannels = new HashMap<>();
     private final Timer chessClocks = new Timer();
 
     public GameManager(RatingStorage ratings, BoardMessageManager boardMessageManager) {
@@ -23,18 +22,18 @@ public class GameManager {
     }
 
     public void addGuild(Guild g) {
-        availableChannels.put(g, new ArrayDeque<>());
+        availableChannels.put(g, new GuildBoardData());
     }
 
-    public void addChannel(Guild guild, String channelId) {
-        availableChannels.computeIfAbsent(guild, k -> new ArrayDeque<>()).add(channelId);
+    public void addChannel(Guild guild, long channelId) {
+        availableChannels.computeIfAbsent(guild, k -> new GuildBoardData()).addChannel(channelId);
     }
 
     public void startGame(Guild guild, Challenge challenge) {
         var available = availableChannels.get(guild);
-        var channelId = available.poll();
-        // TODO: we should queue up the game when there are no available channels instead of failing
+        var channelId = available.pollChannel();
         if (channelId == null) {
+            available.queueChallenge(challenge);
             return;
         }
         var channel = guild.getTextChannelById(channelId);
@@ -78,8 +77,14 @@ public class GameManager {
 
     public void handleGameEnd(OngoingGame game, ChessGame.EndState endState) {
         var channel = game.getChannel();
+        var guild = channel.getGuild();
         games.remove(channel.getIdLong());
-        availableChannels.get(channel.getGuild()).push(channel.getId());
+        var guildBoards = availableChannels.get(guild);
+        if (guildBoards == null) {
+            throw new NullPointerException("game was played in a guild with no data??");
+        }
+        var newchal = guildBoards.returnChannel(channel.getIdLong());
+        newchal.ifPresent(challenge -> startGame(guild, challenge));
         // adjust rating
 
         if (endState == ChessGame.EndState.Draw) {
@@ -95,11 +100,11 @@ public class GameManager {
     }
 
     public void dropChannel(Guild guild, TextChannel channel) {
-        availableChannels.get(guild).remove(channel.getId());
+        availableChannels.get(guild).dropChannel(channel.getIdLong());
     }
 
     public boolean isAvailableBoard(TextChannel channel) {
-        return availableChannels.get(channel.getGuild()).contains(channel.getId());
+        return availableChannels.get(channel.getGuild()).isAvailableBoard(channel.getIdLong());
     }
 
     public void playMove(MessageChannel channel, Message message) {
