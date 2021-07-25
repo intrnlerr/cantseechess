@@ -75,7 +75,7 @@ public class GameManager {
         games.get(channelId).resign(resigner.getIdLong());
     }
 
-    public void handleGameEnd(OngoingGame game, ChessGame.EndState endState) {
+    public void handleGameEnd(OngoingGame game, ChessGame.EndState endState, boolean adjustRating) {
         var channel = game.getChannel();
         var guild = channel.getGuild();
         games.remove(channel.getIdLong());
@@ -85,7 +85,11 @@ public class GameManager {
         }
         var newchal = guildBoards.returnChannel(channel.getIdLong());
         newchal.ifPresent(challenge -> startGame(guild, challenge));
+
         // adjust rating
+        if (!adjustRating) {
+            return;
+        }
 
         if (endState == ChessGame.EndState.Draw) {
             ratings.addGame(game.getWhiteId(), new Rating.GameEntry(game.getBlackRating(), 0.5));

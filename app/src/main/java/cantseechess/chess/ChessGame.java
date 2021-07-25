@@ -20,6 +20,10 @@ public class ChessGame {
     private static final String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     private ThreefoldChecker threefold = new ThreefoldChecker();
 
+    public int getMoveCount() {
+        return moves;
+    }
+
     static class Castling {
         public boolean kingSideWhite;
         public boolean queenSideWhite;

@@ -107,7 +107,7 @@ public class TextChannelOngoing implements OngoingGame {
             e.printStackTrace();
         }
 
-        manager.handleGameEnd(this, endState);
+        manager.handleGameEnd(this, endState, game.getMoveCount() > 2);
     }
 
     @Override
