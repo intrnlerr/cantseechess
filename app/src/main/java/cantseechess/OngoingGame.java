@@ -11,6 +11,7 @@ public interface OngoingGame {
 
     void resign(long player);
     void draw(long player);
+    void cancelGame();
     void endGame(ChessGame.EndState endState);
 
     GuildChannel getChannel();

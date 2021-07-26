@@ -8,6 +8,8 @@ import java.util.TimerTask;
 class ChessClockTask extends TimerTask {
     private final OngoingGame game;
     private final int increment;
+    private boolean cancelling;
+    private int cancelTimer;
     private Color currentTurn;
     private int whiteTime;
     private int blackTime;
@@ -17,6 +19,8 @@ class ChessClockTask extends TimerTask {
         this.whiteTime = whiteTime;
         this.blackTime = blackTime;
         this.increment = increment;
+        cancelling = true;
+        cancelTimer = 15;
     }
 
     void onMove() {
@@ -35,6 +39,13 @@ class ChessClockTask extends TimerTask {
 
     @Override
     public void run() {
+        if (cancelling) {
+            if (--cancelTimer == 0) {
+                this.cancel();
+                game.cancelGame();
+            }
+            return;
+        }
         if (currentTurn == Color.white) {
             if (--whiteTime == 0) {
                 // game over
@@ -45,5 +56,9 @@ class ChessClockTask extends TimerTask {
                 end(Color.black);
             }
         }
+    }
+
+    public void stopCancel() {
+        cancelling = false;
     }
 }

@@ -29,6 +29,10 @@ public class GameManager {
         availableChannels.computeIfAbsent(guild, k -> new GuildBoardData()).addChannel(channelId);
     }
 
+    public void addPerSecondTask(ChessClockTask task) {
+        chessClocks.scheduleAtFixedRate(task, 0, 1000);
+    }
+
     public void startGame(Guild guild, Challenge challenge) {
         var available = availableChannels.get(guild);
         var channelId = available.pollChannel();
@@ -60,14 +64,10 @@ public class GameManager {
                 challenged,
                 challenger,
                 ratings.getRating(challenged),
-                ratings.getRating(challenger)
-        );
-        chessClocks.scheduleAtFixedRate(new ChessClockTask(
-                game,
-                challenge.time,
+                ratings.getRating(challenger),
                 challenge.time,
                 challenge.increment
-        ), 1000, 1000);
+        );
         games.put(channel.getIdLong(), game);
     }
 

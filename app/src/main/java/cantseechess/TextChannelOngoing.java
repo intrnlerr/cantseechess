@@ -19,8 +19,9 @@ public class TextChannelOngoing implements OngoingGame {
     private final Rating blackRating;
     private long drawSender = -1;
     private boolean isDrawable = false;
+    private final ChessClockTask clock;
 
-    public TextChannelOngoing(BoardMessageManager boardMessageManager, GameManager manager, TextChannel channel, ChessGame game, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating) {
+    public TextChannelOngoing(BoardMessageManager boardMessageManager, GameManager manager, TextChannel channel, ChessGame game, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating, int time, int increment) {
         this.boardMessageManager = boardMessageManager;
         this.manager = manager;
         this.channel = channel;
@@ -36,6 +37,15 @@ public class TextChannelOngoing implements OngoingGame {
                 .addField("Black", "<@!" + blackPlayerId + "> " + blackRating, true);
         //boardChannel.sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
         channel.sendMessage(builder.build()).queue();
+
+        clock = new ChessClockTask(
+                this,
+                time,
+                time,
+                increment
+        );
+
+        manager.addPerSecondTask(clock);
     }
 
 
@@ -52,6 +62,7 @@ public class TextChannelOngoing implements OngoingGame {
         try {
             game.makeMove(game.getMove(message.getContentRaw(), color));
             message.addReaction("U+2705").queue();
+            clock.onMove();
         } catch (IllegalMoveException | IllegalArgumentException e) {
             message.addReaction("U+26D4").queue();
         }
@@ -59,6 +70,9 @@ public class TextChannelOngoing implements OngoingGame {
             isDrawable = true;
             channel.sendMessage("Threefold repetition: " +
                     "a draw is now claimable with !draw.").queue();
+        }
+        if (game.getMoveCount() > 2) {
+            clock.stopCancel();
         }
         var result = game.isGameOver();
         if (result != ChessGame.EndState.NotOver) {
@@ -88,6 +102,16 @@ public class TextChannelOngoing implements OngoingGame {
         drawSender = player;
         isDrawable = true;
         channel.sendMessage("A draw has been offered, claim it with !draw.").queue();
+    }
+
+    @Override
+    public void cancelGame() {
+        var guild = channel.getGuild();
+        channel.putPermissionOverride(guild.retrieveMemberById(whitePlayerId).complete())
+                .setDeny(Permission.MESSAGE_WRITE).queue();
+        channel.putPermissionOverride(guild.retrieveMemberById(blackPlayerId).complete())
+                .setDeny(Permission.MESSAGE_WRITE).queue();
+        manager.handleGameEnd(this, ChessGame.EndState.Draw, false);
     }
 
     @Override
