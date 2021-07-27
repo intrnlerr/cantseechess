@@ -6,8 +6,7 @@ import net.dv8tion.jda.api.entities.Emote;
 import java.util.function.Consumer;
 
 public class BoardState {
-    //TODO change from public
-    public Analysis analysis;
+    private Analysis analysis;
     private String score;
     private static final String EMPTY_STRING = "N/A";
     private static final String ANALYZING_STRING = "Analyzing...";
