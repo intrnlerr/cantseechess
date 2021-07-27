@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.*;
 
 import java.util.HashMap;
 import java.util.Timer;
+import java.util.TimerTask;
 
 public class GameManager {
     private final RatingStorage ratings;
@@ -76,15 +77,12 @@ public class GameManager {
     }
 
     public void handleGameEnd(OngoingGame game, ChessGame.EndState endState, boolean adjustRating) {
-        var channel = game.getChannel();
-        var guild = channel.getGuild();
-        games.remove(channel.getIdLong());
-        var guildBoards = availableChannels.get(guild);
-        if (guildBoards == null) {
-            throw new NullPointerException("game was played in a guild with no data??");
-        }
-        var newchal = guildBoards.returnChannel(channel.getIdLong());
-        newchal.ifPresent(challenge -> startGame(guild, challenge));
+        chessClocks.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                GameManager.this.cleanupGame(game);
+            }
+        }, 1000 * 60);
 
         // adjust rating
         if (!adjustRating) {
@@ -101,6 +99,18 @@ public class GameManager {
             ratings.addGame(game.getWhiteId(), new Rating.GameEntry(game.getBlackRating(), 0));
             ratings.addGame(game.getBlackId(), new Rating.GameEntry(game.getWhiteRating(), 1));
         }
+    }
+
+    public void cleanupGame(OngoingGame game) {
+        var channel = game.getChannel();
+        var guild = channel.getGuild();
+        games.remove(channel.getIdLong());
+        var guildBoards = availableChannels.get(guild);
+        if (guildBoards == null) {
+            throw new NullPointerException("game was played in a guild with no data??");
+        }
+        var newchal = guildBoards.returnChannel(channel.getIdLong());
+        newchal.ifPresent(challenge -> startGame(guild, challenge));
     }
 
     public void dropChannel(Guild guild, TextChannel channel) {
