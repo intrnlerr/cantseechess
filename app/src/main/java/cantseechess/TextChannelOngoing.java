@@ -158,4 +158,9 @@ public class TextChannelOngoing implements OngoingGame {
     public Rating getBlackRating() {
         return blackRating;
     }
+
+    @Override
+    public void sendClockSeconds(Color turn, int seconds) {
+        channel.sendMessage(turn + " has " + seconds + " seconds left").queue();
+    }
 }

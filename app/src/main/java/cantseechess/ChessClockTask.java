@@ -37,6 +37,14 @@ class ChessClockTask extends TimerTask {
         game.endGame(loserColor == Color.white ? ChessGame.EndState.BlackWins : ChessGame.EndState.WhiteWins);
     }
 
+    public void intervalCheck(Color turn, int seconds) {
+        if (seconds == 10) {
+            game.sendClockSeconds(turn, seconds);
+        } else if (seconds == 30) {
+            game.sendClockSeconds(turn, seconds);
+        }
+    }
+
     @Override
     public void run() {
         if (cancelling) {
@@ -47,13 +55,19 @@ class ChessClockTask extends TimerTask {
             return;
         }
         if (currentTurn == Color.white) {
-            if (--whiteTime == 0) {
+            --whiteTime;
+            if (whiteTime == 0) {
                 // game over
                 end(Color.white);
+            } else {
+                intervalCheck(Color.white, whiteTime);
             }
         } else {
-            if (--blackTime == 0) {
+            --blackTime;
+            if (blackTime == 0) {
                 end(Color.black);
+            } else {
+                intervalCheck(Color.black, blackTime);
             }
         }
     }

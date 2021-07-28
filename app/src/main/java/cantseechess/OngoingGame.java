@@ -1,6 +1,7 @@
 package cantseechess;
 
 import cantseechess.chess.ChessGame;
+import cantseechess.chess.Color;
 import cantseechess.chess.Rating;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Message;
@@ -21,4 +22,6 @@ public interface OngoingGame {
 
     Rating getWhiteRating();
     Rating getBlackRating();
+
+    void sendClockSeconds(Color turn, int seconds);
 }
