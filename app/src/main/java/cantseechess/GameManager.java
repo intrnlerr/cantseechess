@@ -46,7 +46,15 @@ public class GameManager {
             throw new NullPointerException("channelId is not a real channel??");
         }
         var challenged = Long.parseLong(challenge.challenged);
+        var challengedRating = ratings.getRating(challenged);
+        if (challengedRating == null) {
+            challengedRating = new Rating();
+        }
         var challenger = Long.parseLong(challenge.challenger);
+        var challengerRating = ratings.getRating(challenger);
+        if (challengerRating == null) {
+            challengedRating = new Rating();
+        }
         ChessGame chessGame;
         if (challenge.startFen != null) {
             try {
@@ -64,8 +72,8 @@ public class GameManager {
                 chessGame,
                 challenged,
                 challenger,
-                ratings.getRating(challenged),
-                ratings.getRating(challenger),
+                challengedRating,
+                challengerRating,
                 challenge.time,
                 challenge.increment
         );
