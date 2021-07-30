@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 public class ChessGame {
-    private StringBuilder PGN = new StringBuilder();
+    private final StringBuilder PGN = new StringBuilder();
     private Piece[][] board_pieces = new Piece[8][8];
     private Color turnColor = Color.white;
     private int moves = 1;
@@ -18,7 +18,7 @@ public class ChessGame {
     //Availability to castle
     private Castling castling = new Castling("KQkq");
     private static final String START_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    private ThreefoldChecker threefold = new ThreefoldChecker();
+    private final ThreefoldChecker threefold = new ThreefoldChecker();
 
     public int getMoveCount() {
         return moves;
@@ -95,6 +95,7 @@ public class ChessGame {
             e.printStackTrace();
         }
     }
+
     public ChessGame(int time, int increment) {
         try {
             importFEN(START_FEN);
@@ -350,7 +351,6 @@ public class ChessGame {
             throw new IllegalMoveException("Castling is not possible!");
         }
         var pieceType = move.charAt(0);
-        Optional<Class<?>> pieceClass = Optional.empty();
         Position endpoint;
         if (pieceType >= 'a' && pieceType < 'i') {
             var fromFile = pieceType - 'a';
@@ -591,9 +591,11 @@ public class ChessGame {
             }
         }
         builder.append(turnColor == Color.white ? " w " : " b ")
-                .append(castling.toString() + " ")
+                .append(castling.toString())
+                .append(" ")
                 .append(enPassantSquare != null ? enPassantSquare.toString() + " " : "- ")
-                .append(fiftyMoveRuleCounter + " ")
+                .append(fiftyMoveRuleCounter)
+                .append(" ")
                 .append(moves);
         return builder.toString();
     }
@@ -602,7 +604,9 @@ public class ChessGame {
         int turnNumber = (this.moves + 1) / 2;
         //1. e4 e5 2. d4 d5 3. (etc)
         String turnDisplay = turnColor == Color.black ? turnNumber + ". " : "";
-        PGN.append(turnDisplay + move + " ");
+        PGN.append(turnDisplay)
+                .append(move)
+                .append(" ");
     }
 
     private boolean hasEnemySidePawn(Piece piece, Position pos) {
@@ -733,7 +737,6 @@ public class ChessGame {
                 }
                 for (int ii = 0; ii < 8; ii++) {
                     for (int jj = 0; jj < 8; jj++) {
-                        Piece testPos = board_pieces[ii][jj];
                         if (piece.canMove(board_pieces, new Position(file, rank), new Position(ii, jj))) {
                             legalMove = true;
                             break;
