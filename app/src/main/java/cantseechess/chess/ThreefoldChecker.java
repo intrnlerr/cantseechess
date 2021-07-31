@@ -4,7 +4,22 @@ import java.util.ArrayList;
 import java.util.Random;
 
 class ThreefoldChecker {
-    private final long[] zobristNumbers = new long[781];
+    private static class zobrist {
+        private static final zobrist INSTANCE = new zobrist();
+        private final long[] numbers = new long[781];
+
+        private zobrist() {
+            var r = new Random(RANDOM_SEED);
+            for (int i = 0; i < numbers.length; ++i) {
+                numbers[i] = r.nextLong();
+            }
+        }
+
+        public static long number(int i) {
+            return INSTANCE.numbers[i];
+        }
+    }
+
     private final ArrayList<Long> moveHashes = new ArrayList<>();
     private static final long RANDOM_SEED = 12345;
     private static final int PIECE_OFFSET = 64;
@@ -12,14 +27,6 @@ class ThreefoldChecker {
     private static final int TURN_INDEX = 768;
     private static final int CASTLING_OFFSET = 768;
     private static final int EN_PASSANT_OFFSET = 772;
-
-    ThreefoldChecker() {
-        // maybe we shouldn't use the java library random numbers
-        var r = new Random(RANDOM_SEED);
-        for (int i = 0; i < zobristNumbers.length; ++i) {
-            zobristNumbers[i] = r.nextLong();
-        }
-    }
 
     private long getPieceHash(Piece p, int file, int rank) {
         int i;
@@ -39,7 +46,7 @@ class ThreefoldChecker {
             throw new IllegalArgumentException("Blank is not a valid piece");
         }
         i += (p.getColor().ordinal() * COLOR_OFFSET) + (file + (rank * 8));
-        return zobristNumbers[i];
+        return zobrist.number(i);
     }
 
     long getZobristHash(Piece[][] pieces, Color turn, ChessGame.Castling castling, Position enPassant) {
@@ -52,22 +59,22 @@ class ThreefoldChecker {
             }
         }
         if (turn == Color.black) {
-            hash ^= zobristNumbers[TURN_INDEX];
+            hash ^= zobrist.number(TURN_INDEX);
         }
         if (castling.kingSideWhite) {
-            hash ^= zobristNumbers[CASTLING_OFFSET];
+            hash ^= zobrist.number(CASTLING_OFFSET);
         }
         if (castling.kingSideBlack) {
-            hash ^= zobristNumbers[CASTLING_OFFSET + 1];
+            hash ^= zobrist.number(CASTLING_OFFSET + 1);
         }
         if (castling.queenSideWhite) {
-            hash ^= zobristNumbers[CASTLING_OFFSET + 2];
+            hash ^= zobrist.number(CASTLING_OFFSET + 2);
         }
         if (castling.queenSideBlack) {
-            hash ^= zobristNumbers[CASTLING_OFFSET + 3];
+            hash ^= zobrist.number(CASTLING_OFFSET + 3);
         }
         if (enPassant != null) {
-            hash ^= zobristNumbers[enPassant.getFile() + EN_PASSANT_OFFSET];
+            hash ^= zobrist.number(enPassant.getFile() + EN_PASSANT_OFFSET);
         }
         return hash;
     }
