@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class ChessGame {
     private final StringBuilder PGN = new StringBuilder();
@@ -88,15 +87,6 @@ public class ChessGame {
     }
 
     public ChessGame() {
-        try {
-            importFEN(START_FEN);
-        } catch (IncorrectFENException e) {
-            System.err.println("START_FEN was somehow wrong");
-            e.printStackTrace();
-        }
-    }
-
-    public ChessGame(int time, int increment) {
         try {
             importFEN(START_FEN);
         } catch (IncorrectFENException e) {

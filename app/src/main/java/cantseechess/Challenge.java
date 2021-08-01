@@ -19,8 +19,4 @@ public class Challenge {
         this.time = time;
         this.increment = increment;
     }
-
-    public ChessGame accept() {
-        return new ChessGame();
-    }
 }
