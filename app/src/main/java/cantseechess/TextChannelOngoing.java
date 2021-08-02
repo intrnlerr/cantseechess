@@ -126,11 +126,18 @@ public class TextChannelOngoing implements OngoingGame {
         channel.putPermissionOverride(guild.retrieveMemberById(blackPlayerId).complete())
                 .setDeny(Permission.MESSAGE_WRITE).queue();
 
-        try {
-            boardMessageManager.add(new BoardMessage(channel, game.getPGN()));
-        } catch (IncorrectFENException | IllegalMoveException e) {
-            e.printStackTrace();
-        }
+        guild.retrieveMembersByIds(whitePlayerId, blackPlayerId).onSuccess(l ->
+        {
+            try {
+                boardMessageManager.add(new BoardMessage(
+                        channel,
+                        game.getPGN(),
+                        l.get(0).getNickname() + " vs " + l.get(1).getNickname()));
+            } catch (IncorrectFENException | IllegalMoveException e) {
+                e.printStackTrace();
+            }
+        });
+
 
         manager.handleGameEnd(this, endState, game.getMoveCount() > 2);
     }

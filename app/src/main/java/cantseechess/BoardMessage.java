@@ -21,13 +21,14 @@ public class BoardMessage {
     private int currIndex;
     private final BoardState[] BOARD_STATES;
     private final TextChannel channel;
-    private static final String EMBED_TITLE = "Chess Game";
+    private final String embedTitle;
     private String opening = " N/A ";
     public boolean doAnalysis = false;
 
-    public BoardMessage(TextChannel channel, String PGN) throws IncorrectFENException, IllegalMoveException {
+    public BoardMessage(TextChannel channel, String PGN, String embedTitle) throws IncorrectFENException, IllegalMoveException {
         BOARD_STATES = BoardGenerator.getBoard(PGN, Optional.empty(), this::setOpening);
         this.channel = channel;
+        this.embedTitle = embedTitle;
         currIndex = BOARD_STATES.length - 1;
         updateEmbed(currentState());
     }
@@ -61,9 +62,8 @@ public class BoardMessage {
         if (doAnalysis) startAnalysis();
 
         score = currentState().getScore();
-        //TODO put players names in
         EmbedBuilder embedBuilder = new EmbedBuilder()
-                .setTitle(EMBED_TITLE)
+                .setTitle(embedTitle)
                 .setDescription(board.toString())
                 .addField("Score", score + " ", true)
                 .addField("Opening", opening, true)
