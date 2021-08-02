@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.concurrent.TimeUnit;
+
 public class TextChannelOngoing implements OngoingGame {
     private final BoardMessageManager boardMessageManager;
     private final GameManager manager;
@@ -121,10 +123,10 @@ public class TextChannelOngoing implements OngoingGame {
             return;
         }
         var guild = channel.getGuild();
-        channel.putPermissionOverride(guild.retrieveMemberById(whitePlayerId).complete())
-                .setDeny(Permission.MESSAGE_WRITE).queue();
-        channel.putPermissionOverride(guild.retrieveMemberById(blackPlayerId).complete())
-                .setDeny(Permission.MESSAGE_WRITE).queue();
+        guild.retrieveMemberById(whitePlayerId).flatMap(m -> channel.putPermissionOverride(m)
+                .setDeny(Permission.MESSAGE_WRITE)).queueAfter(1, TimeUnit.MINUTES);
+        guild.retrieveMemberById(blackPlayerId).flatMap(m -> channel.putPermissionOverride(m)
+                .setDeny(Permission.MESSAGE_WRITE)).queueAfter(1, TimeUnit.MINUTES);
 
         guild.retrieveMembersByIds(whitePlayerId, blackPlayerId).onSuccess(l ->
         {
@@ -137,7 +139,6 @@ public class TextChannelOngoing implements OngoingGame {
                 e.printStackTrace();
             }
         });
-
 
         manager.handleGameEnd(this, endState, game.getMoveCount() > 2);
     }
