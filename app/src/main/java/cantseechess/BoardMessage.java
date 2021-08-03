@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class BoardMessage {
@@ -26,7 +25,7 @@ public class BoardMessage {
     public boolean doAnalysis = false;
 
     public BoardMessage(TextChannel channel, String PGN, String embedTitle) throws IncorrectFENException, IllegalMoveException {
-        BOARD_STATES = BoardGenerator.getBoard(PGN, Optional.empty(), this::setOpening);
+        BOARD_STATES = BoardGenerator.getBoard(PGN, this::setOpening, null);
         this.channel = channel;
         this.embedTitle = embedTitle;
         currIndex = BOARD_STATES.length - 1;

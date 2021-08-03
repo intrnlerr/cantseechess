@@ -1,6 +1,5 @@
 package cantseechess;
 
-import cantseechess.chess.ChessGame;
 import cantseechess.chess.Color;
 
 public class Challenge {

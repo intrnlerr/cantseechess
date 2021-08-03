@@ -2,6 +2,7 @@ package cantseechess.chess;
 
 import net.dv8tion.jda.api.entities.Emote;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -16,31 +17,31 @@ public class BoardGenerator {
         Emote[][] state = new Emote[8][8];
         for (int file = 0; file < 8; file++) {
             for (int rank = 0; rank < 8; rank++) {
-                state[7-file][rank] = getEmote(pieces[rank][file], file, rank);
+                state[7 - file][rank] = getEmote(pieces[rank][file], file, rank);
             }
         }
         return new BoardState(FEN, state);
     }
 
-    public static BoardState[] getBoard(String PGN, Optional<String> startFEN, Consumer<String> opening) throws IncorrectFENException, IllegalMoveException {
+    public static BoardState[] getBoard(String PGN, Consumer<String> opening, @Nullable String startFEN) throws IncorrectFENException, IllegalMoveException {
         ChessGame game;
-        if (startFEN.isPresent())
-            game = new ChessGame(startFEN.get());
+        if (startFEN != null)
+            game = new ChessGame(startFEN);
         else game = new ChessGame();
 
-        String[] moves = PGN.replaceAll("[0-9]+\\. *","").replaceAll("\n", " ").split(" ");
+        String[] moves = PGN.replaceAll("[0-9]+\\. *", "").replaceAll("\n", " ").split(" ");
 
-        BoardState[] states = new BoardState[moves.length+1];
-        states[0] = getBoard(startFEN.orElseGet(game::getFEN));
+        BoardState[] states = new BoardState[moves.length + 1];
+        states[0] = getBoard(startFEN == null ? game.getFEN() : startFEN);
 
         for (int i = 0; i < moves.length; i++) {
-            Color color = i%2 == 0 ? Color.white : Color.black;
+            Color color = i % 2 == 0 ? Color.white : Color.black;
 
             game.makeMove(game.getMove(moves[i], color));
             String FEN = game.getFEN();
-            states[i+1] = getBoard(FEN);
+            states[i + 1] = getBoard(FEN);
             Optional<String> openingString = reader.getOpening(FEN);
-            if (openingString.isPresent()) opening.accept(openingString.get());
+            openingString.ifPresent(opening);
         }
         return states;
     }
@@ -70,7 +71,7 @@ public class BoardGenerator {
             toReturn.append("_");
         }
 
-        for (Emote e: boardEmotes) {
+        for (Emote e : boardEmotes) {
             if (e.getName().equals(toReturn.toString())) {
                 return e;
             }

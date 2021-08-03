@@ -146,8 +146,8 @@ public class BotListener extends ListenerAdapter {
         return "challenge declined.";
     }
 
-    private String stats(User sender, Optional<String> target) {
-        var rating = ratings.getRating(Long.parseLong(target.orElse(sender.getId())));
+    private String stats(long target) {
+        var rating = ratings.getRating(target);
         if (rating != null) {
             return "rating: " + rating.getRating() +
                     " rd: " + rating.getDeviation();
@@ -208,9 +208,10 @@ public class BotListener extends ListenerAdapter {
                 break;
             case "stats":
                 var userOption = Optional.ofNullable(event.getOption("user"));
-                var user = userOption.map(option -> option.getAsUser().getId());
+                var user = userOption.map(option -> option.getAsUser().getIdLong());
 
-                reply = stats(event.getUser(), user);
+                reply = stats(user.orElse(event.getUser().getIdLong()));
+
                 break;
             case "import":
                 try {
@@ -250,7 +251,7 @@ public class BotListener extends ListenerAdapter {
                     resign(event.getChannel(), event.getAuthor());
                     break;
                 case "stats":
-                    stats(event.getAuthor(), args.hasNext() ? Optional.ofNullable(parseMention(args.next().name)) : Optional.empty());
+                    stats(args.hasNext() ? Long.parseLong(args.next().name) : event.getAuthor().getIdLong());
                     break;
                 case "import":
                     StringBuilder PGN = new StringBuilder();
