@@ -20,6 +20,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 public class BotListener extends ListenerAdapter {
@@ -93,17 +94,15 @@ public class BotListener extends ListenerAdapter {
         return "challenge created with " + "<@!" + challengedId + ">";
     }
 
-    private String challenge(Guild guild, User challenger, String challengedId, Optional<Color> color, Optional<String> time, Optional<Integer> increment) {
+    private String challenge(User challenger, String challengedId, @Nonnull Color challengerColor, String time, int increment) {
         // FIXME: re-implement this check
         /*
         if (availableChannels.get(guild).isEmpty()) {
             return "no available boards!";
         }
          */
-        String gameTimeString = time.orElse("-1s");
-
         int gameTime = 0;
-        for (String s : gameTimeString.split(" ")) {
+        for (String s : time.split(" ")) {
             int parsed = Integer.parseInt(s.replaceAll("[^0-9.]", ""));
             if (s.contains("m")) {
                 gameTime += parsed * 60;
@@ -111,9 +110,6 @@ public class BotListener extends ListenerAdapter {
                 gameTime += parsed;
             }
         }
-        int gameIncrement = increment.orElse(0);
-        //Pick a random color if color isn't supplied
-        Color challengerColor = color.orElse(Math.round(Math.random()) < 0.5 ? Color.white : Color.black);
 
         //var challengedId = parseMention(args[1]);
         if (challengedId != null) {
@@ -122,7 +118,7 @@ public class BotListener extends ListenerAdapter {
             if (challenges.containsKey(challengedId)) {
                 return "already challenged!";
             }
-            challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, null, gameTime, gameIncrement));
+            challenges.put(challengedId, new Challenge(challenger.getId(), challengedId, challengerColor, null, gameTime, increment));
             challengeTimeout.schedule(new CancelChallengeTask(challenges, challengedId), 1000 * 120);
             return "challenge created with " + "<@!" + challengedId + ">";
         } else return "unable to find user";
@@ -180,16 +176,18 @@ public class BotListener extends ListenerAdapter {
         switch (event.getName()) {
             case "challenge":
                 try {
-                    var colorOption = Optional.ofNullable(event.getOption("color"));
+                    var colorOption = event.getOption("color");
                     var timeOption = Optional.ofNullable(event.getOption("time"));
                     var incrementOption = Optional.ofNullable(event.getOption("time"));
 
                     var challengedId = Objects.requireNonNull(event.getOption("user")).getAsUser().getId();
-                    var color = colorOption.map(option -> Color.valueOf(option.getAsString().toLowerCase()));
-                    var time = timeOption.map(OptionMapping::getAsString);
-                    var increment = incrementOption.map(option -> Integer.parseInt(option.getAsString().replaceAll("[^0-9.]", "")));
+                    var color = colorOption == null ?
+                            (Math.random() < 0.5 ? Color.white : Color.black) :
+                            Color.valueOf(colorOption.getAsString().toLowerCase());
+                    var time = timeOption.map(OptionMapping::getAsString).orElse("1s");
+                    var increment = incrementOption.map(option -> Integer.parseInt(option.getAsString().replaceAll("[^0-9.]", ""))).orElse(0);
 
-                    reply = challenge(event.getGuild(), event.getUser(),
+                    reply = challenge(event.getUser(),
                             challengedId,
                             color,
                             time,
