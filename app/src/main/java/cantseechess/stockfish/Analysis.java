@@ -18,7 +18,11 @@ public class Analysis implements Runnable {
 
     public Analysis(String FEN, Consumer<String> received) {
         try {
-            fish = Runtime.getRuntime().exec(this.getClass().getClassLoader().getResource("stockfish.exe").getPath());
+            var stockUrl = getClass().getClassLoader().getResource("stockfish.exe");
+            if (stockUrl == null) {
+                throw new NullPointerException("somehow JAR generation did not pack stockfish!!");
+            }
+            fish = Runtime.getRuntime().exec(stockUrl.getPath());
         } catch (IOException e) {
             e.printStackTrace();
             return;
