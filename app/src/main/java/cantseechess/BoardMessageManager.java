@@ -3,7 +3,7 @@ package cantseechess;
 import java.util.HashMap;
 
 public class BoardMessageManager {
-    HashMap<Long, BoardMessage> messages;
+    private final HashMap<Long, BoardMessage> messages = new HashMap<>();
 
     public void onButtonClick(long messageIdLong, String componentId) {
         var message = messages.get(messageIdLong);
