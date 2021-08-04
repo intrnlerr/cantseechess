@@ -95,12 +95,6 @@ public class BotListener extends ListenerAdapter {
     }
 
     private String challenge(User challenger, String challengedId, @Nonnull Color challengerColor, String time, int increment) {
-        // FIXME: re-implement this check
-        /*
-        if (availableChannels.get(guild).isEmpty()) {
-            return "no available boards!";
-        }
-         */
         int gameTime = 0;
         for (String s : time.split(" ")) {
             int parsed = Integer.parseInt(s.replaceAll("[^0-9.]", ""));
@@ -131,7 +125,7 @@ public class BotListener extends ListenerAdapter {
         }
         gameManager.startGame(guild, challenge);
         challenges.remove(sender.getId());
-        return "created game";
+        return "queued game";
     }
 
     private String decline(User sender) {
