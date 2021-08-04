@@ -70,10 +70,12 @@ public class Analysis implements Runnable {
 
             try {
                 analyzeBlocking();
+                position.append(" moves");
                 for (var move : movesToAnalyze) {
                     currentColor = currentColor.other();
                     position.append(' ');
                     position.append(move.getUCIMove());
+                    send(position.toString());
                     analyzeBlocking();
                 }
             } catch (IOException e) {
