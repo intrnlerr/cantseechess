@@ -64,27 +64,26 @@ public class Analysis implements Runnable {
     //Runs the analysis, getting the analysis once stockfish is done calculating it
     @Override
     public void run() {
-        while (true) {
-            var position = new StringBuilder("position startpos");
-            send(position.toString());
+        var position = new StringBuilder("position startpos");
+        send(position.toString());
 
-            try {
+        try {
+            analyzeBlocking();
+            position.append(" moves");
+            for (var move : movesToAnalyze) {
+                currentColor = currentColor.other();
+                position.append(' ');
+                position.append(move.getUCIMove());
+                send(position.toString());
                 analyzeBlocking();
-                position.append(" moves");
-                for (var move : movesToAnalyze) {
-                    currentColor = currentColor.other();
-                    position.append(' ');
-                    position.append(move.getUCIMove());
-                    send(position.toString());
-                    analyzeBlocking();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return;
             }
-
-            // TODO: when done analyzing a game, wait for the next game and analyze that one
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        // TODO: when done analyzing a game, wait for the next game and analyze that one
+        // for now we just tell stockfish to terminate
+        send("quit");
     }
 
     private void analyzeBlocking() throws IOException {
