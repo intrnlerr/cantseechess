@@ -14,7 +14,6 @@ import java.util.List;
 
 public class BoardMessage {
     private Message message;
-    private String score = "N/A";
     private int currIndex;
     private final BoardState[] boardStates;
     private final TextChannel channel;
@@ -47,6 +46,9 @@ public class BoardMessage {
 
     private void handleAnalysis(String score) {
         boardStates[analyzerPosition].setScore(score);
+        if (analyzerPosition == currIndex) {
+            updateEmbed(currentState());
+        }
         ++analyzerPosition;
     }
 
@@ -74,7 +76,7 @@ public class BoardMessage {
     }
 
     private void updateEmbed(BoardState board) {
-        score = currentState().getScore();
+        String score = currentState().getScore();
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setTitle(embedTitle)
                 .setDescription(board.toString())
