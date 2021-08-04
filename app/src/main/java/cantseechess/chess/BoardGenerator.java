@@ -3,6 +3,8 @@ package cantseechess.chess;
 import net.dv8tion.jda.api.entities.Emote;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -23,21 +25,33 @@ public class BoardGenerator {
         return new BoardState(FEN, state);
     }
 
-    public static BoardState[] getBoard(String PGN, Consumer<String> opening, @Nullable String startFEN) throws IncorrectFENException, IllegalMoveException {
+    public static ArrayList<ChessGame.Move> getMoves(String PGN) throws IllegalMoveException {
+        ArrayList<ChessGame.Move> movesList = new ArrayList<>();
+        var game = new ChessGame();
+
+        String[] moves = PGN.replaceAll("[0-9]+\\. *", "").replaceAll("\n", " ").split(" ");
+
+        for (int i = 0; i < moves.length; i++) {
+            Color color = i % 2 == 0 ? Color.white : Color.black;
+
+            var move = game.getMove(moves[i], color);
+            game.makeMove(move);
+            movesList.add(move);
+        }
+        return movesList;
+    }
+
+    public static BoardState[] getBoard(List<ChessGame.Move> moves, Consumer<String> opening, @Nullable String startFEN) throws IncorrectFENException {
         ChessGame game;
         if (startFEN != null)
             game = new ChessGame(startFEN);
         else game = new ChessGame();
 
-        String[] moves = PGN.replaceAll("[0-9]+\\. *", "").replaceAll("\n", " ").split(" ");
-
-        BoardState[] states = new BoardState[moves.length + 1];
+        BoardState[] states = new BoardState[moves.size() + 1];
         states[0] = getBoard(startFEN == null ? game.getFEN() : startFEN);
 
-        for (int i = 0; i < moves.length; i++) {
-            Color color = i % 2 == 0 ? Color.white : Color.black;
-
-            game.makeMove(game.getMove(moves[i], color));
+        for (int i = 0; i < moves.size(); i++) {
+            game.makeMove(moves.get(i));
             String FEN = game.getFEN();
             states[i + 1] = getBoard(FEN);
             Optional<String> openingString = reader.getOpening(FEN);

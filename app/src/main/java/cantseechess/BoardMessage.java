@@ -1,9 +1,7 @@
 package cantseechess;
 
-import cantseechess.chess.BoardGenerator;
-import cantseechess.chess.BoardState;
-import cantseechess.chess.IllegalMoveException;
-import cantseechess.chess.IncorrectFENException;
+import cantseechess.chess.*;
+import cantseechess.stockfish.Analysis;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -12,24 +10,44 @@ import net.dv8tion.jda.api.interactions.components.Button;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Consumer;
+import java.util.List;
 
 public class BoardMessage {
     private Message message;
     private String score = "N/A";
     private int currIndex;
-    private final BoardState[] BOARD_STATES;
+    private final BoardState[] boardStates;
     private final TextChannel channel;
     private final String embedTitle;
     private String opening = " N/A ";
-    public boolean doAnalysis = false;
+    public boolean isAnalyzing = false;
+    private final Analysis analyzer;
+    private int analyzerPosition = 0;
 
-    public BoardMessage(TextChannel channel, String PGN, String embedTitle) throws IncorrectFENException, IllegalMoveException {
-        BOARD_STATES = BoardGenerator.getBoard(PGN, this::setOpening, null);
+    public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle) throws IncorrectFENException {
+        boardStates = BoardGenerator.getBoard(moves, this::setOpening, null);
         this.channel = channel;
         this.embedTitle = embedTitle;
-        currIndex = BOARD_STATES.length - 1;
+        currIndex = boardStates.length - 1;
         updateEmbed(currentState());
+        analyzer = new Analysis(this::handleAnalysis);
+        analyzer.setMoves(moves);
+    }
+
+    public BoardMessage(TextChannel channel, String PGN, String embedTitle) throws IncorrectFENException, IllegalMoveException {
+        var moves = BoardGenerator.getMoves(PGN);
+        boardStates = BoardGenerator.getBoard(moves, this::setOpening, null);
+        this.channel = channel;
+        this.embedTitle = embedTitle;
+        currIndex = boardStates.length - 1;
+        updateEmbed(currentState());
+        analyzer = new Analysis(this::handleAnalysis);
+        analyzer.setMoves(moves);
+    }
+
+    private void handleAnalysis(String score) {
+        boardStates[analyzerPosition].setScore(score);
+        ++analyzerPosition;
     }
 
     private void setMessage(Message m) {
@@ -45,21 +63,17 @@ public class BoardMessage {
     }
 
     public void startAnalysis() {
-        BoardState state = currentState();
-        Consumer<String> c = (s -> {
-            state.setScore(s);
-            if (currentState() == state) updateEmbed(currentState());
-        });
-        state.startAnalysis(c);
+        if (!isAnalyzing) {
+            isAnalyzing = true;
+            new Thread(analyzer).start();
+        }
     }
 
     private BoardState currentState() {
-        return BOARD_STATES[currIndex];
+        return boardStates[currIndex];
     }
 
     private void updateEmbed(BoardState board) {
-        if (doAnalysis) startAnalysis();
-
         score = currentState().getScore();
         EmbedBuilder embedBuilder = new EmbedBuilder()
                 .setTitle(embedTitle)
@@ -89,7 +103,7 @@ public class BoardMessage {
 
         ArrayList<Button> b = new ArrayList<>();
         boolean isAtEnd;
-        if (currIndex == BOARD_STATES.length - 1) {
+        if (currIndex == boardStates.length - 1) {
             isAtEnd = true;
         } else if (currIndex == 0) {
             isAtEnd = false;
@@ -106,24 +120,24 @@ public class BoardMessage {
     }
 
     public void first() {
-        updateEmbed(BOARD_STATES[currIndex = 0]);
+        updateEmbed(boardStates[currIndex = 0]);
     }
 
     public void previous() {
         if (currIndex == 0)
-            updateEmbed(BOARD_STATES[currIndex]);
+            updateEmbed(boardStates[currIndex]);
         else
-            updateEmbed(BOARD_STATES[--currIndex]);
+            updateEmbed(boardStates[--currIndex]);
     }
 
     public void next() {
-        if (currIndex == BOARD_STATES.length - 1)
-            updateEmbed(BOARD_STATES[currIndex]);
+        if (currIndex == boardStates.length - 1)
+            updateEmbed(boardStates[currIndex]);
         else
-            updateEmbed(BOARD_STATES[++currIndex]);
+            updateEmbed(boardStates[++currIndex]);
     }
 
     public void last() {
-        updateEmbed(BOARD_STATES[currIndex = BOARD_STATES.length - 1]);
+        updateEmbed(boardStates[currIndex = boardStates.length - 1]);
     }
 }

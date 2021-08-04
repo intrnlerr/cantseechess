@@ -10,6 +10,10 @@ public enum Color {
 
     @Override
     public String toString() {
-        return this == white ? "White" : "Black";
+        return isWhite() ? "White" : "Black";
+    }
+
+    public boolean isWhite() {
+        return this == white;
     }
 }

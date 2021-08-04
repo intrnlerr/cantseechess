@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class TextChannelOngoing implements OngoingGame {
@@ -22,6 +23,7 @@ public class TextChannelOngoing implements OngoingGame {
     private long drawSender = -1;
     private boolean isDrawable = false;
     private final ChessClockTask clock;
+    private final ArrayList<ChessGame.Move> moves = new ArrayList<>();
 
     public TextChannelOngoing(BoardMessageManager boardMessageManager, GameManager manager, TextChannel channel, ChessGame game, long whitePlayerId, long blackPlayerId, Rating whiteRating, Rating blackRating, int time, int increment) {
         this.boardMessageManager = boardMessageManager;
@@ -62,8 +64,10 @@ public class TextChannelOngoing implements OngoingGame {
             return;
         }
         try {
-            game.makeMove(game.getMove(message.getContentRaw(), color));
+            var move = game.getMove(message.getContentRaw(), color);
+            game.makeMove(move);
             game.incrementPGN(message.getContentRaw());
+            moves.add(move);
             message.addReaction("U+2705").queue();
             clock.onMove();
         } catch (IllegalMoveException | IllegalArgumentException e) {
@@ -133,9 +137,9 @@ public class TextChannelOngoing implements OngoingGame {
             try {
                 boardMessageManager.add(new BoardMessage(
                         channel,
-                        game.getPGN(),
+                        moves,
                         l.get(0).getNickname() + " vs " + l.get(1).getNickname()));
-            } catch (IncorrectFENException | IllegalMoveException e) {
+            } catch (IncorrectFENException e) {
                 e.printStackTrace();
             }
         });

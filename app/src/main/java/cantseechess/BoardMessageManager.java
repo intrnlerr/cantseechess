@@ -24,7 +24,6 @@ public class BoardMessageManager {
                 message.next();
                 break;
             case "Analyze":
-                message.doAnalysis = !message.doAnalysis;
                 message.startAnalysis();
                 break;
             default:

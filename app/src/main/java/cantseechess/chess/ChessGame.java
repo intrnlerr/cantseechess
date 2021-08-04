@@ -862,6 +862,10 @@ public class ChessGame {
             this.from = from;
             this.specialMove = specialMove;
         }
+
+        public String getUCIMove() {
+            return from.toString() + to.toString();
+        }
     }
 
     private static class SearchInfo {
