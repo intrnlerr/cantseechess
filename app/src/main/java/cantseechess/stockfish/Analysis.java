@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 //http://wbec-ridderkerk.nl/html/UCIProtocol.html stockfish stuff
 // TODO: analysis is likely better as a singleton with a single stockfish process
@@ -21,7 +21,7 @@ public class Analysis implements Runnable {
 
     private List<ChessGame.Move> movesToAnalyze;
 
-    private Consumer<String> received;
+    private BiConsumer<String, Integer> received;
     private Color currentColor;
     private Process fish;
 
@@ -29,7 +29,7 @@ public class Analysis implements Runnable {
     //if the (next) or (previous) buttons are clicked, then the Analysis class restarts and looks at those states instead.
 
     // TODO: allow games with custom FENs to be analyzed
-    public Analysis(Consumer<String> received) {
+    public Analysis(BiConsumer<String, Integer> received) {
         try {
             var stockUrl = getClass().getClassLoader().getResource("stockfish.exe");
             if (stockUrl == null) {
@@ -68,14 +68,14 @@ public class Analysis implements Runnable {
         send(position.toString());
 
         try {
-            analyzeBlocking();
+            analyzeBlocking(0);
             position.append(" moves");
-            for (var move : movesToAnalyze) {
+            for (int i = 0; i < movesToAnalyze.size(); ++i) {
                 currentColor = currentColor.other();
                 position.append(' ');
-                position.append(move.getUCIMove());
+                position.append(movesToAnalyze.get(i).getUCIMove());
                 send(position.toString());
-                analyzeBlocking();
+                analyzeBlocking(i + 1);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -86,7 +86,7 @@ public class Analysis implements Runnable {
         send("quit");
     }
 
-    private void analyzeBlocking() throws IOException {
+    private void analyzeBlocking(int moveIndex) throws IOException {
         send("go movetime " + maxTime);
         String line;
         String cp = "0.0";
@@ -95,7 +95,7 @@ public class Analysis implements Runnable {
             if (!line.contains("cp") && !line.contains("mate")) continue;
             cp = getScore(line);
         }
-        received.accept(cp);
+        received.accept(cp, moveIndex);
     }
 
     private String getScore(String line) {

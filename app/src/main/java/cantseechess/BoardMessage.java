@@ -21,7 +21,6 @@ public class BoardMessage {
     private String opening = " N/A ";
     public boolean isAnalyzing = false;
     private final Analysis analyzer;
-    private int analyzerPosition = 0;
 
     public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle) throws IncorrectFENException {
         boardStates = BoardGenerator.getBoard(moves, this::setOpening, null);
@@ -37,12 +36,11 @@ public class BoardMessage {
         this(channel, BoardGenerator.getMoves(PGN), embedTitle);
     }
 
-    private void handleAnalysis(String score) {
-        boardStates[analyzerPosition].setScore(score);
-        if (analyzerPosition == currIndex) {
+    private void handleAnalysis(String score, int index) {
+        boardStates[index].setScore(score);
+        if (index == currIndex) {
             updateEmbed(currentState());
         }
-        ++analyzerPosition;
     }
 
     private void setMessage(Message m) {

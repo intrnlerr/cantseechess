@@ -22,7 +22,7 @@ public class AnalysisTest {
         moves.add(m1);
         moves.add(m2);
         var str = new ArrayList<String>();
-        var a = new Analysis(str::add);
+        var a = new Analysis((s, i) -> str.add(s));
         a.setMoves(moves);
         a.run();
         assertEquals(3, str.size());
