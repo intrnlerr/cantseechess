@@ -34,14 +34,7 @@ public class BoardMessage {
     }
 
     public BoardMessage(TextChannel channel, String PGN, String embedTitle) throws IncorrectFENException, IllegalMoveException {
-        var moves = BoardGenerator.getMoves(PGN);
-        boardStates = BoardGenerator.getBoard(moves, this::setOpening, null);
-        this.channel = channel;
-        this.embedTitle = embedTitle;
-        currIndex = boardStates.length - 1;
-        updateEmbed(currentState());
-        analyzer = new Analysis(this::handleAnalysis);
-        analyzer.setMoves(moves);
+        this(channel, BoardGenerator.getMoves(PGN), embedTitle);
     }
 
     private void handleAnalysis(String score) {
