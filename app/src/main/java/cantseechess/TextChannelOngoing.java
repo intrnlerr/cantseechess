@@ -66,7 +66,6 @@ public class TextChannelOngoing implements OngoingGame {
         try {
             var move = game.getMove(message.getContentRaw(), color);
             game.makeMove(move);
-            game.incrementPGN(message.getContentRaw());
             moves.add(move);
             message.addReaction("U+2705").queue();
             clock.onMove();

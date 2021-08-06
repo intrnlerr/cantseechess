@@ -6,7 +6,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 
 public class ChessGame {
-    private final StringBuilder PGN = new StringBuilder();
     private Piece[][] board_pieces = new Piece[8][8];
     private Color turnColor = Color.white;
     private int moves = 1;
@@ -98,10 +97,6 @@ public class ChessGame {
     //Import chess game from fen
     public ChessGame(String FEN) throws IncorrectFENException {
         importFEN(FEN);
-    }
-
-    public String getPGN() {
-        return PGN.toString();
     }
 
     public static Piece[][] FENtoBoard(String FEN) throws IncorrectFENException {
@@ -588,15 +583,6 @@ public class ChessGame {
                 .append(" ")
                 .append(moves);
         return builder.toString();
-    }
-
-    public void incrementPGN(String move) {
-        int turnNumber = (this.moves + 1) / 2;
-        //1. e4 e5 2. d4 d5 3. (etc)
-        String turnDisplay = turnColor == Color.black ? turnNumber + ". " : "";
-        PGN.append(turnDisplay)
-                .append(move)
-                .append(" ");
     }
 
     private boolean hasEnemySidePawn(Piece piece, Position pos) {
