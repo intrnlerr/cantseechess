@@ -10,7 +10,8 @@ import java.util.TreeMap;
 
 public class OpeningReader {
     //Name, FEN
-    private  static final TreeMap<String, String> openings = new TreeMap<>();
+    private static final TreeMap<String, String> openings = new TreeMap<>();
+
     public OpeningReader() {
         if (!openings.isEmpty()) return;
         try {
@@ -37,14 +38,14 @@ public class OpeningReader {
 
     public Optional<String> getOpening(String FEN) {
         String[] split = FEN.split(" ");
-        FEN = "";
         //opening database doesn't have turn number or half-move clock. SAD...
+        StringBuilder FENBuilder = new StringBuilder();
         for (int i = 0; i < 3; i++) {
-            FEN += split[i] + " ";
+            FENBuilder.append(split[i]).append(" ");
         }
-        FEN += split[3];
+        FENBuilder.append(split[3]);
 
-        String opening = openings.get(FEN);
+        String opening = openings.get(FENBuilder.toString());
         return Optional.ofNullable(opening);
     }
 }
