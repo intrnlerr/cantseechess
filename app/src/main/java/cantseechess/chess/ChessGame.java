@@ -864,7 +864,21 @@ public class ChessGame {
         }
 
         public String getUCIMove() {
-            return from.toString() + to.toString();
+            return from.toString() + to.toString() + getPromotionChar();
+        }
+
+        private String getPromotionChar() {
+            switch (specialMove) {
+                case Queen:
+                    return "q";
+                case Rook:
+                    return "r";
+                case Bishop:
+                    return "b";
+                case Knight:
+                    return "n";
+            }
+            return "";
         }
     }
 
