@@ -18,4 +18,16 @@ public class Challenge {
         this.time = time;
         this.increment = increment;
     }
+
+    public long getWhite() {
+        return challengerColor.isWhite() ?
+                Long.parseLong(challenger) :
+                Long.parseLong(challenged);
+    }
+
+    public long getBlack() {
+        return challengerColor.isWhite() ?
+                Long.parseLong(challenged) :
+                Long.parseLong(challenger);
+    }
 }
