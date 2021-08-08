@@ -88,6 +88,11 @@ public class TextChannelOngoing implements OngoingGame {
 
     @Override
     public void resign(long player) {
+        if (clock.isCancelling()) {
+            clock.cancel();
+            cancelGame();
+            return;
+        }
         Color color;
         if (player == whitePlayerId) {
             color = Color.white;
@@ -117,6 +122,7 @@ public class TextChannelOngoing implements OngoingGame {
                 .setDeny(Permission.MESSAGE_WRITE).queue();
         channel.putPermissionOverride(guild.retrieveMemberById(blackPlayerId).complete())
                 .setDeny(Permission.MESSAGE_WRITE).queue();
+        channel.sendMessage("game cancelled").queue();
         manager.handleGameEnd(this, ChessGame.EndState.Draw, false);
     }
 
