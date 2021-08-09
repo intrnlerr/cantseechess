@@ -84,6 +84,10 @@ public class GameManager {
         games.get(channelId).resign(resigner.getIdLong());
     }
 
+    public void cancelGame(OngoingGame game) {
+        cleanupGame(game);
+    }
+
     public void handleGameEnd(OngoingGame game, ChessGame.EndState endState, boolean adjustRating) {
         chessClocks.schedule(new TimerTask() {
             @Override
@@ -109,7 +113,7 @@ public class GameManager {
         }
     }
 
-    public void cleanupGame(OngoingGame game) {
+    private void cleanupGame(OngoingGame game) {
         var channel = game.getChannel();
         var guild = channel.getGuild();
         games.remove(channel.getIdLong());
