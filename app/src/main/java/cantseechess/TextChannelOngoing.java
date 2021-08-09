@@ -149,6 +149,7 @@ public class TextChannelOngoing implements OngoingGame {
             }
         });
 
+        clock.cancel();
         manager.handleGameEnd(this, endState, game.getMoveCount() > 2);
     }
 
