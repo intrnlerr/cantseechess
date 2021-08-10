@@ -1,5 +1,7 @@
 package cantseechess;
 
+import cantseechess.chess.BoardGenerator;
+
 import java.util.HashMap;
 
 public class BoardMessageManager {
@@ -32,6 +34,10 @@ public class BoardMessageManager {
     }
 
     public void add(BoardMessage msg) {
+        if (BoardGenerator.boardEmotes == null) {
+            System.out.println("no emotes!");
+            return;
+        }
         messages.put(msg.getMessage().getIdLong(), msg);
     }
 }
