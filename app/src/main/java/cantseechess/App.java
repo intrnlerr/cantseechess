@@ -64,7 +64,12 @@ public class App {
                         .addOption(OptionType.STRING, "pgn", "Import a chess game from a PGN", true),
                 new CommandData("resign", "Resign from your current game"))
                 .queue();
-        BoardGenerator.boardEmotes = jda.getGuildById(864636208147988510L).getEmotes().toArray(Emote[]::new);
+        var emoteGuild = jda.getGuildById(864636208147988510L);
+        if (emoteGuild != null) {
+            BoardGenerator.boardEmotes = emoteGuild.getEmotes().toArray(Emote[]::new);
+        } else {
+            System.out.println("could not get emote guild");
+        }
 
         System.out.println(new App().getGreeting());
     }
