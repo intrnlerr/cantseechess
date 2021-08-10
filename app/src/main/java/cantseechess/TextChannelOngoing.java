@@ -140,10 +140,10 @@ public class TextChannelOngoing implements OngoingGame {
         guild.retrieveMembersByIds(whitePlayerId, blackPlayerId).onSuccess(l ->
         {
             try {
-                boardMessageManager.add(new BoardMessage(
+                boardMessageManager.add(
                         channel,
                         moves,
-                        l.get(0).getNickname() + " vs " + l.get(1).getNickname()));
+                        l.get(0).getNickname() + " vs " + l.get(1).getNickname());
             } catch (IncorrectFENException e) {
                 e.printStackTrace();
             }

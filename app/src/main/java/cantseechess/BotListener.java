@@ -156,8 +156,7 @@ public class BotListener extends ListenerAdapter {
 
     private String imp(TextChannel channel, String PGN) {
         try {
-            BoardMessage msg = new BoardMessage(channel, PGN, "Imported Game");
-            boardMessageManager.add(msg);
+            boardMessageManager.add(channel, PGN, "Imported Game");
             return "importing game...";
         } catch (IncorrectFENException | IllegalMoveException e) {
             return "Please enter a correct PGN";
