@@ -17,13 +17,12 @@ public class Analysis implements Runnable {
     private BufferedReader stockfishReader;
     private OutputStreamWriter stockfishWriter;
     //The max amount of time stockfish should calculate the score
-    private final int maxTime = 2000;
+    private static final int MAX_TIME = 2000;
 
     private List<ChessGame.Move> movesToAnalyze;
 
     private BiConsumer<String, Integer> received;
     private Color currentColor;
-    private Process fish;
 
     //send out an analysis which gets processed by the bot and the bot edits the message containing the analysis.
     //if the (next) or (previous) buttons are clicked, then the Analysis class restarts and looks at those states instead.
@@ -35,16 +34,15 @@ public class Analysis implements Runnable {
             if (stockUrl == null) {
                 throw new NullPointerException("somehow JAR generation did not pack stockfish!!");
             }
-            fish = Runtime.getRuntime().exec(stockUrl.getPath());
+            var fish = Runtime.getRuntime().exec(stockUrl.getPath());
+            InputStreamReader fishReader = new InputStreamReader(fish.getInputStream());
+            stockfishReader = new BufferedReader(fishReader);
+            stockfishWriter = new OutputStreamWriter(fish.getOutputStream());
+            currentColor = Color.white;
+            this.received = received;
         } catch (IOException e) {
             e.printStackTrace();
-            return;
         }
-        InputStreamReader fishReader = new InputStreamReader(fish.getInputStream());
-        stockfishReader = new BufferedReader(fishReader);
-        stockfishWriter = new OutputStreamWriter(fish.getOutputStream());
-        currentColor = Color.white;
-        this.received = received;
     }
 
     public void setMoves(@Nonnull List<ChessGame.Move> moves) {
@@ -87,7 +85,7 @@ public class Analysis implements Runnable {
     }
 
     private void analyzeBlocking(int moveIndex) throws IOException {
-        send("go movetime " + maxTime);
+        send("go movetime " + MAX_TIME);
         String line;
         String cp = "0.0";
         while ((line = stockfishReader.readLine()) != null) {
