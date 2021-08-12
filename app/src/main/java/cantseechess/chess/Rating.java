@@ -16,12 +16,6 @@ public class Rating {
         this.volatility = DEFAULT_VOLATILITY;
     }
 
-    public Rating(double rating) {
-        this.rating = rating;
-        this.deviation = DEFAULT_DEVIATION;
-        this.volatility = DEFAULT_VOLATILITY;
-    }
-
     public Rating(double rating, double deviation) {
         this.rating = rating;
         this.deviation = deviation;
@@ -38,14 +32,6 @@ public class Rating {
 
     public double getVolatility() {
         return volatility;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
-    }
-
-    public void setDeviation(double deviation) {
-        this.deviation = deviation;
     }
 
     //http://www.glicko.net/glicko/glicko2.pdf
@@ -68,18 +54,18 @@ public class Rating {
         } else {
             int k = 1;
             B = a - (k * VOLATILITY_CHANGE);
-            while (f(a - k * VOLATILITY_CHANGE, v, mu, a, delta, phi) < 0) {
+            while (f(a - k * VOLATILITY_CHANGE, v, a, delta, phi) < 0) {
                 k++;
                 B = a - (k * VOLATILITY_CHANGE);
             }
         }
-        double fA = f(A, v, mu, a, delta, phi);
-        double fB = f(B, v, mu, a, delta, phi);
+        double fA = f(A, v, a, delta, phi);
+        double fB = f(B, v, a, delta, phi);
         double C;
         double fC;
         while (Math.abs(B - A) > CONVERGENCE_NUMBER) {
             C = A + ((A - B) * fA) / (fB - fA);
-            fC = f(C, v, mu, a, delta, phi);
+            fC = f(C, v, a, delta, phi);
             if (fC * fB < 0) {
                 A = B;
                 fA = fB;
@@ -127,7 +113,7 @@ public class Rating {
         return Math.log(Math.pow(volatility, 2));
     }
 
-    double f(double x, double v, double mu, double a, double delta, double phi) {
+    double f(double x, double v, double a, double delta, double phi) {
         return (Math.pow(Math.E, x) * (Math.pow(delta, 2) - Math.pow(phi, 2) - v - Math.pow(Math.E, x))) / (2 * Math.pow(Math.pow(phi, 2) + v + Math.pow(Math.E, x), 2)) - ((x - a) / Math.pow(VOLATILITY_CHANGE, 2));
     }
 

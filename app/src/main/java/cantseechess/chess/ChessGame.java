@@ -828,10 +828,6 @@ public class ChessGame {
         return board_pieces[file][rank];
     }
 
-    public Piece[][] getPieces() {
-        return board_pieces;
-    }
-
     public static class Move {
         final Position from;
         final Position to;
