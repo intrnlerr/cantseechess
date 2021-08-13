@@ -6,6 +6,7 @@ import cantseechess.chess.IllegalMoveException;
 import cantseechess.stockfish.Analysis;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
@@ -13,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 public class AnalysisTest {
 
     @Test
-    public void analysis() throws IllegalMoveException {
+    public void analysis() throws IllegalMoveException, IOException {
         var game = new ChessGame();
         var m1 = game.getMove("e4", Color.white);
         game.makeMove(m1);

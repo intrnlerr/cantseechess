@@ -6,6 +6,7 @@ import cantseechess.chess.IllegalMoveException;
 import cantseechess.chess.IncorrectFENException;
 import net.dv8tion.jda.api.entities.TextChannel;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -43,8 +44,12 @@ public class BoardMessageManager {
             System.out.println("no emotes!");
             return;
         }
-        var msg = new BoardMessage(channel, moves, title);
-        messages.put(msg.getMessage().getIdLong(), msg);
+        try {
+            var msg = new BoardMessage(channel, moves, title);
+            messages.put(msg.getMessage().getIdLong(), msg);
+        } catch (IOException e) {
+            System.out.println();
+        }
     }
 
     public void add(TextChannel channel, String PGN, String title) throws IncorrectFENException, IllegalMoveException {
@@ -52,7 +57,11 @@ public class BoardMessageManager {
             System.out.println("no emotes!");
             return;
         }
-        var msg = new BoardMessage(channel, BoardGenerator.getMoves(PGN), title);
-        messages.put(msg.getMessage().getIdLong(), msg);
+        try {
+           var msg = new BoardMessage(channel, BoardGenerator.getMoves(PGN), title);
+            messages.put(msg.getMessage().getIdLong(), msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

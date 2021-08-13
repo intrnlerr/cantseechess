@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.components.Button;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -22,7 +23,7 @@ public class BoardMessage {
     public boolean isAnalyzing = false;
     private final Analysis analyzer;
 
-    public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle) throws IncorrectFENException {
+    public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle) throws IncorrectFENException, IOException {
         boardStates = BoardGenerator.getBoard(moves, this::setOpening, null);
         this.channel = channel;
         this.embedTitle = embedTitle;
@@ -30,10 +31,6 @@ public class BoardMessage {
         updateEmbed(currentState());
         analyzer = new Analysis(this::handleAnalysis);
         analyzer.setMoves(moves);
-    }
-
-    public BoardMessage(TextChannel channel, String PGN, String embedTitle) throws IncorrectFENException, IllegalMoveException {
-        this(channel, BoardGenerator.getMoves(PGN), embedTitle);
     }
 
     private void handleAnalysis(String score, int index) {
