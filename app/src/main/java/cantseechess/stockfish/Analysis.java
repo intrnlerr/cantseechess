@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -28,12 +29,8 @@ public class Analysis implements Runnable {
     //if the (next) or (previous) buttons are clicked, then the Analysis class restarts and looks at those states instead.
 
     // TODO: allow games with custom FENs to be analyzed
-    public Analysis(BiConsumer<String, Integer> received) throws IOException {
-        var stockUrl = getClass().getClassLoader().getResource("stockfish.exe");
-        if (stockUrl == null) {
-            throw new NullPointerException("somehow JAR generation did not pack stockfish!!");
-        }
-        var fish = Runtime.getRuntime().exec(stockUrl.getPath());
+    public Analysis(@Nonnull URL stockfish, BiConsumer<String, Integer> received) throws IOException {
+        var fish = Runtime.getRuntime().exec(stockfish.getPath());
         InputStreamReader fishReader = new InputStreamReader(fish.getInputStream());
         stockfishReader = new BufferedReader(fishReader);
         stockfishWriter = new OutputStreamWriter(fish.getOutputStream());

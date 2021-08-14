@@ -29,7 +29,7 @@ public class BoardMessage {
         this.embedTitle = embedTitle;
         currIndex = boardStates.length - 1;
         updateEmbed(currentState());
-        analyzer = new Analysis(this::handleAnalysis);
+        analyzer = new Analysis(getClass().getResource("stockfish.exe"), this::handleAnalysis);
         analyzer.setMoves(moves);
     }
 
