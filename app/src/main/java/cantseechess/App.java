@@ -5,51 +5,51 @@ package cantseechess;
 
 import cantseechess.chess.BoardGenerator;
 import cantseechess.storage.HashmapStorage;
+import com.google.gson.Gson;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
 
 public class App {
     public String getGreeting() {
         return "Hello World!";
     }
 
-    public static String getToken() {
-        var tokenPath = Paths.get("token");
+    public static BotConfig getConfig() throws IOException {
+        var gson = new Gson();
         try {
-            return Files.readString(tokenPath, StandardCharsets.UTF_8);
-        } catch (NoSuchFileException e) {
-            try {
-                Files.createFile(tokenPath);
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            return gson.fromJson(new FileReader("config.json"), BotConfig.class);
+        } catch (FileNotFoundException e) {
+            System.out.println(gson.toJson(new BotConfig()));
+            var writer = new FileWriter("config.json");
+            gson.toJson(new BotConfig(), writer);
+            writer.flush();
         }
         return null;
     }
 
     public static void main(String[] args) throws Exception {
-        String token = getToken();
-        if (token == null || token.isBlank()) {
+        BotConfig config = getConfig();
+        if (config == null) {
+            System.out.println("no token file!");
+            return;
+        }
+        if (config.token == null || config.token.isBlank()) {
             System.out.println("no token in token file");
             return;
         }
         var ratings = new HashmapStorage();
-        JDA jda = JDABuilder.createDefault(token)
+        JDA jda = JDABuilder.createDefault(config.token)
                 .addEventListeners(new BotListener(ratings))
                 .build();
         jda.awaitReady();
-
 
         jda.updateCommands().addCommands(new CommandData("challenge", "Challenge a user to a game of chess")
                         .addOption(OptionType.USER, "user", "The user you'd like to challenge", true)
@@ -64,7 +64,7 @@ public class App {
                         .addOption(OptionType.STRING, "pgn", "Import a chess game from a PGN", true),
                 new CommandData("resign", "Resign from your current game"))
                 .queue();
-        var emoteGuild = jda.getGuildById(864636208147988510L);
+        var emoteGuild = jda.getGuildById(config.emojiGuild);
         if (emoteGuild != null) {
             BoardGenerator.boardEmotes = emoteGuild.getEmotes().toArray(Emote[]::new);
         } else {
@@ -72,5 +72,10 @@ public class App {
         }
 
         System.out.println(new App().getGreeting());
+    }
+
+    private static class BotConfig {
+        String token = "token";
+        String emojiGuild = "how";
     }
 }
