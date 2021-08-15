@@ -29,8 +29,8 @@ public class Analysis implements Runnable {
     //if the (next) or (previous) buttons are clicked, then the Analysis class restarts and looks at those states instead.
 
     // TODO: allow games with custom FENs to be analyzed
-    public Analysis(@Nonnull URL stockfish, BiConsumer<String, Integer> received) throws IOException {
-        var fish = Runtime.getRuntime().exec(stockfish.getPath());
+    public Analysis(@Nonnull String stockfish, BiConsumer<String, Integer> received) throws IOException {
+        var fish = Runtime.getRuntime().exec(stockfish);
         InputStreamReader fishReader = new InputStreamReader(fish.getInputStream());
         stockfishReader = new BufferedReader(fishReader);
         stockfishWriter = new OutputStreamWriter(fish.getOutputStream());
