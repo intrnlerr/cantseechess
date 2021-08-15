@@ -12,6 +12,11 @@ import java.util.HashMap;
 
 public class BoardMessageManager {
     private final HashMap<Long, BoardMessage> messages = new HashMap<>();
+    private final String stockfishPath;
+
+    public BoardMessageManager(String stockfishPath) {
+        this.stockfishPath = stockfishPath;
+    }
 
     public void onButtonClick(long messageIdLong, String componentId) {
         var message = messages.get(messageIdLong);
@@ -45,7 +50,7 @@ public class BoardMessageManager {
             return;
         }
         try {
-            var msg = new BoardMessage(channel, moves, title);
+            var msg = new BoardMessage(channel, moves, title, stockfishPath);
             messages.put(msg.getMessage().getIdLong(), msg);
         } catch (IOException e) {
             System.out.println();
@@ -58,7 +63,7 @@ public class BoardMessageManager {
             return;
         }
         try {
-           var msg = new BoardMessage(channel, BoardGenerator.getMoves(PGN), title);
+           var msg = new BoardMessage(channel, BoardGenerator.getMoves(PGN), title, stockfishPath);
             messages.put(msg.getMessage().getIdLong(), msg);
         } catch (IOException e) {
             e.printStackTrace();

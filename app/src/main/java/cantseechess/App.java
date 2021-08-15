@@ -12,10 +12,7 @@ import net.dv8tion.jda.api.entities.Emote;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 public class App {
     public String getGreeting() {
@@ -35,6 +32,15 @@ public class App {
         return null;
     }
 
+    public static String getStockfish(String specifiedPath) {
+        var sf = new File(specifiedPath);
+        if (!sf.exists()) {
+            // FIXME: maybe we shouldn't package stockfish
+            return App.class.getResource("stockfish.exe").getPath();
+        }
+        return sf.getAbsolutePath();
+    }
+
     public static void main(String[] args) throws Exception {
         BotConfig config = getConfig();
         if (config == null) {
@@ -47,7 +53,7 @@ public class App {
         }
         var ratings = new HashmapStorage();
         JDA jda = JDABuilder.createDefault(config.token)
-                .addEventListeners(new BotListener(ratings))
+                .addEventListeners(new BotListener(ratings, getStockfish(config.stockfishPath)))
                 .build();
         jda.awaitReady();
 
@@ -77,5 +83,6 @@ public class App {
     private static class BotConfig {
         String token = "token";
         String emojiGuild = "how";
+        String stockfishPath = "";
     }
 }

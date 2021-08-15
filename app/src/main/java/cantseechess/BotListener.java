@@ -31,9 +31,9 @@ public class BotListener extends ListenerAdapter {
     private final Timer challengeTimeout = new Timer();
     private static final String commandPrefix = "!";
 
-    public BotListener(RatingStorage ratings) {
+    public BotListener(RatingStorage ratings, String stockfishPath) {
         this.ratings = ratings;
-        boardMessageManager = new BoardMessageManager();
+        boardMessageManager = new BoardMessageManager(stockfishPath);
         this.gameManager = new GameManager(ratings, boardMessageManager);
     }
 

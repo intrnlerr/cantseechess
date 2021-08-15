@@ -1,6 +1,9 @@
 package cantseechess;
 
-import cantseechess.chess.*;
+import cantseechess.chess.BoardGenerator;
+import cantseechess.chess.BoardState;
+import cantseechess.chess.ChessGame;
+import cantseechess.chess.IncorrectFENException;
 import cantseechess.stockfish.Analysis;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -23,13 +26,13 @@ public class BoardMessage {
     public boolean isAnalyzing = false;
     private final Analysis analyzer;
 
-    public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle) throws IncorrectFENException, IOException {
+    public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle, String stockfish) throws IncorrectFENException, IOException {
         boardStates = BoardGenerator.getBoard(moves, this::setOpening, null);
         this.channel = channel;
         this.embedTitle = embedTitle;
         currIndex = boardStates.length - 1;
         updateEmbed(currentState());
-        analyzer = new Analysis(getClass().getResource("stockfish.exe").getPath(), this::handleAnalysis);
+        analyzer = new Analysis(stockfish, this::handleAnalysis);
         analyzer.setMoves(moves);
     }
 
