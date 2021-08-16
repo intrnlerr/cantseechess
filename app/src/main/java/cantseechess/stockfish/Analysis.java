@@ -8,21 +8,20 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 //http://wbec-ridderkerk.nl/html/UCIProtocol.html stockfish stuff
 // TODO: analysis is likely better as a singleton with a single stockfish process
 public class Analysis implements Runnable {
-    private BufferedReader stockfishReader;
-    private OutputStreamWriter stockfishWriter;
+    private final BufferedReader stockfishReader;
+    private final OutputStreamWriter stockfishWriter;
     //The max amount of time stockfish should calculate the score
     private static final int MAX_TIME = 2000;
 
     private List<ChessGame.Move> movesToAnalyze;
 
-    private BiConsumer<String, Integer> received;
+    private final BiConsumer<String, Integer> received;
     private Color currentColor;
 
     //send out an analysis which gets processed by the bot and the bot edits the message containing the analysis.
