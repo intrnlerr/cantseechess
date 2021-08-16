@@ -36,7 +36,7 @@ public class App {
         var sf = new File(specifiedPath);
         if (!sf.exists()) {
             // FIXME: maybe we shouldn't package stockfish
-            return App.class.getResource("stockfish.exe").getPath();
+            return App.class.getResource("/stockfish.exe").getPath();
         }
         return sf.getAbsolutePath();
     }
