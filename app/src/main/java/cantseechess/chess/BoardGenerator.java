@@ -14,8 +14,8 @@ public class BoardGenerator {
     public static Emote[] boardEmotes;
     private static final OpeningReader reader = new OpeningReader();
 
-    public static BoardState getBoard(String FEN) throws IncorrectFENException {
-        Piece[][] pieces = ChessGame.FENtoBoard(FEN);
+    public static BoardState getBoard(ChessGame game, String FEN) {
+        Piece[][] pieces = game.getPieces();
         Emote[][] state = new Emote[8][8];
         for (int file = 0; file < 8; file++) {
             for (int rank = 0; rank < 8; rank++) {
@@ -48,12 +48,12 @@ public class BoardGenerator {
         else game = new ChessGame();
 
         BoardState[] states = new BoardState[moves.size() + 1];
-        states[0] = getBoard(startFEN == null ? game.getFEN() : startFEN);
+        states[0] = getBoard(game, startFEN == null ? game.getFEN() : startFEN);
 
         for (int i = 0; i < moves.size(); i++) {
             game.makeMove(moves.get(i));
             String FEN = game.getFEN();
-            states[i + 1] = getBoard(FEN);
+            states[i + 1] = getBoard(game, FEN);
             Optional<String> openingString = reader.getOpening(FEN);
             openingString.ifPresent(opening);
         }

@@ -99,6 +99,10 @@ public class ChessGame {
         importFEN(FEN);
     }
 
+    public Piece[][] getPieces() {
+        return board_pieces;
+    }
+
     public static Piece[][] FENtoBoard(String FEN) throws IncorrectFENException {
         Piece[][] toReturn = new Piece[8][8];
         try {
