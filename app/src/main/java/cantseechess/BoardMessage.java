@@ -108,7 +108,7 @@ public class BoardMessage {
         b.add(message.getActionRows().get(0).getButtons().get(1).withDisabled(!isAtEnd));
         b.add(message.getActionRows().get(0).getButtons().get(2).withDisabled(isAtEnd));
         b.add(message.getActionRows().get(0).getButtons().get(3).withDisabled(isAtEnd));
-        b.add(message.getActionRows().get(0).getButtons().get(4).withDisabled(false));
+        b.add(message.getActionRows().get(0).getButtons().get(4).withDisabled(isAnalyzing));
         return b;
     }
 
