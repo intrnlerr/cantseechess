@@ -117,10 +117,8 @@ public class TextChannelOngoing implements OngoingGame {
     @Override
     public void cancelGame() {
         var guild = channel.getGuild();
-        channel.putPermissionOverride(guild.retrieveMemberById(whitePlayerId).complete())
-                .setDeny(Permission.MESSAGE_WRITE).queue();
-        channel.putPermissionOverride(guild.retrieveMemberById(blackPlayerId).complete())
-                .setDeny(Permission.MESSAGE_WRITE).queue();
+        guild.retrieveMemberById(whitePlayerId).queue(m -> channel.putPermissionOverride(m).setDeny(Permission.MESSAGE_WRITE).queue());
+        guild.retrieveMemberById(blackPlayerId).queue(m -> channel.putPermissionOverride(m).setDeny(Permission.MESSAGE_WRITE).queue());
         channel.sendMessage("game cancelled").queue();
         clock.cancel();
         manager.cancelGame(this);
