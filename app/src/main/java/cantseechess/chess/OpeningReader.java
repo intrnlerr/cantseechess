@@ -10,17 +10,15 @@ import java.util.TreeMap;
 
 public class OpeningReader {
     //Name, FEN
-    private static final TreeMap<String, String> openings = new TreeMap<>();
+    private final TreeMap<String, String> openings = new TreeMap<>();
 
     public OpeningReader() {
-        if (!openings.isEmpty()) return;
         try {
             for (char i = 'a'; i <= 'e'; i++) {
                 URL url = new URL("https://raw.githubusercontent.com/niklasf/chess-openings/master/" + i + ".tsv");
                 URLConnection conn = url.openConnection();
 
                 conn.setRequestProperty("X-Requested-With", "Curl");
-
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
                 String line;
                 String[] info;
@@ -29,7 +27,6 @@ public class OpeningReader {
                     if (info.length < 4) continue;
                     openings.put(info[2], info[1]);
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
