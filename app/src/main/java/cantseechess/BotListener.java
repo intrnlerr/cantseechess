@@ -4,10 +4,8 @@ import cantseechess.chess.Color;
 import cantseechess.chess.IllegalMoveException;
 import cantseechess.chess.IncorrectFENException;
 import cantseechess.storage.RatingStorage;
-import net.dv8tion.jda.api.entities.AbstractChannel;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelCreateEvent;
 import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
@@ -31,9 +29,9 @@ public class BotListener extends ListenerAdapter {
     private final Timer challengeTimeout = new Timer();
     private static final String commandPrefix = "!";
 
-    public BotListener(RatingStorage ratings, String stockfishPath) {
+    public BotListener(RatingStorage ratings, String stockfishPath, String emojiGuild) {
         this.ratings = ratings;
-        boardMessageManager = new BoardMessageManager(stockfishPath);
+        boardMessageManager = new BoardMessageManager(stockfishPath, emojiGuild);
         this.gameManager = new GameManager(ratings, boardMessageManager);
     }
 
@@ -322,6 +320,11 @@ public class BotListener extends ListenerAdapter {
     public void onButtonClick(ButtonClickEvent event) {
         event.deferEdit().queue();
         boardMessageManager.onButtonClick(event.getMessageIdLong(), event.getComponentId());
+    }
+
+    @Override
+    public void onReady(@NotNull ReadyEvent event) {
+        boardMessageManager.setEmojiGuild(event.getJDA());
     }
 
     @Override

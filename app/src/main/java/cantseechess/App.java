@@ -53,7 +53,7 @@ public class App {
         }
         var ratings = new HashmapStorage();
         JDA jda = JDABuilder.createDefault(config.token)
-                .addEventListeners(new BotListener(ratings, getStockfish(config.stockfishPath)))
+                .addEventListeners(new BotListener(ratings, getStockfish(config.stockfishPath), config.emojiGuild))
                 .build();
         jda.awaitReady();
 
@@ -70,12 +70,6 @@ public class App {
                         .addOption(OptionType.STRING, "pgn", "Import a chess game from a PGN", true),
                 new CommandData("resign", "Resign from your current game"))
                 .queue();
-        var emoteGuild = jda.getGuildById(config.emojiGuild);
-        if (emoteGuild != null) {
-            BoardGenerator.boardEmotes = emoteGuild.getEmotes().toArray(Emote[]::new);
-        } else {
-            System.out.println("could not get emote guild");
-        }
 
         System.out.println(new App().getGreeting());
     }

@@ -26,8 +26,8 @@ public class BoardMessage {
     public boolean isAnalyzing = false;
     private final Analysis analyzer;
 
-    public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle, String stockfish) throws IncorrectFENException, IOException {
-        boardStates = BoardGenerator.getBoard(moves, this::setOpening, null);
+    public BoardMessage(TextChannel channel, List<ChessGame.Move> moves, String embedTitle, String stockfish, BoardGenerator generator) throws IncorrectFENException, IOException {
+        boardStates = generator.getBoard(moves, this::setOpening, null);
         this.channel = channel;
         this.embedTitle = embedTitle;
         currIndex = boardStates.length - 1;

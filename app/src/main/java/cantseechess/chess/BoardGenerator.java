@@ -3,6 +3,7 @@ package cantseechess.chess;
 import net.dv8tion.jda.api.entities.Emote;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -10,11 +11,15 @@ import java.util.function.Consumer;
 
 
 public class BoardGenerator {
+    private Emote[] boardEmotes;
+    private final OpeningReader openings;
 
-    public static Emote[] boardEmotes;
-    private static final OpeningReader reader = new OpeningReader();
+    public BoardGenerator() {
+        openings = new OpeningReader();
+    }
 
-    public static BoardState getBoard(ChessGame game, String FEN) {
+
+    public BoardState getBoard(ChessGame game, String FEN) {
         Piece[][] pieces = game.getPieces();
         Emote[][] state = new Emote[8][8];
         for (int file = 0; file < 8; file++) {
@@ -41,7 +46,7 @@ public class BoardGenerator {
         return movesList;
     }
 
-    public static BoardState[] getBoard(List<ChessGame.Move> moves, Consumer<String> opening, @Nullable String startFEN) throws IncorrectFENException {
+    public BoardState[] getBoard(List<ChessGame.Move> moves, Consumer<String> opening, @Nullable String startFEN) throws IncorrectFENException {
         ChessGame game;
         if (startFEN != null)
             game = new ChessGame(startFEN);
@@ -54,13 +59,13 @@ public class BoardGenerator {
             game.makeMove(moves.get(i));
             String FEN = game.getFEN();
             states[i + 1] = getBoard(game, FEN);
-            Optional<String> openingString = reader.getOpening(FEN);
+            Optional<String> openingString = openings.getOpening(FEN);
             openingString.ifPresent(opening);
         }
         return states;
     }
 
-    private static Emote getEmote(Piece p, int file, int rank) {
+    private Emote getEmote(Piece p, int file, int rank) {
         StringBuilder toReturn = new StringBuilder();
         String pieceType = "";
         String pieceColor = "";
@@ -91,6 +96,14 @@ public class BoardGenerator {
             }
         }
         return null;
+    }
+
+    public void setBoardEmotes(Emote[] boardEmotes) {
+        this.boardEmotes = boardEmotes;
+    }
+
+    public boolean noEmotes() {
+        return this.boardEmotes == null;
     }
 
     //private static BufferedImage wPawn, wKnight, wRook, wBishop, wQueen, wKing, bPawn, bKnight, bRook, bBishop, bQueen, bKing;
