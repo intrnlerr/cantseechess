@@ -3,7 +3,6 @@ package cantseechess.chess;
 import net.dv8tion.jda.api.entities.Emote;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
