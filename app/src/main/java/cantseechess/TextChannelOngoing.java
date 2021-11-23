@@ -49,6 +49,12 @@ public class TextChannelOngoing implements OngoingGame {
                 increment
         );
 
+        var guild = channel.getGuild();
+        guild.retrieveMemberById(whitePlayerId).flatMap(m -> channel.putPermissionOverride(m)
+                .setAllow(Permission.MESSAGE_WRITE)).queue();
+        guild.retrieveMemberById(blackPlayerId).flatMap(m -> channel.putPermissionOverride(m)
+                .setAllow(Permission.MESSAGE_WRITE)).queue();
+
         manager.addPerSecondTask(clock);
     }
 
