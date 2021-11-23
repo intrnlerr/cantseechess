@@ -37,8 +37,8 @@ public class TextChannelOngoing implements OngoingGame {
 
         EmbedBuilder builder = new EmbedBuilder()
                 .setTitle("Game Begun!")
-                .addField("White", "<@!" + whitePlayerId + "> " + whiteRating, true)
-                .addField("Black", "<@!" + blackPlayerId + "> " + blackRating, true);
+                .addField("White", "<@!" + whitePlayerId + "> " + whiteRating.getRating(), true)
+                .addField("Black", "<@!" + blackPlayerId + "> " + blackRating.getRating(), true);
         //boardChannel.sendMessage("game between <@!" + challenge.challenged + "> and <@!" + challenge.challenger + "> begun!").queue();
         channel.sendMessage(builder.build()).queue();
 
