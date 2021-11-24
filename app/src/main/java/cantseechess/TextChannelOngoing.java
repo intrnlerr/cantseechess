@@ -83,7 +83,9 @@ public class TextChannelOngoing implements OngoingGame {
             channel.sendMessage("Threefold repetition: " +
                     "a draw is now claimable with !draw.").queue();
         }
-        if (game.getMoveCount() > 2) {
+        if (game.getMoveCount() < 2) {
+            clock.resetCancel();
+        } else if (game.getMoveCount() > 2) {
             clock.stopCancel();
         }
         var result = game.isGameOver();

@@ -79,4 +79,8 @@ class ChessClockTask extends TimerTask {
     public boolean isCancelling() {
         return cancelling;
     }
+
+    public void resetCancel() {
+        cancelTimer = 15;
+    }
 }
