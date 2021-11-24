@@ -55,7 +55,8 @@ public class BotListener extends ListenerAdapter {
         if (challengedId == null) {
             return "Not a mention";
         }
-        int time = 10;
+        // time is in seconds
+        int time = 10 * (60);
         int increment = 0;
         Color challengerColor = Math.random() < 0.5 ? Color.white : Color.black;
         String startFen = null;
