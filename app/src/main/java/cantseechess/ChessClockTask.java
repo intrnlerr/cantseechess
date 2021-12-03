@@ -6,6 +6,7 @@ import cantseechess.chess.Color;
 import java.util.TimerTask;
 
 class ChessClockTask extends TimerTask {
+    private final static int CANCEL_TIME = 60;
     private final OngoingGame game;
     private final int increment;
     private boolean cancelling;
@@ -20,7 +21,7 @@ class ChessClockTask extends TimerTask {
         this.blackTime = blackTime;
         this.increment = increment;
         cancelling = true;
-        cancelTimer = 15;
+        cancelTimer = CANCEL_TIME;
     }
 
     void onMove() {
@@ -81,6 +82,6 @@ class ChessClockTask extends TimerTask {
     }
 
     public void resetCancel() {
-        cancelTimer = 15;
+        cancelTimer = CANCEL_TIME;
     }
 }
